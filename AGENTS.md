@@ -49,6 +49,15 @@ This repo uses `bd` for task tracking.
 - V6 static bootstrap hard training: `bash scripts/train_v6_static_bootstrap_hard.sh`
 - V6 growth clone hard training: `bash scripts/train_v6_growth_clone_hard.sh`
 - V6 growth mutate hard training: `bash scripts/train_v6_growth_mutate_followup.sh`
+- V7 static bootstrap hard smoke: `bash scripts/smoke_v7_static_bootstrap_hard.sh`
+- V7 staged static hard smoke: `bash scripts/smoke_v7_staged_static_hard.sh`
+- V7 growth clone hard smoke: `bash scripts/smoke_v7_growth_clone_hard.sh`
+- V7 growth mutate hard smoke: `bash scripts/smoke_v7_growth_mutate_hard.sh`
+- V7 static bootstrap hard training: `bash scripts/train_v7_static_bootstrap_hard.sh`
+- V7 staged static hard training: `bash scripts/train_v7_staged_static_hard.sh`
+- V7 growth clone hard training: `bash scripts/train_v7_growth_clone_hard.sh`
+- V7 growth mutate hard training: `bash scripts/train_v7_growth_mutate_hard.sh`
+- V7 growth mutate hard long training: `bash scripts/train_v7_growth_mutate_hard_long.sh`
 
 ## Constraints
 

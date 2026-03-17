@@ -13,7 +13,7 @@ from tqdm import tqdm
 from apsgnn.config import ExperimentConfig, dump_config, load_config
 from apsgnn.ddp_utils import cleanup_distributed, is_distributed, is_main_process, setup_distributed
 from apsgnn.eval import accumulate_metric_sums, finalize_metrics, reduce_metric_sums, run_evaluation
-from apsgnn.growth import CoverageTracker, GrowthSchedule, split_model_for_growth
+from apsgnn.growth import CoverageTracker, GrowthSchedule, transition_model_for_growth
 from apsgnn.model import APSGNNModel
 from apsgnn.tasks import GrowthMemoryRoutingTask, MemoryRoutingTask, SanityRoutingTask
 from apsgnn.utils import (
@@ -106,6 +106,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", required=True, help="Path to YAML config.")
     parser.add_argument("--run-name", default=None, help="Override runtime.run_name.")
     parser.add_argument("--train-steps", type=int, default=None, help="Override train steps.")
+    parser.add_argument("--seed", type=int, default=None, help="Override train seed.")
     parser.add_argument("--benchmark-only", action="store_true", help="Run warmup + throughput benchmark only.")
     parser.add_argument("--checkpoint", default=None, help="Optional checkpoint to resume from.")
     parser.add_argument("--init-checkpoint", default=None, help="Optional model-only warm-start checkpoint.")
@@ -172,6 +173,8 @@ def main() -> None:
         config.runtime.run_name = args.run_name
     if args.train_steps is not None:
         config.train.train_steps = args.train_steps
+    if args.seed is not None:
+        config.train.seed = args.seed
     if args.init_checkpoint is not None:
         config.train.init_checkpoint = args.init_checkpoint
 
@@ -243,10 +246,11 @@ def main() -> None:
         if current_stage is None or stage.index != current_stage.index:
             split_stats = None
             if current_stage is not None and stage.active_compute_nodes > current_stage.active_compute_nodes:
-                split_stats = split_model_for_growth(
+                split_stats = transition_model_for_growth(
                     unwrap_model(model),
                     current_stage.active_compute_nodes,
                     stage.active_compute_nodes,
+                    transition_mode=config.growth.transition_mode,
                     split_mode=config.growth.split_mode,
                     mutation_scale=config.growth.split_mutation_scale,
                     seed=config.train.seed + stage.index,

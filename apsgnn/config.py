@@ -106,6 +106,7 @@ class GrowthConfig:
     enabled: bool = False
     stage_active_counts: list[int] = field(default_factory=list)
     stage_steps: list[int] = field(default_factory=list)
+    transition_mode: str = "split"
     bootstrap_steps: int = 0
     clock_prior_bias: float = 0.0
     delay_zero_bias: float = 0.0

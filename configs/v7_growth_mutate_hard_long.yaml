@@ -1,0 +1,73 @@
+model:
+  d_model: 128
+  nhead: 4
+  num_layers_per_node: 2
+  nodes_total: 33
+  address_dim: 128
+  max_delay: 7
+  max_ttl: 32
+  num_classes: 32
+  key_dim: 32
+  cache_capacity: 48
+  cache_read_variant: learned_implicit
+  cache_read_hidden_dim: 256
+  cache_read_layers: 3
+  use_cache: true
+  use_first_hop_key_hint: false
+  use_learned_first_hop_router: true
+  first_hop_router_variant: key_mlp_ce
+  first_hop_router_hidden_dim: 256
+  first_hop_router_layers: 3
+  first_hop_router_use_residual: false
+  first_hop_router_separate_heads: true
+  first_hop_router_aux_type: none
+task:
+  name: memory_growth
+  batch_size: 1
+  writers_per_episode: 2
+  writer_ttl: 1
+  query_ttl_min: 2
+  query_ttl_max: 3
+  max_rollout_steps: 12
+  train_eval_writers: [2, 6, 10]
+  start_node_pool_size: 2
+train:
+  seed: 4234
+  batch_size_per_gpu: 1
+  train_steps: 4000
+  eval_interval: 400
+  log_interval: 50
+  save_interval: 400
+  lr: 2.0e-4
+  weight_decay: 0.01
+  grad_clip: 1.0
+  adam_betas: [0.9, 0.95]
+  bf16: true
+  val_batches: 24
+  loss_weights:
+    query_ce: 1.0
+    writer_route: 2.0
+    query_route: 2.0
+    query_home_to_output: 1.0
+    delay_reg: 0.05
+    gravity: 0.01
+    missing_output: 0.5
+  first_hop_teacher_force_start: 1.0
+  first_hop_teacher_force_end: 0.0
+  first_hop_teacher_force_anneal_steps: 800
+growth:
+  enabled: true
+  stage_active_counts: [4, 8, 16, 32]
+  stage_steps: [250, 350, 500, 2900]
+  bootstrap_steps: 75
+  clock_prior_bias: 0.35
+  delay_zero_bias: 0.25
+  bootstrap_clock_prior_bias: 6.0
+  bootstrap_delay_zero_bias: 6.0
+  bootstrap_route_weight: 1.0
+  bootstrap_delay_weight: 0.1
+  split_mode: mutate
+  transition_mode: split
+  mutation_scale: 0.05
+  gradient_norm_threshold: 1.0e-8
+  utility_ema_decay: 0.95

@@ -241,6 +241,40 @@ def split_model_for_growth(
     }
 
 
+def default_split_stats() -> dict[str, Any]:
+    return {
+        "sibling_divergence": 0.0,
+        "sibling_pairs": [],
+        "mutated_children": [],
+    }
+
+
+def transition_model_for_growth(
+    model: APSGNNModel,
+    previous_active_compute_nodes: int,
+    next_active_compute_nodes: int,
+    *,
+    transition_mode: str,
+    split_mode: str,
+    mutation_scale: float,
+    seed: int,
+) -> dict[str, Any]:
+    if next_active_compute_nodes <= previous_active_compute_nodes:
+        return default_split_stats()
+    if transition_mode == "activate":
+        return default_split_stats()
+    if transition_mode != "split":
+        raise ValueError(f"Unsupported growth.transition_mode: {transition_mode}")
+    return split_model_for_growth(
+        model,
+        previous_active_compute_nodes,
+        next_active_compute_nodes,
+        split_mode=split_mode,
+        mutation_scale=mutation_scale,
+        seed=seed,
+    )
+
+
 def collect_node_gradient_norms(model: APSGNNModel) -> Tensor:
     norms = torch.zeros(model.config.model.num_compute_nodes, device=model.address_table.device, dtype=torch.float32)
     for node_index, cell in enumerate(model.node_cells, start=1):
