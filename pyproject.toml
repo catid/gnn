@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "apsgnn"
+version = "0.1.0"
+description = "Constrained asynchronous packet-switched graph network experiment in pure PyTorch."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "einops",
+  "matplotlib",
+  "numpy",
+  "pandas",
+  "pyyaml",
+  "pytest",
+  "tqdm",
+]
+
+[tool.setuptools.packages.find]
+include = ["apsgnn*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

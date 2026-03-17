@@ -1,0 +1,19 @@
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
+
+# Local issue-tracker state
+.beads/
+
+# Local environments and caches
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Build metadata
+*.egg-info/
+
+# Local experiment artifacts
+runs/

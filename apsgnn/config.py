@@ -1,0 +1,121 @@
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, field, fields, is_dataclass
+from pathlib import Path
+from typing import Any, TypeVar
+
+import yaml
+
+
+@dataclass
+class ModelConfig:
+    nodes_total: int = 32
+    d_model: int = 128
+    address_dim: int = 128
+    nhead: int = 4
+    delay_bins: int = 8
+    max_ttl: int = 8
+    cache_capacity: int = 64
+    enable_cache: bool = True
+    route_temperature: float = 0.7
+    delay_temperature: float = 0.7
+    use_first_hop_key_hint: bool = True
+    first_hop_hint_residual_scale: float = 0.25
+    readout_class_scale: float = 8.0
+    num_classes: int = 32
+    key_dim: int = 32
+    packet_roles: int = 3
+    mlp_ratio: int = 4
+    dropout: float = 0.0
+
+    @property
+    def num_compute_nodes(self) -> int:
+        return self.nodes_total - 1
+
+
+@dataclass
+class TaskConfig:
+    name: str = "memory"
+    writers_per_episode: int = 6
+    writer_inject_step: int = 0
+    query_inject_step: int = 2
+    max_rollout_steps: int = 10
+    sanity_min_ttl: int = 2
+    sanity_max_ttl: int = 4
+    train_eval_writers: list[int] = field(default_factory=lambda: [6, 10])
+    hash_seed: int = 17
+
+
+@dataclass
+class TrainConfig:
+    seed: int = 1234
+    batch_size_per_gpu: int = 16
+    train_steps: int = 3000
+    eval_interval: int = 250
+    log_interval: int = 25
+    save_interval: int = 250
+    val_batches: int = 40
+    lr: float = 2.0e-4
+    weight_decay: float = 0.01
+    grad_clip: float = 1.0
+    bf16: bool = True
+    compile_model: bool = False
+    aux_writer_weight: float = 1.0
+    aux_query_weight: float = 1.0
+    aux_home_out_weight: float = 1.0
+    address_aux_weight: float = 2.0
+    delay_reg_weight: float = 0.05
+    gravity_weight: float = 0.01
+    missing_output_penalty: float = 0.5
+    sanity_route_weight: float = 1.0
+    sanity_delay_weight: float = 0.05
+    benchmark_warmup_steps: int = 10
+    benchmark_steps: int = 100
+
+
+@dataclass
+class RuntimeConfig:
+    output_root: str = "runs"
+    report_root: str = "reports"
+    run_name: str = "default"
+    notes: str = ""
+
+
+@dataclass
+class ExperimentConfig:
+    model: ModelConfig = field(default_factory=ModelConfig)
+    task: TaskConfig = field(default_factory=TaskConfig)
+    train: TrainConfig = field(default_factory=TrainConfig)
+    runtime: RuntimeConfig = field(default_factory=RuntimeConfig)
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+ConfigT = TypeVar("ConfigT")
+
+
+def _merge_dataclass(instance: ConfigT, updates: dict[str, Any]) -> ConfigT:
+    for dataclass_field in fields(instance):
+        key = dataclass_field.name
+        if key not in updates:
+            continue
+        value = getattr(instance, key)
+        incoming = updates[key]
+        if is_dataclass(value):
+            _merge_dataclass(value, incoming)
+        else:
+            setattr(instance, key, incoming)
+    return instance
+
+
+def load_config(path: str | Path) -> ExperimentConfig:
+    config = ExperimentConfig()
+    with Path(path).open("r", encoding="utf-8") as handle:
+        updates = yaml.safe_load(handle) or {}
+    return _merge_dataclass(config, updates)
+
+
+def dump_config(config: ExperimentConfig, path: str | Path) -> None:
+    with Path(path).open("w", encoding="utf-8") as handle:
+        yaml.safe_dump(config.to_dict(), handle, sort_keys=False)

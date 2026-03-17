@@ -1,0 +1,19 @@
+model:
+  nodes_total: 32
+  cache_capacity: 64
+task:
+  name: memory
+  writers_per_episode: 6
+  max_rollout_steps: 10
+train:
+  batch_size_per_gpu: 16
+  train_steps: 3000
+  eval_interval: 250
+  log_interval: 25
+  save_interval: 250
+  val_batches: 40
+  lr: 2.0e-4
+  grad_clip: 1.0
+  bf16: true
+runtime:
+  run_name: main

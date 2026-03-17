@@ -1,0 +1,16 @@
+model:
+  nodes_total: 16
+  cache_capacity: 16
+task:
+  name: sanity
+  max_rollout_steps: 8
+train:
+  batch_size_per_gpu: 8
+  train_steps: 250
+  eval_interval: 50
+  log_interval: 25
+  save_interval: 125
+  val_batches: 16
+  lr: 3.0e-4
+runtime:
+  run_name: smoke
