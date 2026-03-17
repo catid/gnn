@@ -158,6 +158,90 @@ V5 growth mutate training:
 bash scripts/train_v5_growth_mutate.sh
 ```
 
+V6 static moderate smoke:
+
+```bash
+bash scripts/smoke_v6_static_moderate.sh
+```
+
+V6 static bootstrap moderate smoke:
+
+```bash
+bash scripts/smoke_v6_static_bootstrap_moderate.sh
+```
+
+V6 growth clone moderate smoke:
+
+```bash
+bash scripts/smoke_v6_growth_clone_moderate.sh
+```
+
+V6 static hard smoke:
+
+```bash
+bash scripts/smoke_v6_static_hard.sh
+```
+
+V6 static bootstrap hard smoke:
+
+```bash
+bash scripts/smoke_v6_static_bootstrap_hard.sh
+```
+
+V6 growth clone hard smoke:
+
+```bash
+bash scripts/smoke_v6_growth_clone_hard.sh
+```
+
+V6 growth mutate hard smoke:
+
+```bash
+bash scripts/smoke_v6_growth_mutate_followup.sh
+```
+
+V6 static moderate training:
+
+```bash
+bash scripts/train_v6_static_moderate.sh
+```
+
+V6 static bootstrap moderate training:
+
+```bash
+bash scripts/train_v6_static_bootstrap_moderate.sh
+```
+
+V6 growth clone moderate training:
+
+```bash
+bash scripts/train_v6_growth_clone_moderate.sh
+```
+
+V6 static hard training:
+
+```bash
+bash scripts/train_v6_static_hard.sh
+```
+
+V6 static bootstrap hard training:
+
+```bash
+bash scripts/train_v6_static_bootstrap_hard.sh
+```
+
+V6 growth clone hard training:
+
+```bash
+bash scripts/train_v6_growth_clone_hard.sh
+```
+
+V6 growth mutate hard follow-up:
+
+```bash
+bash scripts/train_v6_growth_mutate_followup.sh
+```
+
 Manual evaluation of a checkpoint:
 
 ```bash
@@ -191,6 +275,7 @@ torchrun --standalone --nproc_per_node=2 -m apsgnn.eval \
 - APSGNN v3 keeps the v2 task and memory path stable, but upgrades first-hop routing with a stronger key-centric router and a CE-vs-aux selection path.
 - APSGNN v4 keeps the v3 router fixed, warm-starts from the v3 cached checkpoint, freezes the first-hop router, and weakens cache retrieval with learned implicit or learned key-conditioned attention over cached residuals.
 - APSGNN v5 keeps the v4 memory path and v3-style router family, but tests a reduced 16-leaf benchmark with a clockwise transport prior, stage bootstraps, and 4->8->16 growth via clone or mutate splitting.
+- APSGNN v6 scales the growth study to a harder 32-leaf benchmark, uses task-packet-only coverage metrics, hardens ingress coverage with a restricted start-node pool, and compares static, static+bootstrap, growth clone, and mutate follow-up runs across moderate and hard regimes.
 - Scripts requesting 4 GPUs automatically fall back to the available GPU count.
 - Metrics and checkpoints are written to `runs/<timestamp>-<name>/`.
 - Final report and summary plots are written to `reports/`.

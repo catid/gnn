@@ -13,7 +13,7 @@ from tqdm import tqdm
 from apsgnn.config import ExperimentConfig, dump_config, load_config
 from apsgnn.ddp_utils import cleanup_distributed, is_distributed, is_main_process, setup_distributed
 from apsgnn.eval import accumulate_metric_sums, finalize_metrics, reduce_metric_sums, run_evaluation
-from apsgnn.growth import CoverageTracker, GrowthSchedule, collect_node_gradient_norms, split_model_for_growth
+from apsgnn.growth import CoverageTracker, GrowthSchedule, split_model_for_growth
 from apsgnn.model import APSGNNModel
 from apsgnn.tasks import GrowthMemoryRoutingTask, MemoryRoutingTask, SanityRoutingTask
 from apsgnn.utils import (
@@ -285,22 +285,58 @@ def main() -> None:
 
         coverage_snapshot: dict[str, float | int] = {}
         if config.growth.enabled:
-            visit_counts = output.get("diagnostics", {}).get(
-                "visit_counts",
-                torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
+            diagnostics = output.get("diagnostics", {})
+            stacked_signals = torch.stack(
+                [
+                    diagnostics.get(
+                        "all_visit_counts",
+                        torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
+                    ).to(device=device, dtype=torch.float64),
+                    diagnostics.get(
+                        "task_visit_counts",
+                        torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
+                    ).to(device=device, dtype=torch.float64),
+                    diagnostics.get(
+                        "query_visit_counts",
+                        torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
+                    ).to(device=device, dtype=torch.float64),
+                    diagnostics.get(
+                        "bootstrap_visit_counts",
+                        torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
+                    ).to(device=device, dtype=torch.float64),
+                    diagnostics.get(
+                        "all_gradient_signal",
+                        torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
+                    ).to(device=device, dtype=torch.float64),
+                    diagnostics.get(
+                        "task_gradient_signal",
+                        torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
+                    ).to(device=device, dtype=torch.float64),
+                    diagnostics.get(
+                        "query_gradient_signal",
+                        torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
+                    ).to(device=device, dtype=torch.float64),
+                    diagnostics.get(
+                        "bootstrap_gradient_signal",
+                        torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
+                    ).to(device=device, dtype=torch.float64),
+                ],
+                dim=0,
             )
-            visit_counts = visit_counts.to(device=device, dtype=torch.float64)
             if is_distributed():
-                torch.distributed.all_reduce(visit_counts)
-            grad_norms = collect_node_gradient_norms(unwrapped_model).to(device=device, dtype=torch.float64)
-            if is_distributed():
-                torch.distributed.all_reduce(grad_norms)
+                torch.distributed.all_reduce(stacked_signals)
             if coverage_tracker is not None:
                 coverage_snapshot = coverage_tracker.update(
                     step=step,
                     stage=stage,
-                    visit_counts=visit_counts,
-                    gradient_norms=grad_norms,
+                    all_visit_counts=stacked_signals[0],
+                    task_visit_counts=stacked_signals[1],
+                    query_visit_counts=stacked_signals[2],
+                    bootstrap_visit_counts=stacked_signals[3],
+                    all_gradient_signal=stacked_signals[4],
+                    task_gradient_signal=stacked_signals[5],
+                    query_gradient_signal=stacked_signals[6],
+                    bootstrap_gradient_signal=stacked_signals[7],
                 )
 
         torch.nn.utils.clip_grad_norm_(model.parameters(), config.train.grad_clip)

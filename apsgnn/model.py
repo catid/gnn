@@ -458,6 +458,42 @@ class APSGNNModel(nn.Module):
         )
         return self.input_ln(residual)
 
+    def _register_gradient_probe(
+        self,
+        tensor: Tensor,
+        *,
+        packet_mask: Tensor,
+        role_tensor: Tensor,
+        node_index: int,
+        gradient_buffers: dict[str, Tensor] | None,
+    ) -> None:
+        if gradient_buffers is None or not tensor.requires_grad:
+            return
+
+        node_slot = node_index - 1
+        packet_mask_detached = packet_mask.detach()
+        role_tensor_detached = role_tensor.detach()
+
+        def _hook(grad: Tensor) -> None:
+            active_grad = grad.detach()[packet_mask_detached]
+            if active_grad.numel() == 0:
+                return
+            active_roles = role_tensor_detached[packet_mask_detached]
+            per_packet_grad = active_grad.float().norm(dim=-1)
+            with torch.no_grad():
+                gradient_buffers["all"][node_slot] += per_packet_grad.sum()
+                task_mask = active_roles != ROLE_SANITY
+                if task_mask.any():
+                    gradient_buffers["task"][node_slot] += per_packet_grad[task_mask].sum()
+                query_mask = active_roles == ROLE_QUERY
+                if query_mask.any():
+                    gradient_buffers["query"][node_slot] += per_packet_grad[query_mask].sum()
+                bootstrap_mask = active_roles == ROLE_SANITY
+                if bootstrap_mask.any():
+                    gradient_buffers["bootstrap"][node_slot] += per_packet_grad[bootstrap_mask].sum()
+
+        tensor.register_hook(_hook)
+
     def encode_writers(self, batch: MemoryBatch) -> Tensor:
         writers = batch.writer_keys.size(1)
         role = self.role_embed.weight[ROLE_WRITER]
@@ -625,7 +661,16 @@ class APSGNNModel(nn.Module):
         retrieval_top_mass_count = zero
         retrieval_entry_sum = zero
         retrieval_entry_count = zero
-        visit_counts_sum = torch.zeros(cfg.model.num_compute_nodes, device=device, dtype=dtype)
+        all_visit_counts_sum = torch.zeros(cfg.model.num_compute_nodes, device=device, dtype=dtype)
+        task_visit_counts_sum = torch.zeros_like(all_visit_counts_sum)
+        query_visit_counts_sum = torch.zeros_like(all_visit_counts_sum)
+        bootstrap_visit_counts_sum = torch.zeros_like(all_visit_counts_sum)
+        gradient_buffers = {
+            "all": torch.zeros(cfg.model.num_compute_nodes, device=device, dtype=torch.float32),
+            "task": torch.zeros(cfg.model.num_compute_nodes, device=device, dtype=torch.float32),
+            "query": torch.zeros(cfg.model.num_compute_nodes, device=device, dtype=torch.float32),
+            "bootstrap": torch.zeros(cfg.model.num_compute_nodes, device=device, dtype=torch.float32),
+        }
 
         for step in range(cfg.task.max_rollout_steps):
             cache_events = _concat_cache_events(cache_buffer.pop_current())
@@ -662,7 +707,7 @@ class APSGNNModel(nn.Module):
 
             processed_packets_sum = processed_packets_sum + float(len(active_packets))
 
-            predictions = self._run_compute_nodes(active_packets, cache)
+            predictions = self._run_compute_nodes(active_packets, cache, gradient_buffers=gradient_buffers)
             route_logits = predictions["route_logits"]
             delay_logits = predictions["delay_logits"]
             dest_index = predictions["dest_index"]
@@ -677,7 +722,10 @@ class APSGNNModel(nn.Module):
             retrieval_top_mass = predictions["retrieval_top_mass"]
             retrieval_entry_count_values = predictions["retrieval_entry_count"]
             clockwise_targets = predictions["clockwise_target"]
-            visit_counts_sum = visit_counts_sum + predictions["visit_counts"].to(dtype)
+            all_visit_counts_sum = all_visit_counts_sum + predictions["visit_counts"].to(dtype)
+            task_visit_counts_sum = task_visit_counts_sum + predictions["task_visit_counts"].to(dtype)
+            query_visit_counts_sum = query_visit_counts_sum + predictions["query_visit_counts"].to(dtype)
+            bootstrap_visit_counts_sum = bootstrap_visit_counts_sum + predictions["bootstrap_visit_counts"].to(dtype)
 
             writer_first_mask = (active_packets.role == ROLE_WRITER) & (active_packets.hop_index == 0)
             if writer_first_mask.any():
@@ -894,7 +942,15 @@ class APSGNNModel(nn.Module):
                 "packets_processed_sum": processed_packets_sum.detach().to(dtype),
             },
             "diagnostics": {
-                "visit_counts": visit_counts_sum.detach(),
+                "visit_counts": all_visit_counts_sum.detach(),
+                "all_visit_counts": all_visit_counts_sum.detach(),
+                "task_visit_counts": task_visit_counts_sum.detach(),
+                "query_visit_counts": query_visit_counts_sum.detach(),
+                "bootstrap_visit_counts": bootstrap_visit_counts_sum.detach(),
+                "all_gradient_signal": gradient_buffers["all"],
+                "task_gradient_signal": gradient_buffers["task"],
+                "query_gradient_signal": gradient_buffers["query"],
+                "bootstrap_gradient_signal": gradient_buffers["bootstrap"],
             },
         }
 
@@ -1191,7 +1247,13 @@ class APSGNNModel(nn.Module):
         entry_count[rows_with_cache] = entry_count_rows
         return full_read, entropy, top_mass, entry_count
 
-    def _run_compute_nodes(self, packets: PacketBatch, cache: NodeCache) -> dict[str, Tensor]:
+    def _run_compute_nodes(
+        self,
+        packets: PacketBatch,
+        cache: NodeCache,
+        *,
+        gradient_buffers: dict[str, Tensor] | None = None,
+    ) -> dict[str, Tensor]:
         cfg = self.config.model
         device = packets.residual.device
 
@@ -1206,6 +1268,9 @@ class APSGNNModel(nn.Module):
         retrieval_top_mass = torch.zeros_like(retrieval_entropy)
         retrieval_entry_count = torch.zeros_like(retrieval_entropy)
         visit_counts = torch.zeros(cfg.num_compute_nodes, device=device, dtype=packets.residual.dtype)
+        task_visit_counts = torch.zeros_like(visit_counts)
+        query_visit_counts = torch.zeros_like(visit_counts)
+        bootstrap_visit_counts = torch.zeros_like(visit_counts)
 
         grouped: dict[tuple[int, int], list[int]] = {}
         batch_index_cpu = packets.batch_index.detach().cpu().tolist()
@@ -1220,7 +1285,6 @@ class APSGNNModel(nn.Module):
         for node_index, groups in by_node.items():
             if node_index == 0:
                 continue
-            visit_counts[node_index - 1] = visit_counts[node_index - 1] + sum(len(indices) for _, indices in groups)
             cell = self.node_cells[node_index - 1]
             group_count = len(groups)
             max_packets = max(len(indices) for _, indices in groups)
@@ -1250,6 +1314,14 @@ class APSGNNModel(nn.Module):
                 packet_mask[group_idx, :count] = True
                 role_tensor[group_idx, :count] = packets.role[index_tensor]
                 routing_key_tensor[group_idx, :count] = packets.routing_key[index_tensor]
+
+            active_roles = role_tensor[packet_mask]
+            visit_counts[node_index - 1] = visit_counts[node_index - 1] + active_roles.numel()
+            task_visit_counts[node_index - 1] = task_visit_counts[node_index - 1] + (active_roles != ROLE_SANITY).sum()
+            query_visit_counts[node_index - 1] = query_visit_counts[node_index - 1] + (active_roles == ROLE_QUERY).sum()
+            bootstrap_visit_counts[node_index - 1] = (
+                bootstrap_visit_counts[node_index - 1] + (active_roles == ROLE_SANITY).sum()
+            )
 
             cache_tensor, cache_mask = cache.gather(group_batch_index, group_node_index)
             if self.uses_explicit_cache_read():
@@ -1286,6 +1358,14 @@ class APSGNNModel(nn.Module):
                 group_entropy = torch.zeros(group_count, max_packets, device=device, dtype=packet_tensor.dtype)
                 group_top_mass = torch.zeros_like(group_entropy)
                 group_entry_count = torch.zeros_like(group_entropy)
+
+            self._register_gradient_probe(
+                outputs["hidden"],
+                packet_mask=packet_mask,
+                role_tensor=role_tensor,
+                node_index=node_index,
+                gradient_buffers=gradient_buffers,
+            )
 
             for group_idx, (_, indices) in enumerate(groups):
                 count = len(indices)
@@ -1430,6 +1510,9 @@ class APSGNNModel(nn.Module):
             "retrieval_entry_count": retrieval_entry_count,
             "clockwise_target": clockwise_target,
             "visit_counts": visit_counts,
+            "task_visit_counts": task_visit_counts,
+            "query_visit_counts": query_visit_counts,
+            "bootstrap_visit_counts": bootstrap_visit_counts,
         }
 
     def _schedule_packets(

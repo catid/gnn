@@ -9,6 +9,23 @@ from apsgnn.config import ExperimentConfig
 from apsgnn.growth import active_node_ids, project_home_leaves
 
 
+def sample_start_nodes(
+    active_nodes: int,
+    pool_size: int,
+    shape: tuple[int, ...],
+    generator: torch.Generator,
+) -> Tensor:
+    if pool_size <= 0 or pool_size >= active_nodes:
+        return torch.randint(1, active_nodes + 1, shape, generator=generator)
+
+    active_ids = active_node_ids(active_nodes)
+    stride = active_nodes / float(pool_size)
+    ingress_indices = torch.floor(torch.arange(pool_size, dtype=torch.float32) * stride).long()
+    ingress_nodes = active_ids[ingress_indices.clamp_max(active_nodes - 1)]
+    sampled = torch.randint(0, ingress_nodes.numel(), shape, generator=generator)
+    return ingress_nodes[sampled]
+
+
 @dataclass
 class MemoryBatch:
     writer_keys: Tensor
@@ -91,14 +108,24 @@ class MemoryRoutingTask:
         writer_labels = torch.randint(0, cfg.model.num_classes, (batch_size, writers), generator=generator)
         writer_scores = writer_keys @ self.home_hash
         writer_home_nodes = 1 + writer_scores.argmax(dim=-1)
-        writer_start_nodes = torch.randint(1, cfg.model.nodes_total, (batch_size, writers), generator=generator)
+        writer_start_nodes = sample_start_nodes(
+            active_nodes=cfg.model.num_compute_nodes,
+            pool_size=cfg.task.start_node_pool_size,
+            shape=(batch_size, writers),
+            generator=generator,
+        )
 
         batch_indices = torch.arange(batch_size)
         query_writer_index = torch.randint(0, writers, (batch_size,), generator=generator)
         query_keys = writer_keys[batch_indices, query_writer_index].clone()
         query_home_nodes = writer_home_nodes[batch_indices, query_writer_index].clone()
         query_labels = writer_labels[batch_indices, query_writer_index].clone()
-        query_start_nodes = torch.randint(1, cfg.model.nodes_total, (batch_size,), generator=generator)
+        query_start_nodes = sample_start_nodes(
+            active_nodes=cfg.model.num_compute_nodes,
+            pool_size=cfg.task.start_node_pool_size,
+            shape=(batch_size,),
+            generator=generator,
+        )
         query_ttl = torch.randint(
             cfg.task.query_ttl_min,
             cfg.task.query_ttl_max + 1,
@@ -151,7 +178,12 @@ class GrowthMemoryRoutingTask:
         writer_scores = writer_keys @ self.home_hash
         writer_home_leaf = 1 + writer_scores.argmax(dim=-1)
         writer_home_nodes = project_home_leaves(writer_home_leaf, active_nodes, self.final_compute_nodes)
-        writer_start_nodes = torch.randint(1, active_nodes + 1, (batch_size, writers), generator=generator)
+        writer_start_nodes = sample_start_nodes(
+            active_nodes=active_nodes,
+            pool_size=cfg.task.start_node_pool_size,
+            shape=(batch_size, writers),
+            generator=generator,
+        )
 
         batch_indices = torch.arange(batch_size)
         query_writer_index = torch.randint(0, writers, (batch_size,), generator=generator)
@@ -159,7 +191,12 @@ class GrowthMemoryRoutingTask:
         query_home_leaf = writer_home_leaf[batch_indices, query_writer_index].clone()
         query_home_nodes = project_home_leaves(query_home_leaf, active_nodes, self.final_compute_nodes)
         query_labels = writer_labels[batch_indices, query_writer_index].clone()
-        query_start_nodes = torch.randint(1, active_nodes + 1, (batch_size,), generator=generator)
+        query_start_nodes = sample_start_nodes(
+            active_nodes=active_nodes,
+            pool_size=cfg.task.start_node_pool_size,
+            shape=(batch_size,),
+            generator=generator,
+        )
         query_ttl = torch.randint(
             cfg.task.query_ttl_min,
             cfg.task.query_ttl_max + 1,

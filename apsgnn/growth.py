@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import dataclass
+import math
 from typing import TYPE_CHECKING, Any
 
 import torch
@@ -254,6 +255,9 @@ def collect_node_gradient_norms(model: APSGNNModel) -> Tensor:
 
 
 class CoverageTracker:
+    CHECKPOINTS = (10, 50, 100, 200)
+    COVERAGE_LEVELS = (0.5, 0.75, 1.0)
+
     def __init__(
         self,
         *,
@@ -268,6 +272,68 @@ class CoverageTracker:
         self.history: list[dict[str, Any]] = []
         self.current_stage_summary: dict[str, Any] | None = None
 
+    @staticmethod
+    def _coverage_fraction(values: Tensor, active: int, *, threshold: float) -> float:
+        if active <= 0:
+            return 0.0
+        return float((values[:active] > threshold).to(torch.float32).mean().item())
+
+    @staticmethod
+    def _count_fraction(values: Tensor, active: int, *, threshold: float) -> float:
+        if active <= 0:
+            return 0.0
+        return float((values[:active] >= threshold).to(torch.float32).mean().item())
+
+    @staticmethod
+    def _normalized_entropy(values: Tensor, active: int) -> float:
+        trimmed = values[:active].clamp_min(0.0)
+        total = float(trimmed.sum().item())
+        if total <= 0.0 or active <= 1:
+            return 0.0
+        probabilities = trimmed / total
+        safe = probabilities.clamp_min(1.0e-12)
+        entropy = -(probabilities * safe.log()).sum()
+        return float((entropy / math.log(active)).item())
+
+    @staticmethod
+    def _gini(values: Tensor, active: int) -> float:
+        trimmed = values[:active].clamp_min(0.0)
+        total = float(trimmed.sum().item())
+        if total <= 0.0 or active <= 1:
+            return 0.0
+        sorted_values = torch.sort(trimmed).values
+        n = sorted_values.numel()
+        index = torch.arange(1, n + 1, dtype=sorted_values.dtype)
+        gini = (2.0 * (index * sorted_values).sum() / (n * sorted_values.sum())) - (n + 1) / n
+        return float(gini.item())
+
+    @staticmethod
+    def _post_bootstrap_slope(history: list[dict[str, float | int]], metric_key: str) -> float:
+        post_bootstrap = [row for row in history if int(row["post_bootstrap_step"]) >= 0]
+        if len(post_bootstrap) < 2:
+            return 0.0
+        first = post_bootstrap[0]
+        window = [row for row in post_bootstrap if int(row["post_bootstrap_step"]) <= 20]
+        last = window[-1] if len(window) >= 2 else post_bootstrap[-1]
+        step_delta = max(int(last["post_bootstrap_step"]) - int(first["post_bootstrap_step"]), 1)
+        value_delta = float(last[metric_key]) - float(first[metric_key])
+        return value_delta / step_delta
+
+    @staticmethod
+    def _maybe_set_threshold_times(
+        summary: dict[str, Any],
+        *,
+        local_step: int,
+        metric_name: str,
+        value: float,
+    ) -> None:
+        post_bootstrap_step = max(local_step - int(summary["bootstrap_steps"]), 0)
+        thresholds = summary[metric_name]
+        for level in CoverageTracker.COVERAGE_LEVELS:
+            key = f"{int(level * 100)}"
+            if thresholds[key] is None and value >= level:
+                thresholds[key] = post_bootstrap_step
+
     def start_stage(self, stage: GrowthStage, *, split_stats: dict[str, Any] | None = None) -> None:
         if self.current_stage_summary is not None:
             self.completed_stages.append(self._finalize_stage())
@@ -276,16 +342,33 @@ class CoverageTracker:
             "stage_name": stage.name,
             "active_compute_nodes": stage.active_compute_nodes,
             "start_step": stage.start_step,
-            "visit_seen": torch.zeros(self.num_compute_nodes, dtype=torch.bool),
-            "grad_seen": torch.zeros(self.num_compute_nodes, dtype=torch.bool),
-            "visit_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
-            "grad_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
-            "visit_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
-            "grad_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "bootstrap_steps": stage.bootstrap_steps,
+            "all_visit_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "task_visit_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "query_visit_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "bootstrap_visit_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "all_grad_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "task_grad_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "query_grad_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "bootstrap_grad_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "task_visit_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "task_grad_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
             "visit_coverage_at": {},
             "grad_coverage_at": {},
+            "all_visit_coverage_at": {},
+            "all_grad_coverage_at": {},
+            "task_visit_coverage_at": {},
+            "task_grad_coverage_at": {},
+            "query_visit_coverage_at": {},
+            "query_grad_coverage_at": {},
+            "task_visit_ge5_at": {},
+            "task_visit_entropy_at": {},
+            "task_visit_gini_at": {},
             "time_to_full_visit": None,
             "time_to_full_grad": None,
+            "task_time_to_visit": {"50": None, "75": None, "100": None},
+            "task_time_to_grad": {"50": None, "75": None, "100": None},
+            "history": [],
             "split_stats": split_stats or {
                 "sibling_divergence": 0.0,
                 "sibling_pairs": [],
@@ -298,8 +381,16 @@ class CoverageTracker:
         *,
         step: int,
         stage: GrowthStage,
-        visit_counts: Tensor,
-        gradient_norms: Tensor,
+        visit_counts: Tensor | None = None,
+        gradient_norms: Tensor | None = None,
+        all_visit_counts: Tensor | None = None,
+        task_visit_counts: Tensor | None = None,
+        query_visit_counts: Tensor | None = None,
+        bootstrap_visit_counts: Tensor | None = None,
+        all_gradient_signal: Tensor | None = None,
+        task_gradient_signal: Tensor | None = None,
+        query_gradient_signal: Tensor | None = None,
+        bootstrap_gradient_signal: Tensor | None = None,
     ) -> dict[str, float | int]:
         if self.current_stage_summary is None or self.current_stage_summary["stage_index"] != stage.index:
             self.start_stage(stage)
@@ -308,40 +399,128 @@ class CoverageTracker:
 
         active = stage.active_compute_nodes
         local_step = stage.local_step(step)
-        visit_counts = visit_counts.detach().cpu().to(torch.float64)
-        gradient_norms = gradient_norms.detach().cpu().to(torch.float64)
+        if all_visit_counts is None:
+            if visit_counts is None:
+                raise ValueError("CoverageTracker.update requires visit counts.")
+            all_visit_counts = visit_counts
+        if task_visit_counts is None:
+            task_visit_counts = all_visit_counts
+        if query_visit_counts is None:
+            query_visit_counts = torch.zeros_like(task_visit_counts)
+        if bootstrap_visit_counts is None:
+            bootstrap_visit_counts = (all_visit_counts - task_visit_counts).clamp_min(0.0)
+        if all_gradient_signal is None:
+            if gradient_norms is None:
+                raise ValueError("CoverageTracker.update requires gradient norms or gradient signals.")
+            all_gradient_signal = gradient_norms
+        if task_gradient_signal is None:
+            task_gradient_signal = all_gradient_signal
+        if query_gradient_signal is None:
+            query_gradient_signal = torch.zeros_like(task_gradient_signal)
+        if bootstrap_gradient_signal is None:
+            bootstrap_gradient_signal = (all_gradient_signal - task_gradient_signal).clamp_min(0.0)
 
-        summary["visit_seen"][:active] |= visit_counts[:active] > 0
-        summary["grad_seen"][:active] |= gradient_norms[:active] > self.gradient_norm_threshold
-        summary["visit_histogram"][:active] += visit_counts[:active]
-        summary["grad_histogram"][:active] += gradient_norms[:active]
+        all_visit_counts = all_visit_counts.detach().cpu().to(torch.float64)
+        task_visit_counts = task_visit_counts.detach().cpu().to(torch.float64)
+        query_visit_counts = query_visit_counts.detach().cpu().to(torch.float64)
+        bootstrap_visit_counts = bootstrap_visit_counts.detach().cpu().to(torch.float64)
+        all_gradient_signal = all_gradient_signal.detach().cpu().to(torch.float64)
+        task_gradient_signal = task_gradient_signal.detach().cpu().to(torch.float64)
+        query_gradient_signal = query_gradient_signal.detach().cpu().to(torch.float64)
+        bootstrap_gradient_signal = bootstrap_gradient_signal.detach().cpu().to(torch.float64)
+
+        summary["all_visit_histogram"][:active] += all_visit_counts[:active]
+        summary["task_visit_histogram"][:active] += task_visit_counts[:active]
+        summary["query_visit_histogram"][:active] += query_visit_counts[:active]
+        summary["bootstrap_visit_histogram"][:active] += bootstrap_visit_counts[:active]
+        summary["all_grad_histogram"][:active] += all_gradient_signal[:active]
+        summary["task_grad_histogram"][:active] += task_gradient_signal[:active]
+        summary["query_grad_histogram"][:active] += query_gradient_signal[:active]
+        summary["bootstrap_grad_histogram"][:active] += bootstrap_gradient_signal[:active]
         decay = self.utility_ema_decay
-        summary["visit_ema"][:active] = decay * summary["visit_ema"][:active] + (1.0 - decay) * visit_counts[:active]
-        summary["grad_ema"][:active] = decay * summary["grad_ema"][:active] + (1.0 - decay) * gradient_norms[:active]
+        summary["task_visit_ema"][:active] = (
+            decay * summary["task_visit_ema"][:active] + (1.0 - decay) * task_visit_counts[:active]
+        )
+        summary["task_grad_ema"][:active] = (
+            decay * summary["task_grad_ema"][:active] + (1.0 - decay) * task_gradient_signal[:active]
+        )
 
-        visit_fraction = float(summary["visit_seen"][:active].to(torch.float32).mean().item())
-        grad_fraction = float(summary["grad_seen"][:active].to(torch.float32).mean().item())
+        all_visit_fraction = self._coverage_fraction(summary["all_visit_histogram"], active, threshold=0.0)
+        task_visit_fraction = self._coverage_fraction(summary["task_visit_histogram"], active, threshold=0.0)
+        query_visit_fraction = self._coverage_fraction(summary["query_visit_histogram"], active, threshold=0.0)
+        all_grad_fraction = self._coverage_fraction(
+            summary["all_grad_histogram"],
+            active,
+            threshold=self.gradient_norm_threshold,
+        )
+        task_grad_fraction = self._coverage_fraction(
+            summary["task_grad_histogram"],
+            active,
+            threshold=self.gradient_norm_threshold,
+        )
+        query_grad_fraction = self._coverage_fraction(
+            summary["query_grad_histogram"],
+            active,
+            threshold=self.gradient_norm_threshold,
+        )
+        task_visit_ge5_fraction = self._count_fraction(summary["task_visit_histogram"], active, threshold=5.0)
+        task_visit_entropy = self._normalized_entropy(summary["task_visit_histogram"], active)
+        task_visit_gini = self._gini(summary["task_visit_histogram"], active)
 
-        for checkpoint in (10, 50, 100):
+        for checkpoint in self.CHECKPOINTS:
             key = str(checkpoint)
             if local_step == checkpoint:
-                summary["visit_coverage_at"][key] = visit_fraction
-                summary["grad_coverage_at"][key] = grad_fraction
+                summary["visit_coverage_at"][key] = all_visit_fraction
+                summary["grad_coverage_at"][key] = all_grad_fraction
+                summary["all_visit_coverage_at"][key] = all_visit_fraction
+                summary["all_grad_coverage_at"][key] = all_grad_fraction
+                summary["task_visit_coverage_at"][key] = task_visit_fraction
+                summary["task_grad_coverage_at"][key] = task_grad_fraction
+                summary["query_visit_coverage_at"][key] = query_visit_fraction
+                summary["query_grad_coverage_at"][key] = query_grad_fraction
+                summary["task_visit_ge5_at"][key] = task_visit_ge5_fraction
+                summary["task_visit_entropy_at"][key] = task_visit_entropy
+                summary["task_visit_gini_at"][key] = task_visit_gini
 
-        if summary["time_to_full_visit"] is None and visit_fraction == 1.0:
+        if summary["time_to_full_visit"] is None and all_visit_fraction == 1.0:
             summary["time_to_full_visit"] = local_step
-        if summary["time_to_full_grad"] is None and grad_fraction == 1.0:
+        if summary["time_to_full_grad"] is None and all_grad_fraction == 1.0:
             summary["time_to_full_grad"] = local_step
+
+        self._maybe_set_threshold_times(
+            summary,
+            local_step=local_step,
+            metric_name="task_time_to_visit",
+            value=task_visit_fraction,
+        )
+        self._maybe_set_threshold_times(
+            summary,
+            local_step=local_step,
+            metric_name="task_time_to_grad",
+            value=task_grad_fraction,
+        )
 
         history_row = {
             "step": step,
             "stage_index": stage.index,
             "active_compute_nodes": active,
             "stage_local_step": local_step,
-            "visit_coverage": visit_fraction,
-            "gradient_coverage": grad_fraction,
+            "bootstrap_active": int(stage.bootstrap_active(step)),
+            "post_bootstrap_step": max(local_step - stage.bootstrap_steps, 0),
+            "visit_coverage": all_visit_fraction,
+            "gradient_coverage": all_grad_fraction,
+            "all_visit_coverage": all_visit_fraction,
+            "all_gradient_coverage": all_grad_fraction,
+            "task_visit_coverage": task_visit_fraction,
+            "task_gradient_coverage": task_grad_fraction,
+            "query_visit_coverage": query_visit_fraction,
+            "query_gradient_coverage": query_grad_fraction,
+            "task_visit_ge5_fraction": task_visit_ge5_fraction,
+            "task_visit_entropy": task_visit_entropy,
+            "task_visit_gini": task_visit_gini,
         }
         self.history.append(history_row)
+        summary["history"].append(history_row)
         return history_row
 
     def _finalize_stage(self) -> dict[str, Any]:
@@ -357,11 +536,11 @@ class CoverageTracker:
         for left_child, right_child in sibling_pairs:
             if right_child not in mutated_children:
                 continue
-            if summary["visit_histogram"][right_child - 1] > 0:
+            if summary["task_visit_histogram"][right_child - 1] > 0:
                 mutated_children_with_traffic += 1
-            if summary["visit_ema"][right_child - 1] > summary["visit_ema"][left_child - 1]:
+            if summary["task_visit_ema"][right_child - 1] > summary["task_visit_ema"][left_child - 1]:
                 mutated_traffic_wins += 1
-            if summary["grad_ema"][right_child - 1] > summary["grad_ema"][left_child - 1]:
+            if summary["task_grad_ema"][right_child - 1] > summary["task_grad_ema"][left_child - 1]:
                 mutated_grad_wins += 1
 
         return {
@@ -369,14 +548,38 @@ class CoverageTracker:
             "stage_name": summary["stage_name"],
             "active_compute_nodes": active,
             "start_step": summary["start_step"],
+            "bootstrap_steps": summary["bootstrap_steps"],
             "visit_coverage_at": summary["visit_coverage_at"],
             "grad_coverage_at": summary["grad_coverage_at"],
+            "all_visit_coverage_at": summary["all_visit_coverage_at"],
+            "all_grad_coverage_at": summary["all_grad_coverage_at"],
+            "task_visit_coverage_at": summary["task_visit_coverage_at"],
+            "task_grad_coverage_at": summary["task_grad_coverage_at"],
+            "query_visit_coverage_at": summary["query_visit_coverage_at"],
+            "query_grad_coverage_at": summary["query_grad_coverage_at"],
+            "task_visit_ge5_at": summary["task_visit_ge5_at"],
+            "task_visit_entropy_at": summary["task_visit_entropy_at"],
+            "task_visit_gini_at": summary["task_visit_gini_at"],
             "time_to_full_visit": summary["time_to_full_visit"],
             "time_to_full_grad": summary["time_to_full_grad"],
-            "visit_histogram": summary["visit_histogram"][:active].tolist(),
-            "grad_histogram": summary["grad_histogram"][:active].tolist(),
-            "visit_ema": summary["visit_ema"][:active].tolist(),
-            "grad_ema": summary["grad_ema"][:active].tolist(),
+            "task_time_to_visit": summary["task_time_to_visit"],
+            "task_time_to_grad": summary["task_time_to_grad"],
+            "post_bootstrap_visit_slope": self._post_bootstrap_slope(summary["history"], "task_visit_coverage"),
+            "post_bootstrap_grad_slope": self._post_bootstrap_slope(summary["history"], "task_gradient_coverage"),
+            "visit_histogram": summary["all_visit_histogram"][:active].tolist(),
+            "grad_histogram": summary["all_grad_histogram"][:active].tolist(),
+            "all_visit_histogram": summary["all_visit_histogram"][:active].tolist(),
+            "task_visit_histogram": summary["task_visit_histogram"][:active].tolist(),
+            "query_visit_histogram": summary["query_visit_histogram"][:active].tolist(),
+            "bootstrap_visit_histogram": summary["bootstrap_visit_histogram"][:active].tolist(),
+            "all_grad_histogram": summary["all_grad_histogram"][:active].tolist(),
+            "task_grad_histogram": summary["task_grad_histogram"][:active].tolist(),
+            "query_grad_histogram": summary["query_grad_histogram"][:active].tolist(),
+            "bootstrap_grad_histogram": summary["bootstrap_grad_histogram"][:active].tolist(),
+            "visit_ema": summary["task_visit_ema"][:active].tolist(),
+            "grad_ema": summary["task_grad_ema"][:active].tolist(),
+            "task_visit_ema": summary["task_visit_ema"][:active].tolist(),
+            "task_grad_ema": summary["task_grad_ema"][:active].tolist(),
             "split_stats": {
                 "sibling_divergence": split_stats.get("sibling_divergence", 0.0),
                 "sibling_pairs": sibling_pairs,
@@ -395,14 +598,33 @@ class CoverageTracker:
     def current_snapshot(self) -> dict[str, float | int]:
         if self.current_stage_summary is None:
             return {}
-        active = self.current_stage_summary["active_compute_nodes"]
-        visit_fraction = float(self.current_stage_summary["visit_seen"][:active].to(torch.float32).mean().item())
-        grad_fraction = float(self.current_stage_summary["grad_seen"][:active].to(torch.float32).mean().item())
+        summary = self.current_stage_summary
+        active = summary["active_compute_nodes"]
+        visit_fraction = self._coverage_fraction(summary["all_visit_histogram"], active, threshold=0.0)
+        grad_fraction = self._coverage_fraction(
+            summary["all_grad_histogram"],
+            active,
+            threshold=self.gradient_norm_threshold,
+        )
+        task_visit_fraction = self._coverage_fraction(summary["task_visit_histogram"], active, threshold=0.0)
+        task_grad_fraction = self._coverage_fraction(
+            summary["task_grad_histogram"],
+            active,
+            threshold=self.gradient_norm_threshold,
+        )
+        task_visit_ge5_fraction = self._count_fraction(summary["task_visit_histogram"], active, threshold=5.0)
+        task_visit_entropy = self._normalized_entropy(summary["task_visit_histogram"], active)
+        task_visit_gini = self._gini(summary["task_visit_histogram"], active)
         return {
             "active_node_visit_coverage": visit_fraction,
             "active_node_gradient_coverage": grad_fraction,
+            "task_node_visit_coverage": task_visit_fraction,
+            "task_node_gradient_coverage": task_grad_fraction,
+            "task_nodes_ge5_visit_fraction": task_visit_ge5_fraction,
+            "task_visit_entropy": task_visit_entropy,
+            "task_visit_gini": task_visit_gini,
             "active_compute_nodes": active,
-            "stage_index": int(self.current_stage_summary["stage_index"]),
+            "stage_index": int(summary["stage_index"]),
         }
 
     def to_dict(self) -> dict[str, Any]:

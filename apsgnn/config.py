@@ -50,6 +50,7 @@ class TaskConfig:
     writers_per_episode: int = 6
     writer_inject_step: int = 0
     query_inject_step: int = 2
+    start_node_pool_size: int = 0
     query_ttl_min: int = 3
     query_ttl_max: int = 6
     max_rollout_steps: int = 10
