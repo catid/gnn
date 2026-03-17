@@ -41,6 +41,10 @@ def first_hop_teacher_force_ratio(config_step: int, config: ExperimentConfig) ->
     return float(start + (end - start) * progress)
 
 
+def is_first_hop_router_checkpoint_key(key: str) -> bool:
+    return key.startswith("first_hop_router") or key.startswith("first_hop_router_ln")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Train APSGNN experiments.")
     parser.add_argument("--config", required=True, help="Path to YAML config.")
@@ -91,15 +95,9 @@ def maybe_load_checkpoint(
         return 0, -math.inf
     checkpoint = torch.load(checkpoint_path, map_location=device)
     missing_keys, unexpected_keys = model.load_state_dict(checkpoint["model"], strict=False)
-    allowed_missing = {
-        "first_hop_router_ln.weight",
-        "first_hop_router_ln.bias",
-        "first_hop_router.0.weight",
-        "first_hop_router.0.bias",
-        "first_hop_router.2.weight",
-        "first_hop_router.2.bias",
-    }
-    if unexpected_keys or set(missing_keys) - allowed_missing:
+    disallowed_missing = [key for key in missing_keys if not is_first_hop_router_checkpoint_key(key)]
+    disallowed_unexpected = [key for key in unexpected_keys if not is_first_hop_router_checkpoint_key(key)]
+    if disallowed_missing or disallowed_unexpected:
         raise RuntimeError(
             f"Checkpoint load mismatch: missing={missing_keys}, unexpected={unexpected_keys}",
         )

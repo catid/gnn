@@ -19,6 +19,10 @@ This repo uses `bd` for task tracking.
 - V2 smoke: `bash scripts/smoke_v2.sh`
 - V2 main training: `bash scripts/train_v2.sh`
 - V2 no-cache ablation: `bash scripts/ablate_v2_no_cache.sh`
+- V3 CE smoke: `bash scripts/smoke_v3_router_ce.sh`
+- V3 aux smoke: `bash scripts/smoke_v3_router_aux.sh`
+- V3 main training: `bash scripts/train_v3_router.sh`
+- V3 no-cache ablation: `bash scripts/ablate_v3_router_no_cache.sh`
 
 ## Constraints
 

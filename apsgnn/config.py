@@ -21,6 +21,13 @@ class ModelConfig:
     delay_temperature: float = 0.7
     use_first_hop_key_hint: bool = True
     use_learned_first_hop_router: bool = False
+    first_hop_router_variant: str = "legacy"
+    first_hop_router_hidden_dim: int = 256
+    first_hop_router_layers: int = 2
+    first_hop_router_use_residual: bool = True
+    first_hop_router_residual_scale: float = 0.25
+    first_hop_router_separate_heads: bool = False
+    first_hop_router_aux_type: str = "none"
     first_hop_hint_residual_scale: float = 0.25
     readout_class_scale: float = 8.0
     num_classes: int = 32
@@ -73,6 +80,7 @@ class TrainConfig:
     first_hop_teacher_force_start: float = 0.0
     first_hop_teacher_force_end: float = 0.0
     first_hop_teacher_force_anneal_steps: int = 1
+    first_hop_router_aux_weight: float = 0.0
     benchmark_warmup_steps: int = 10
     benchmark_steps: int = 100
 

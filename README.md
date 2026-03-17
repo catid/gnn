@@ -62,6 +62,30 @@ V2 learned-router no-cache ablation:
 bash scripts/ablate_v2_no_cache.sh
 ```
 
+V3 router CE smoke:
+
+```bash
+bash scripts/smoke_v3_router_ce.sh
+```
+
+V3 router auxiliary smoke:
+
+```bash
+bash scripts/smoke_v3_router_aux.sh
+```
+
+V3 selected-router training:
+
+```bash
+bash scripts/train_v3_router.sh
+```
+
+V3 selected-router no-cache ablation:
+
+```bash
+bash scripts/ablate_v3_router_no_cache.sh
+```
+
 Manual evaluation of a checkpoint:
 
 ```bash
@@ -92,6 +116,7 @@ torchrun --standalone --nproc_per_node=2 -m apsgnn.eval \
 
 - Address routing uses negative squared L2 to a frozen orthogonal address table with node `0` fixed at the origin.
 - APSGNN v2 replaces the frozen first-hop key hint with a learned strongly supervised first-hop router and optional teacher forcing on the first hop only.
+- APSGNN v3 keeps the v2 task and memory path stable, but upgrades first-hop routing with a stronger key-centric router and a CE-vs-aux selection path.
 - Scripts requesting 4 GPUs automatically fall back to the available GPU count.
 - Metrics and checkpoints are written to `runs/<timestamp>-<name>/`.
 - Final report and summary plots are written to `reports/`.

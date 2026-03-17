@@ -1,0 +1,31 @@
+model:
+  nodes_total: 32
+  cache_capacity: 64
+  use_first_hop_key_hint: false
+  use_learned_first_hop_router: true
+  first_hop_router_variant: key_mlp_ce
+  first_hop_router_hidden_dim: 384
+  first_hop_router_layers: 3
+  first_hop_router_use_residual: false
+  first_hop_router_separate_heads: true
+  first_hop_router_aux_type: none
+task:
+  name: memory
+  writers_per_episode: 6
+  max_rollout_steps: 10
+train:
+  batch_size_per_gpu: 16
+  train_steps: 600
+  eval_interval: 150
+  log_interval: 25
+  save_interval: 150
+  val_batches: 40
+  lr: 2.0e-4
+  aux_writer_weight: 2.0
+  aux_query_weight: 2.0
+  first_hop_teacher_force_start: 1.0
+  first_hop_teacher_force_end: 0.0
+  first_hop_teacher_force_anneal_steps: 1200
+  first_hop_router_aux_weight: 0.0
+runtime:
+  run_name: v3-router-ce-search

@@ -16,6 +16,10 @@ from apsgnn.tasks import MemoryRoutingTask, SanityRoutingTask
 from apsgnn.utils import ensure_dir, environment_info, save_json, seed_everything
 
 
+def is_first_hop_router_checkpoint_key(key: str) -> bool:
+    return key.startswith("first_hop_router") or key.startswith("first_hop_router_ln")
+
+
 def accumulate_metric_sums(
     accumulator: dict[str, torch.Tensor],
     metric_sums: dict[str, torch.Tensor],
@@ -126,15 +130,9 @@ def _load_checkpoint(model: APSGNNModel, checkpoint_path: str | Path, device: to
     checkpoint = torch.load(checkpoint_path, map_location=device)
     state = checkpoint["model"]
     missing_keys, unexpected_keys = model.load_state_dict(state, strict=False)
-    allowed_missing = {
-        "first_hop_router_ln.weight",
-        "first_hop_router_ln.bias",
-        "first_hop_router.0.weight",
-        "first_hop_router.0.bias",
-        "first_hop_router.2.weight",
-        "first_hop_router.2.bias",
-    }
-    if unexpected_keys or set(missing_keys) - allowed_missing:
+    disallowed_missing = [key for key in missing_keys if not is_first_hop_router_checkpoint_key(key)]
+    disallowed_unexpected = [key for key in unexpected_keys if not is_first_hop_router_checkpoint_key(key)]
+    if disallowed_missing or disallowed_unexpected:
         raise RuntimeError(
             f"Checkpoint load mismatch: missing={missing_keys}, unexpected={unexpected_keys}",
         )
