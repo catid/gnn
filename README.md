@@ -110,6 +110,54 @@ V4 selected-retrieval no-cache ablation:
 bash scripts/ablate_v4_retrieval_no_cache.sh
 ```
 
+V5 static sparse smoke:
+
+```bash
+bash scripts/smoke_v5_static_sparse.sh
+```
+
+V5 static bootstrap smoke:
+
+```bash
+bash scripts/smoke_v5_static_bootstrap.sh
+```
+
+V5 growth clone smoke:
+
+```bash
+bash scripts/smoke_v5_growth_clone.sh
+```
+
+V5 growth mutate smoke:
+
+```bash
+bash scripts/smoke_v5_growth_mutate.sh
+```
+
+V5 static sparse training:
+
+```bash
+bash scripts/train_v5_static_sparse.sh
+```
+
+V5 static bootstrap training:
+
+```bash
+bash scripts/train_v5_static_bootstrap.sh
+```
+
+V5 growth clone training:
+
+```bash
+bash scripts/train_v5_growth_clone.sh
+```
+
+V5 growth mutate training:
+
+```bash
+bash scripts/train_v5_growth_mutate.sh
+```
+
 Manual evaluation of a checkpoint:
 
 ```bash
@@ -142,6 +190,7 @@ torchrun --standalone --nproc_per_node=2 -m apsgnn.eval \
 - APSGNN v2 replaces the frozen first-hop key hint with a learned strongly supervised first-hop router and optional teacher forcing on the first hop only.
 - APSGNN v3 keeps the v2 task and memory path stable, but upgrades first-hop routing with a stronger key-centric router and a CE-vs-aux selection path.
 - APSGNN v4 keeps the v3 router fixed, warm-starts from the v3 cached checkpoint, freezes the first-hop router, and weakens cache retrieval with learned implicit or learned key-conditioned attention over cached residuals.
+- APSGNN v5 keeps the v4 memory path and v3-style router family, but tests a reduced 16-leaf benchmark with a clockwise transport prior, stage bootstraps, and 4->8->16 growth via clone or mutate splitting.
 - Scripts requesting 4 GPUs automatically fall back to the available GPU count.
 - Metrics and checkpoints are written to `runs/<timestamp>-<name>/`.
 - Final report and summary plots are written to `reports/`.

@@ -11,8 +11,9 @@ from tqdm import tqdm
 
 from apsgnn.config import dump_config, load_config
 from apsgnn.ddp_utils import cleanup_distributed, is_distributed, is_main_process, setup_distributed
+from apsgnn.growth import GrowthSchedule
 from apsgnn.model import APSGNNModel
-from apsgnn.tasks import MemoryRoutingTask, SanityRoutingTask
+from apsgnn.tasks import GrowthMemoryRoutingTask, MemoryRoutingTask, SanityRoutingTask
 from apsgnn.utils import ensure_dir, environment_info, save_json, seed_everything
 
 
@@ -109,15 +110,22 @@ def run_evaluation(
 ) -> dict[str, float]:
     config = load_config(config_path)
     task_name = config.task.name
-    if task_name == "memory":
+    if task_name == "memory_growth":
+        task = GrowthMemoryRoutingTask(config)
+    elif task_name == "memory":
         task = MemoryRoutingTask(config)
     else:
         task = SanityRoutingTask(config)
+    growth_schedule = GrowthSchedule.from_config(config)
 
     was_training = model.training
     model.eval()
     unwrapped = model.module if isinstance(model, DDP) else model
     unwrapped.set_first_hop_teacher_force_ratio(0.0)
+    unwrapped.set_growth_context(
+        active_compute_nodes=growth_schedule.final_active_compute_nodes,
+        bootstrap_active=False,
+    )
     metric_sums: dict[str, torch.Tensor] = {}
     iterator = range(batches)
     if is_main_process():
@@ -125,7 +133,15 @@ def run_evaluation(
 
     for offset in iterator:
         seed = config.train.seed + 1_000_000 + rank * 100_000 + offset
-        if task_name == "memory":
+        if task_name == "memory_growth":
+            batch = task.generate(
+                batch_size=config.train.batch_size_per_gpu,
+                seed=seed,
+                writers_per_episode=writers_per_episode,
+                active_compute_nodes=growth_schedule.final_active_compute_nodes,
+                bootstrap_mode=False,
+            ).to(device)
+        elif task_name == "memory":
             batch = task.generate(
                 batch_size=config.train.batch_size_per_gpu,
                 seed=seed,

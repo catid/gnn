@@ -50,6 +50,8 @@ class TaskConfig:
     writers_per_episode: int = 6
     writer_inject_step: int = 0
     query_inject_step: int = 2
+    query_ttl_min: int = 3
+    query_ttl_max: int = 6
     max_rollout_steps: int = 10
     sanity_min_ttl: int = 2
     sanity_max_ttl: int = 4
@@ -99,11 +101,32 @@ class RuntimeConfig:
 
 
 @dataclass
+class GrowthConfig:
+    enabled: bool = False
+    stage_active_counts: list[int] = field(default_factory=list)
+    stage_steps: list[int] = field(default_factory=list)
+    bootstrap_steps: int = 0
+    clock_prior_bias: float = 0.0
+    delay_zero_bias: float = 0.0
+    bootstrap_clock_prior_bias: float = 0.0
+    bootstrap_delay_zero_bias: float = 0.0
+    bootstrap_route_weight: float = 1.0
+    bootstrap_delay_weight: float = 0.05
+    bootstrap_force_clockwise: bool = True
+    bootstrap_force_delay_zero: bool = True
+    split_mode: str = "none"
+    split_mutation_scale: float = 0.02
+    gradient_norm_threshold: float = 1.0e-12
+    utility_ema_decay: float = 0.95
+
+
+@dataclass
 class ExperimentConfig:
     model: ModelConfig = field(default_factory=ModelConfig)
     task: TaskConfig = field(default_factory=TaskConfig)
     train: TrainConfig = field(default_factory=TrainConfig)
     runtime: RuntimeConfig = field(default_factory=RuntimeConfig)
+    growth: GrowthConfig = field(default_factory=GrowthConfig)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

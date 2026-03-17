@@ -9,6 +9,7 @@ from torch import Tensor, nn
 
 from apsgnn.buffer import NodeCache, TemporalRingBuffer
 from apsgnn.config import ExperimentConfig
+from apsgnn.growth import clockwise_successor
 from apsgnn.node import ComputeNodeCell
 from apsgnn.routing import build_address_table, route_from_address, sample_delay, straight_through_sample
 from apsgnn.tasks import MemoryBatch, SanityBatch
@@ -378,6 +379,8 @@ class APSGNNModel(nn.Module):
                 layers=model_cfg.cache_read_layers,
             )
         self.first_hop_teacher_force_ratio = 0.0
+        self.active_compute_nodes = model_cfg.num_compute_nodes
+        self.bootstrap_active = False
 
         self.node_cells = nn.ModuleList(
             [
@@ -404,6 +407,13 @@ class APSGNNModel(nn.Module):
     def set_first_hop_teacher_force_ratio(self, ratio: float) -> None:
         self.first_hop_teacher_force_ratio = float(min(max(ratio, 0.0), 1.0))
 
+    def set_growth_context(self, *, active_compute_nodes: int | None = None, bootstrap_active: bool = False) -> None:
+        if active_compute_nodes is None:
+            self.active_compute_nodes = self.config.model.num_compute_nodes
+        else:
+            self.active_compute_nodes = int(active_compute_nodes)
+        self.bootstrap_active = bool(bootstrap_active)
+
     def uses_legacy_first_hop_router(self) -> bool:
         return self.config.model.first_hop_router_variant == "legacy"
 
@@ -420,6 +430,33 @@ class APSGNNModel(nn.Module):
 
     def uses_learned_cache_read(self) -> bool:
         return self.config.model.cache_read_variant in {"learned_implicit", "learned_keycond"}
+
+    def uses_growth_curriculum(self) -> bool:
+        return self.config.growth.enabled
+
+    def _active_node_mask(self, device: torch.device, dtype: torch.dtype) -> Tensor:
+        mask = torch.zeros(self.config.model.nodes_total, device=device, dtype=dtype)
+        mask[0] = 1.0
+        mask[1 : self.active_compute_nodes + 1] = 1.0
+        return mask
+
+    def _clockwise_target(self, current_node: Tensor) -> Tensor:
+        return clockwise_successor(current_node, self.active_compute_nodes)
+
+    def _coverage_packet_residual(
+        self,
+        *,
+        start_nodes: Tensor,
+        ttl: Tensor,
+        device: torch.device,
+        dtype: torch.dtype,
+    ) -> Tensor:
+        residual = (
+            self.role_embed.weight[ROLE_SANITY].to(dtype)
+            + self.start_node_embed(start_nodes)
+            + self.ttl_embed(ttl.clamp(min=0, max=self.config.model.max_ttl))
+        )
+        return self.input_ln(residual)
 
     def encode_writers(self, batch: MemoryBatch) -> Tensor:
         writers = batch.writer_keys.size(1)
@@ -521,6 +558,37 @@ class APSGNNModel(nn.Module):
         )
         live_buffer.schedule(cfg.task.query_inject_step, query_packets)
 
+        if batch.bootstrap_start_nodes is not None and batch.bootstrap_ttl is not None:
+            coverage_start_nodes = batch.bootstrap_start_nodes.reshape(-1)
+            coverage_ttl = batch.bootstrap_ttl.reshape(-1)
+            coverage_count = coverage_start_nodes.numel()
+            coverage_batch_index = (
+                torch.arange(batch_size, device=device)
+                .unsqueeze(1)
+                .expand(-1, batch.bootstrap_start_nodes.size(1))
+                .reshape(-1)
+            )
+            coverage_packets = PacketBatch(
+                residual=self._coverage_packet_residual(
+                    start_nodes=coverage_start_nodes,
+                    ttl=coverage_ttl,
+                    device=device,
+                    dtype=dtype,
+                ),
+                routing_key=torch.zeros(coverage_count, cfg.model.key_dim, device=device, dtype=dtype),
+                ttl=coverage_ttl,
+                batch_index=coverage_batch_index,
+                current_node=coverage_start_nodes,
+                role=torch.full((coverage_count,), ROLE_SANITY, device=device, dtype=torch.long),
+                target_label=torch.zeros(coverage_count, device=device, dtype=torch.long),
+                target_home=torch.zeros(coverage_count, device=device, dtype=torch.long),
+                hop_index=torch.zeros(coverage_count, device=device, dtype=torch.long),
+                has_visited_home=torch.zeros(coverage_count, device=device, dtype=torch.bool),
+                packet_id=torch.arange(coverage_count, device=device, dtype=torch.long)
+                + batch_size * (writers_per_episode + 1),
+            )
+            live_buffer.schedule(cfg.task.writer_inject_step, coverage_packets)
+
         first_query_logits: list[Tensor | None] = [None for _ in range(batch_size)]
         query_delivered = torch.zeros(batch_size, device=device, dtype=torch.bool)
         query_last_hops = torch.zeros(batch_size, device=device, dtype=torch.long)
@@ -533,6 +601,8 @@ class APSGNNModel(nn.Module):
         loss_delay_sum = zero
         loss_gravity_sum = zero
         loss_missing_sum = zero
+        loss_bootstrap_route_sum = zero
+        loss_bootstrap_delay_sum = zero
 
         writer_hit_sum = zero
         writer_hit_count = zero
@@ -555,6 +625,7 @@ class APSGNNModel(nn.Module):
         retrieval_top_mass_count = zero
         retrieval_entry_sum = zero
         retrieval_entry_count = zero
+        visit_counts_sum = torch.zeros(cfg.model.num_compute_nodes, device=device, dtype=dtype)
 
         for step in range(cfg.task.max_rollout_steps):
             cache_events = _concat_cache_events(cache_buffer.pop_current())
@@ -605,6 +676,8 @@ class APSGNNModel(nn.Module):
             retrieval_entropy = predictions["retrieval_entropy"]
             retrieval_top_mass = predictions["retrieval_top_mass"]
             retrieval_entry_count_values = predictions["retrieval_entry_count"]
+            clockwise_targets = predictions["clockwise_target"]
+            visit_counts_sum = visit_counts_sum + predictions["visit_counts"].to(dtype)
 
             writer_first_mask = (active_packets.role == ROLE_WRITER) & (active_packets.hop_index == 0)
             if writer_first_mask.any():
@@ -682,6 +755,24 @@ class APSGNNModel(nn.Module):
             if gravity_mask.any():
                 loss_gravity_sum = loss_gravity_sum + address_norm[gravity_mask].square().sum()
 
+            bootstrap_mask = (active_packets.role == ROLE_SANITY) & torch.tensor(
+                self.bootstrap_active,
+                device=device,
+                dtype=torch.bool,
+            )
+            if bootstrap_mask.any():
+                loss_bootstrap_route_sum = loss_bootstrap_route_sum + F.cross_entropy(
+                    route_logits[bootstrap_mask],
+                    clockwise_targets[bootstrap_mask],
+                    reduction="sum",
+                )
+                bootstrap_delay_targets = torch.zeros(bootstrap_mask.sum(), device=device, dtype=torch.long)
+                loss_bootstrap_delay_sum = loss_bootstrap_delay_sum + F.cross_entropy(
+                    delay_logits[bootstrap_mask],
+                    bootstrap_delay_targets,
+                    reduction="sum",
+                )
+
             delay_sum = delay_sum + delay_index.sum()
             delay_count = delay_count + delay_index.numel()
 
@@ -754,6 +845,8 @@ class APSGNNModel(nn.Module):
             + cfg.train.aux_home_out_weight * loss_home_out_sum
             + cfg.train.delay_reg_weight * loss_delay_sum
             + cfg.train.gravity_weight * loss_gravity_sum
+            + cfg.growth.bootstrap_route_weight * loss_bootstrap_route_sum
+            + cfg.growth.bootstrap_delay_weight * loss_bootstrap_delay_sum
             + loss_missing_sum
         )
         total_loss = total_loss_sum / batch_size
@@ -769,6 +862,8 @@ class APSGNNModel(nn.Module):
                 "loss_home_to_output": loss_home_out_sum.detach(),
                 "loss_delay": loss_delay_sum.detach(),
                 "loss_gravity": loss_gravity_sum.detach(),
+                "loss_bootstrap_route": loss_bootstrap_route_sum.detach(),
+                "loss_bootstrap_delay": loss_bootstrap_delay_sum.detach(),
                 "loss_missing_output": loss_missing_sum.detach(),
                 "query_accuracy_hit": query_correct.detach(),
                 "query_accuracy_count": delivered_mask.sum().to(dtype),
@@ -797,6 +892,9 @@ class APSGNNModel(nn.Module):
                 "retrieval_entry_sum": retrieval_entry_sum.detach(),
                 "retrieval_entry_count": retrieval_entry_count.detach().to(dtype),
                 "packets_processed_sum": processed_packets_sum.detach().to(dtype),
+            },
+            "diagnostics": {
+                "visit_counts": visit_counts_sum.detach(),
             },
         }
 
@@ -1107,6 +1205,7 @@ class APSGNNModel(nn.Module):
         retrieval_entropy = torch.zeros(packets.residual.size(0), device=device, dtype=packets.residual.dtype)
         retrieval_top_mass = torch.zeros_like(retrieval_entropy)
         retrieval_entry_count = torch.zeros_like(retrieval_entropy)
+        visit_counts = torch.zeros(cfg.num_compute_nodes, device=device, dtype=packets.residual.dtype)
 
         grouped: dict[tuple[int, int], list[int]] = {}
         batch_index_cpu = packets.batch_index.detach().cpu().tolist()
@@ -1121,6 +1220,7 @@ class APSGNNModel(nn.Module):
         for node_index, groups in by_node.items():
             if node_index == 0:
                 continue
+            visit_counts[node_index - 1] = visit_counts[node_index - 1] + sum(len(indices) for _, indices in groups)
             cell = self.node_cells[node_index - 1]
             group_count = len(groups)
             max_packets = max(len(indices) for _, indices in groups)
@@ -1222,6 +1322,7 @@ class APSGNNModel(nn.Module):
         predicted_dest_index = dest_index
         first_hop_aux_prediction = address
         teacher_forced_mask = torch.zeros_like(dest_index, dtype=torch.bool)
+        clockwise_target = self._clockwise_target(packets.current_node)
         if cfg.use_learned_first_hop_router:
             first_hop_mask = (packets.hop_index == 0) & (
                 (packets.role == ROLE_WRITER) | (packets.role == ROLE_QUERY)
@@ -1255,11 +1356,64 @@ class APSGNNModel(nn.Module):
                         forced_indices = first_hop_indices[force_mask_local]
                         dest_index[forced_indices] = packets.target_home[forced_indices]
                         teacher_forced_mask[forced_indices] = True
-        _, delay_index = sample_delay(
-            delay_logits,
-            temperature=cfg.delay_temperature,
-            training=self.training,
-        )
+        if self.uses_growth_curriculum():
+            route_logits = route_logits.clone()
+            if self.active_compute_nodes < cfg.num_compute_nodes:
+                route_logits[:, self.active_compute_nodes + 1 :] = -1.0e9
+
+            compute_mask = packets.current_node > 0
+            if compute_mask.any() and self.config.growth.clock_prior_bias > 0.0:
+                route_logits[compute_mask, clockwise_target[compute_mask]] = (
+                    route_logits[compute_mask, clockwise_target[compute_mask]]
+                    + self.config.growth.clock_prior_bias
+                )
+
+            delay_logits = delay_logits.clone()
+            if self.config.growth.delay_zero_bias > 0.0:
+                delay_logits[:, 0] = delay_logits[:, 0] + self.config.growth.delay_zero_bias
+
+            coverage_mask = (packets.role == ROLE_SANITY) & torch.tensor(
+                self.bootstrap_active,
+                device=device,
+                dtype=torch.bool,
+            )
+            if coverage_mask.any():
+                if self.config.growth.bootstrap_clock_prior_bias > 0.0:
+                    route_logits[coverage_mask, clockwise_target[coverage_mask]] = (
+                        route_logits[coverage_mask, clockwise_target[coverage_mask]]
+                        + self.config.growth.bootstrap_clock_prior_bias
+                    )
+                if self.config.growth.bootstrap_delay_zero_bias > 0.0:
+                    delay_logits[coverage_mask, 0] = (
+                        delay_logits[coverage_mask, 0] + self.config.growth.bootstrap_delay_zero_bias
+                    )
+
+            route_choice = straight_through_sample(
+                route_logits,
+                temperature=cfg.route_temperature,
+                training=self.training,
+            )
+            predicted_dest_index = route_choice.argmax(dim=-1)
+            dest_index = predicted_dest_index.clone()
+
+        if teacher_forced_mask.any():
+            dest_index = dest_index.clone()
+            dest_index[teacher_forced_mask] = packets.target_home[teacher_forced_mask]
+
+        _, delay_index = sample_delay(delay_logits, temperature=cfg.delay_temperature, training=self.training)
+        if self.uses_growth_curriculum():
+            coverage_mask = (packets.role == ROLE_SANITY) & torch.tensor(
+                self.bootstrap_active,
+                device=device,
+                dtype=torch.bool,
+            )
+            if coverage_mask.any():
+                if self.config.growth.bootstrap_force_clockwise:
+                    dest_index = dest_index.clone()
+                    dest_index[coverage_mask] = clockwise_target[coverage_mask]
+                if self.config.growth.bootstrap_force_delay_zero:
+                    delay_index = delay_index.clone()
+                    delay_index[coverage_mask] = 0
         return {
             "next_residual": next_residual,
             "predicted_address": address,
@@ -1274,6 +1428,8 @@ class APSGNNModel(nn.Module):
             "retrieval_entropy": retrieval_entropy,
             "retrieval_top_mass": retrieval_top_mass,
             "retrieval_entry_count": retrieval_entry_count,
+            "clockwise_target": clockwise_target,
+            "visit_counts": visit_counts,
         }
 
     def _schedule_packets(

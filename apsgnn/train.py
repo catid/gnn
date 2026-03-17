@@ -13,8 +13,9 @@ from tqdm import tqdm
 from apsgnn.config import ExperimentConfig, dump_config, load_config
 from apsgnn.ddp_utils import cleanup_distributed, is_distributed, is_main_process, setup_distributed
 from apsgnn.eval import accumulate_metric_sums, finalize_metrics, reduce_metric_sums, run_evaluation
+from apsgnn.growth import CoverageTracker, GrowthSchedule, collect_node_gradient_norms, split_model_for_growth
 from apsgnn.model import APSGNNModel
-from apsgnn.tasks import MemoryRoutingTask, SanityRoutingTask
+from apsgnn.tasks import GrowthMemoryRoutingTask, MemoryRoutingTask, SanityRoutingTask
 from apsgnn.utils import (
     MetricsWriter,
     count_parameters,
@@ -176,7 +177,13 @@ def main() -> None:
 
     seed_everything(config.train.seed + rank)
     task_name = config.task.name
-    task = MemoryRoutingTask(config) if task_name == "memory" else SanityRoutingTask(config)
+    if task_name == "memory_growth":
+        task = GrowthMemoryRoutingTask(config)
+    elif task_name == "memory":
+        task = MemoryRoutingTask(config)
+    else:
+        task = SanityRoutingTask(config)
+    growth_schedule = GrowthSchedule.from_config(config)
 
     run_dir = create_run_dir(config.runtime.output_root, config.runtime.run_name)
     if is_main_process():
@@ -212,8 +219,18 @@ def main() -> None:
         )
 
     metrics_writer = MetricsWriter(run_dir) if is_main_process() else None
+    coverage_tracker = (
+        CoverageTracker(
+            num_compute_nodes=config.model.num_compute_nodes,
+            gradient_norm_threshold=config.growth.gradient_norm_threshold,
+            utility_ema_decay=config.growth.utility_ema_decay,
+        )
+        if config.growth.enabled and is_main_process()
+        else None
+    )
     interval_metric_sums: dict[str, torch.Tensor] = {}
     interval_start_time = time.perf_counter()
+    current_stage = None
     progress = range(start_step + 1, config.train.train_steps + 1)
     if is_main_process() and not args.benchmark_only:
         progress = tqdm(progress, desc=config.runtime.run_name)
@@ -222,11 +239,41 @@ def main() -> None:
         torch.cuda.reset_peak_memory_stats(device)
 
     for step in progress:
+        stage = growth_schedule.stage_for_step(step)
+        if current_stage is None or stage.index != current_stage.index:
+            split_stats = None
+            if current_stage is not None and stage.active_compute_nodes > current_stage.active_compute_nodes:
+                split_stats = split_model_for_growth(
+                    unwrap_model(model),
+                    current_stage.active_compute_nodes,
+                    stage.active_compute_nodes,
+                    split_mode=config.growth.split_mode,
+                    mutation_scale=config.growth.split_mutation_scale,
+                    seed=config.train.seed + stage.index,
+                )
+                if is_distributed():
+                    torch.distributed.barrier()
+            current_stage = stage
+            if coverage_tracker is not None:
+                coverage_tracker.start_stage(stage, split_stats=split_stats)
+
         model.train()
-        unwrap_model(model).set_first_hop_teacher_force_ratio(first_hop_teacher_force_ratio(step, config))
+        unwrapped_model = unwrap_model(model)
+        unwrapped_model.set_first_hop_teacher_force_ratio(first_hop_teacher_force_ratio(step, config))
+        unwrapped_model.set_growth_context(
+            active_compute_nodes=stage.active_compute_nodes,
+            bootstrap_active=stage.bootstrap_active(step),
+        )
         optimizer.zero_grad(set_to_none=True)
         batch_seed = config.train.seed + rank * 100_000 + step
-        if task_name == "memory":
+        if task_name == "memory_growth":
+            batch = task.generate(
+                config.train.batch_size_per_gpu,
+                batch_seed,
+                active_compute_nodes=stage.active_compute_nodes,
+                bootstrap_mode=stage.bootstrap_active(step),
+            ).to(device)
+        elif task_name == "memory":
             batch = task.generate(config.train.batch_size_per_gpu, batch_seed).to(device)
         else:
             batch = task.generate(config.train.batch_size_per_gpu, batch_seed).to(device)
@@ -235,6 +282,27 @@ def main() -> None:
             output = model(batch)
             loss = output["loss"]
         loss.backward()
+
+        coverage_snapshot: dict[str, float | int] = {}
+        if config.growth.enabled:
+            visit_counts = output.get("diagnostics", {}).get(
+                "visit_counts",
+                torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
+            )
+            visit_counts = visit_counts.to(device=device, dtype=torch.float64)
+            if is_distributed():
+                torch.distributed.all_reduce(visit_counts)
+            grad_norms = collect_node_gradient_norms(unwrapped_model).to(device=device, dtype=torch.float64)
+            if is_distributed():
+                torch.distributed.all_reduce(grad_norms)
+            if coverage_tracker is not None:
+                coverage_snapshot = coverage_tracker.update(
+                    step=step,
+                    stage=stage,
+                    visit_counts=visit_counts,
+                    gradient_norms=grad_norms,
+                )
+
         torch.nn.utils.clip_grad_norm_(model.parameters(), config.train.grad_clip)
         optimizer.step()
 
@@ -261,6 +329,11 @@ def main() -> None:
                 row = {"step": step, "train/loss": train_metrics["loss"]}
                 for key, value in train_metrics.items():
                     row[f"train/{key}"] = float(value)
+                if coverage_tracker is not None:
+                    for key, value in coverage_tracker.current_snapshot().items():
+                        row[f"train/{key}"] = float(value)
+                    row["train/stage_local_step"] = int(coverage_snapshot.get("stage_local_step", stage.local_step(step)))
+                    row["train/stage_bootstrap_active"] = float(stage.bootstrap_active(step))
             interval_metric_sums = {}
             interval_start_time = time.perf_counter()
 
@@ -298,11 +371,15 @@ def main() -> None:
     if args.benchmark_only and is_main_process():
         csv_path = metrics_writer.flush_csv()
         plot_metrics(csv_path, run_dir / "benchmark")
+        if coverage_tracker is not None:
+            save_json(coverage_tracker.to_dict(), run_dir / "coverage_summary.json")
         print(f"Benchmark run written to {run_dir}")
     elif is_main_process():
         csv_path = metrics_writer.flush_csv()
         plot_metrics(csv_path, run_dir / "training")
         save_checkpoint(run_dir, model, optimizer, config.train.train_steps, best_metric, "last")
+        if coverage_tracker is not None:
+            save_json(coverage_tracker.to_dict(), run_dir / "coverage_summary.json")
         print(f"Training run written to {run_dir}")
 
     cleanup_distributed()

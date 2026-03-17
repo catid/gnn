@@ -27,6 +27,14 @@ This repo uses `bd` for task tracking.
 - V4 key-conditioned retrieval smoke: `bash scripts/smoke_v4_retrieval_keycond.sh`
 - V4 main training: `bash scripts/train_v4_retrieval.sh`
 - V4 no-cache ablation: `bash scripts/ablate_v4_retrieval_no_cache.sh`
+- V5 static sparse smoke: `bash scripts/smoke_v5_static_sparse.sh`
+- V5 static bootstrap smoke: `bash scripts/smoke_v5_static_bootstrap.sh`
+- V5 growth clone smoke: `bash scripts/smoke_v5_growth_clone.sh`
+- V5 growth mutate smoke: `bash scripts/smoke_v5_growth_mutate.sh`
+- V5 static sparse training: `bash scripts/train_v5_static_sparse.sh`
+- V5 static bootstrap training: `bash scripts/train_v5_static_bootstrap.sh`
+- V5 growth clone training: `bash scripts/train_v5_growth_clone.sh`
+- V5 growth mutate training: `bash scripts/train_v5_growth_mutate.sh`
 
 ## Constraints
 
