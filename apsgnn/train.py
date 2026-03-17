@@ -45,6 +45,61 @@ def is_first_hop_router_checkpoint_key(key: str) -> bool:
     return key.startswith("first_hop_router") or key.startswith("first_hop_router_ln")
 
 
+def is_cache_retriever_checkpoint_key(key: str) -> bool:
+    return key.startswith("cache_retriever")
+
+
+def load_model_weights(
+    model: APSGNNModel,
+    checkpoint_path: str,
+    device: torch.device,
+    *,
+    allow_cache_retriever_mismatch: bool,
+) -> tuple[dict[str, object], list[str], list[str]]:
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    state = checkpoint["model"]
+    missing_keys, unexpected_keys = model.load_state_dict(state, strict=False)
+
+    def allowed(key: str) -> bool:
+        if is_first_hop_router_checkpoint_key(key):
+            return True
+        if allow_cache_retriever_mismatch and is_cache_retriever_checkpoint_key(key):
+            return True
+        return False
+
+    disallowed_missing = [key for key in missing_keys if not allowed(key)]
+    disallowed_unexpected = [key for key in unexpected_keys if not allowed(key)]
+    if disallowed_missing or disallowed_unexpected:
+        raise RuntimeError(
+            f"Checkpoint load mismatch: missing={missing_keys}, unexpected={unexpected_keys}",
+        )
+    return checkpoint, missing_keys, unexpected_keys
+
+
+def maybe_initialize_from_checkpoint(
+    model: APSGNNModel,
+    checkpoint_path: str | None,
+    device: torch.device,
+) -> None:
+    if checkpoint_path is None or checkpoint_path == "":
+        return
+    load_model_weights(
+        model,
+        checkpoint_path,
+        device,
+        allow_cache_retriever_mismatch=True,
+    )
+
+
+def freeze_first_hop_router(model: APSGNNModel) -> None:
+    for module_name in ("first_hop_router", "first_hop_router_ln"):
+        module = getattr(model, module_name, None)
+        if module is None:
+            continue
+        for parameter in module.parameters():
+            parameter.requires_grad = False
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Train APSGNN experiments.")
     parser.add_argument("--config", required=True, help="Path to YAML config.")
@@ -52,6 +107,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--train-steps", type=int, default=None, help="Override train steps.")
     parser.add_argument("--benchmark-only", action="store_true", help="Run warmup + throughput benchmark only.")
     parser.add_argument("--checkpoint", default=None, help="Optional checkpoint to resume from.")
+    parser.add_argument("--init-checkpoint", default=None, help="Optional model-only warm-start checkpoint.")
     return parser
 
 
@@ -93,14 +149,12 @@ def maybe_load_checkpoint(
 ) -> tuple[int, float]:
     if checkpoint_path is None:
         return 0, -math.inf
-    checkpoint = torch.load(checkpoint_path, map_location=device)
-    missing_keys, unexpected_keys = model.load_state_dict(checkpoint["model"], strict=False)
-    disallowed_missing = [key for key in missing_keys if not is_first_hop_router_checkpoint_key(key)]
-    disallowed_unexpected = [key for key in unexpected_keys if not is_first_hop_router_checkpoint_key(key)]
-    if disallowed_missing or disallowed_unexpected:
-        raise RuntimeError(
-            f"Checkpoint load mismatch: missing={missing_keys}, unexpected={unexpected_keys}",
-        )
+    checkpoint, _, _ = load_model_weights(
+        model,
+        checkpoint_path,
+        device,
+        allow_cache_retriever_mismatch=False,
+    )
     optimizer.load_state_dict(checkpoint["optimizer"])
     return int(checkpoint["step"]), float(checkpoint.get("best_metric", -math.inf))
 
@@ -117,6 +171,8 @@ def main() -> None:
         config.runtime.run_name = args.run_name
     if args.train_steps is not None:
         config.train.train_steps = args.train_steps
+    if args.init_checkpoint is not None:
+        config.train.init_checkpoint = args.init_checkpoint
 
     seed_everything(config.train.seed + rank)
     task_name = config.task.name
@@ -129,9 +185,13 @@ def main() -> None:
         save_run_metadata(run_dir, config)
 
     model = APSGNNModel(config).to(device)
+    if args.checkpoint is None:
+        maybe_initialize_from_checkpoint(model, config.train.init_checkpoint or None, device)
+    if config.train.freeze_first_hop_router:
+        freeze_first_hop_router(model)
     use_autocast = device.type == "cuda" and config.train.bf16 and torch.cuda.is_bf16_supported()
     optimizer = torch.optim.AdamW(
-        model.parameters(),
+        [parameter for parameter in model.parameters() if parameter.requires_grad],
         lr=config.train.lr,
         weight_decay=config.train.weight_decay,
     )

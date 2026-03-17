@@ -127,6 +127,20 @@ def _concat_output_events(events: list[OutputEvent]) -> OutputEvent | None:
     )
 
 
+def _build_mlp(input_dim: int, hidden_dim: int, output_dim: int, layers: int) -> nn.Sequential:
+    modules: list[nn.Module] = []
+    current_dim = input_dim
+    total_layers = max(layers, 1)
+    for layer_idx in range(total_layers):
+        next_dim = output_dim if layer_idx == total_layers - 1 else hidden_dim
+        modules.append(nn.Linear(current_dim, next_dim))
+        if layer_idx != total_layers - 1:
+            modules.append(nn.GELU())
+            modules.append(nn.LayerNorm(next_dim))
+        current_dim = next_dim
+    return nn.Sequential(*modules)
+
+
 class KeyCentricFirstHopRouter(nn.Module):
     def __init__(
         self,
@@ -222,6 +236,97 @@ class KeyCentricFirstHopRouter(nn.Module):
         return outputs
 
 
+class LearnedCacheRetriever(nn.Module):
+    def __init__(
+        self,
+        *,
+        variant: str,
+        d_model: int,
+        key_dim: int,
+        hidden_dim: int,
+        layers: int,
+    ) -> None:
+        super().__init__()
+        self.variant = variant
+        self.d_model = d_model
+        self.uses_key_conditioning = variant == "learned_keycond"
+
+        if self.uses_key_conditioning:
+            self.key_condition_proj = nn.Linear(key_dim, d_model)
+            query_input_dim = d_model * 2
+        else:
+            self.key_condition_proj = None
+            query_input_dim = d_model
+        self.query_mlp = _build_mlp(query_input_dim, hidden_dim, hidden_dim, layers)
+        self.cache_key_proj = nn.Sequential(
+            nn.LayerNorm(d_model),
+            nn.Linear(d_model, hidden_dim),
+        )
+        self.cache_value_proj = nn.Sequential(
+            nn.LayerNorm(d_model),
+            nn.Linear(d_model, d_model),
+        )
+        self.merge_proj = nn.Sequential(
+            nn.Linear(d_model * 2, d_model),
+            nn.GELU(),
+            nn.Linear(d_model, d_model),
+        )
+        self.merge_gate = nn.Linear(d_model, d_model)
+
+    def build_query_inputs(self, hidden: Tensor, routing_key: Tensor) -> Tensor:
+        if not self.uses_key_conditioning:
+            return hidden
+        assert self.key_condition_proj is not None
+        key_features = F.gelu(self.key_condition_proj(routing_key))
+        return torch.cat([hidden, key_features], dim=-1)
+
+    def forward(
+        self,
+        *,
+        hidden: Tensor,
+        routing_key: Tensor,
+        cache_entries: Tensor,
+        cache_mask: Tensor,
+    ) -> dict[str, Tensor]:
+        if hidden.numel() == 0:
+            zeros = hidden.new_zeros(hidden.size(0), self.d_model)
+            empty_weights = hidden.new_zeros(hidden.size(0), cache_entries.size(1))
+            return {
+                "update": zeros,
+                "attention_weights": empty_weights,
+                "entropy": hidden.new_zeros(hidden.size(0)),
+                "top_mass": hidden.new_zeros(hidden.size(0)),
+                "entry_count": hidden.new_zeros(hidden.size(0)),
+            }
+
+        query = self.query_mlp(self.build_query_inputs(hidden, routing_key))
+        cache_keys = self.cache_key_proj(cache_entries)
+        cache_values = self.cache_value_proj(cache_entries)
+
+        scores = torch.einsum("gd,gcd->gc", query, cache_keys) / math.sqrt(cache_keys.size(-1))
+        scores = scores.masked_fill(~cache_mask, -1.0e9)
+        attention_weights = scores.softmax(dim=-1)
+        attention_weights = attention_weights * cache_mask.to(attention_weights.dtype)
+        attention_norm = attention_weights.sum(dim=-1, keepdim=True).clamp_min(1.0e-6)
+        attention_weights = attention_weights / attention_norm
+
+        retrieved = torch.einsum("gc,gcd->gd", attention_weights, cache_values)
+        merged = self.merge_proj(torch.cat([hidden, retrieved], dim=-1))
+        gated_update = torch.sigmoid(self.merge_gate(hidden)) * merged
+
+        safe_weights = attention_weights.clamp_min(1.0e-8)
+        entropy = -(attention_weights * safe_weights.log()).sum(dim=-1)
+        top_mass = attention_weights.max(dim=-1).values
+        entry_count = cache_mask.sum(dim=-1).to(hidden.dtype)
+        return {
+            "update": gated_update,
+            "attention_weights": attention_weights,
+            "entropy": entropy,
+            "top_mass": top_mass,
+            "entry_count": entry_count,
+        }
+
+
 class APSGNNModel(nn.Module):
     def __init__(self, config: ExperimentConfig) -> None:
         super().__init__()
@@ -262,6 +367,16 @@ class APSGNNModel(nn.Module):
                 residual_scale=model_cfg.first_hop_router_residual_scale,
                 aux_type=model_cfg.first_hop_router_aux_type,
             )
+        if model_cfg.cache_read_variant == "explicit":
+            self.cache_retriever: LearnedCacheRetriever | None = None
+        else:
+            self.cache_retriever = LearnedCacheRetriever(
+                variant=model_cfg.cache_read_variant,
+                d_model=model_cfg.d_model,
+                key_dim=model_cfg.key_dim,
+                hidden_dim=model_cfg.cache_read_hidden_dim,
+                layers=model_cfg.cache_read_layers,
+            )
         self.first_hop_teacher_force_ratio = 0.0
 
         self.node_cells = nn.ModuleList(
@@ -299,6 +414,12 @@ class APSGNNModel(nn.Module):
             and self.config.model.first_hop_router_aux_type == "address_l2"
             and self.config.train.first_hop_router_aux_weight > 0.0
         )
+
+    def uses_explicit_cache_read(self) -> bool:
+        return self.config.model.cache_read_variant == "explicit"
+
+    def uses_learned_cache_read(self) -> bool:
+        return self.config.model.cache_read_variant in {"learned_implicit", "learned_keycond"}
 
     def encode_writers(self, batch: MemoryBatch) -> Tensor:
         writers = batch.writer_keys.size(1)
@@ -428,6 +549,12 @@ class APSGNNModel(nn.Module):
         cache_mean_count = zero
         cache_max_sum = zero
         cache_max_count = zero
+        retrieval_entropy_sum = zero
+        retrieval_entropy_count = zero
+        retrieval_top_mass_sum = zero
+        retrieval_top_mass_count = zero
+        retrieval_entry_sum = zero
+        retrieval_entry_count = zero
 
         for step in range(cfg.task.max_rollout_steps):
             cache_events = _concat_cache_events(cache_buffer.pop_current())
@@ -475,6 +602,9 @@ class APSGNNModel(nn.Module):
             first_hop_aux_prediction = predictions["first_hop_aux_prediction"]
             address_norm = predictions["address_norm"]
             teacher_forced_mask = predictions["teacher_forced_mask"]
+            retrieval_entropy = predictions["retrieval_entropy"]
+            retrieval_top_mass = predictions["retrieval_top_mass"]
+            retrieval_entry_count_values = predictions["retrieval_entry_count"]
 
             writer_first_mask = (active_packets.role == ROLE_WRITER) & (active_packets.hop_index == 0)
             if writer_first_mask.any():
@@ -541,6 +671,12 @@ class APSGNNModel(nn.Module):
                 home_out_count = home_out_count + first_home_mask.sum()
                 zeros = torch.zeros(first_home_mask.sum(), device=device, dtype=torch.long)
                 loss_delay_sum = loss_delay_sum + F.cross_entropy(delay_logits[first_home_mask], zeros, reduction="sum")
+                retrieval_entropy_sum = retrieval_entropy_sum + retrieval_entropy[first_home_mask].sum()
+                retrieval_entropy_count = retrieval_entropy_count + first_home_mask.sum()
+                retrieval_top_mass_sum = retrieval_top_mass_sum + retrieval_top_mass[first_home_mask].sum()
+                retrieval_top_mass_count = retrieval_top_mass_count + first_home_mask.sum()
+                retrieval_entry_sum = retrieval_entry_sum + retrieval_entry_count_values[first_home_mask].sum()
+                retrieval_entry_count = retrieval_entry_count + first_home_mask.sum()
 
             gravity_mask = (active_packets.role == ROLE_QUERY) & (active_packets.has_visited_home | entered_home)
             if gravity_mask.any():
@@ -654,6 +790,12 @@ class APSGNNModel(nn.Module):
                 "cache_mean_count": cache_mean_count.detach().to(dtype),
                 "cache_max_sum": cache_max_sum.detach(),
                 "cache_max_count": cache_max_count.detach().to(dtype),
+                "retrieval_entropy_sum": retrieval_entropy_sum.detach(),
+                "retrieval_entropy_count": retrieval_entropy_count.detach().to(dtype),
+                "retrieval_top_mass_sum": retrieval_top_mass_sum.detach(),
+                "retrieval_top_mass_count": retrieval_top_mass_count.detach().to(dtype),
+                "retrieval_entry_sum": retrieval_entry_sum.detach(),
+                "retrieval_entry_count": retrieval_entry_count.detach().to(dtype),
                 "packets_processed_sum": processed_packets_sum.detach().to(dtype),
             },
         }
@@ -862,6 +1004,95 @@ class APSGNNModel(nn.Module):
             "aux_address": aux_address,
         }
 
+    def _explicit_cache_read(
+        self,
+        *,
+        packet_tensor: Tensor,
+        role_tensor: Tensor,
+        routing_key_tensor: Tensor,
+        cache_tensor: Tensor,
+        cache_mask: Tensor,
+    ) -> tuple[Tensor, Tensor]:
+        cfg = self.config.model
+        full_explicit_read = torch.zeros_like(packet_tensor)
+        rows_with_cache = cache_mask.any(dim=1)
+        if not rows_with_cache.any():
+            return packet_tensor, full_explicit_read
+
+        query_mask = role_tensor[rows_with_cache] == ROLE_QUERY
+        if not query_mask.any():
+            return packet_tensor, full_explicit_read
+
+        cache_tensor_with_cache = cache_tensor[rows_with_cache]
+        cache_mask_with_cache = cache_mask[rows_with_cache]
+        routing_key_with_cache = routing_key_tensor[rows_with_cache]
+        cache_keys = cache_tensor_with_cache[:, :, : cfg.key_dim]
+        attention_scores = torch.einsum("gqk,gck->gqc", routing_key_with_cache, cache_keys) / math.sqrt(cfg.key_dim)
+        attention_scores = attention_scores.masked_fill(~cache_mask_with_cache[:, None, :], -1.0e9)
+        attention_weights = attention_scores.softmax(dim=-1)
+        explicit_read = torch.einsum("gqc,gcd->gqd", attention_weights, cache_tensor_with_cache)
+        masked_read = explicit_read * query_mask.unsqueeze(-1).to(packet_tensor.dtype)
+
+        updated_packet_tensor = packet_tensor.clone()
+        updated_packet_tensor[rows_with_cache] = updated_packet_tensor[rows_with_cache] + masked_read
+        full_explicit_read[rows_with_cache] = masked_read
+        return updated_packet_tensor, full_explicit_read
+
+    def _learned_cache_read(
+        self,
+        *,
+        hidden_tensor: Tensor,
+        role_tensor: Tensor,
+        routing_key_tensor: Tensor,
+        cache_tensor: Tensor,
+        cache_mask: Tensor,
+    ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
+        full_read = torch.zeros_like(hidden_tensor)
+        entropy = torch.zeros(hidden_tensor.size(0), hidden_tensor.size(1), device=hidden_tensor.device, dtype=hidden_tensor.dtype)
+        top_mass = torch.zeros_like(entropy)
+        entry_count = torch.zeros_like(entropy)
+        rows_with_cache = cache_mask.any(dim=1)
+        if not rows_with_cache.any() or self.cache_retriever is None:
+            return full_read, entropy, top_mass, entry_count
+
+        query_mask = role_tensor[rows_with_cache] == ROLE_QUERY
+        if not query_mask.any():
+            return full_read, entropy, top_mass, entry_count
+
+        hidden_rows = hidden_tensor[rows_with_cache]
+        routing_key_rows = routing_key_tensor[rows_with_cache]
+        cache_rows = cache_tensor[rows_with_cache]
+        cache_mask_rows = cache_mask[rows_with_cache]
+
+        query_positions = query_mask.nonzero(as_tuple=False)
+        selected_hidden = hidden_rows[query_positions[:, 0], query_positions[:, 1]]
+        selected_keys = routing_key_rows[query_positions[:, 0], query_positions[:, 1]]
+        selected_cache = cache_rows[query_positions[:, 0]]
+        selected_cache_mask = cache_mask_rows[query_positions[:, 0]]
+
+        retrieval_outputs = self.cache_retriever(
+            hidden=selected_hidden,
+            routing_key=selected_keys,
+            cache_entries=selected_cache,
+            cache_mask=selected_cache_mask,
+        )
+        full_read_rows = torch.zeros_like(hidden_rows)
+        entropy_rows = torch.zeros(hidden_rows.size(0), hidden_rows.size(1), device=hidden_rows.device, dtype=hidden_rows.dtype)
+        top_mass_rows = torch.zeros_like(entropy_rows)
+        entry_count_rows = torch.zeros_like(entropy_rows)
+        full_read_rows[query_positions[:, 0], query_positions[:, 1]] = retrieval_outputs["update"].to(full_read_rows.dtype)
+        entropy_rows[query_positions[:, 0], query_positions[:, 1]] = retrieval_outputs["entropy"].to(entropy_rows.dtype)
+        top_mass_rows[query_positions[:, 0], query_positions[:, 1]] = retrieval_outputs["top_mass"].to(top_mass_rows.dtype)
+        entry_count_rows[query_positions[:, 0], query_positions[:, 1]] = retrieval_outputs["entry_count"].to(
+            entry_count_rows.dtype
+        )
+
+        full_read[rows_with_cache] = full_read_rows
+        entropy[rows_with_cache] = entropy_rows
+        top_mass[rows_with_cache] = top_mass_rows
+        entry_count[rows_with_cache] = entry_count_rows
+        return full_read, entropy, top_mass, entry_count
+
     def _run_compute_nodes(self, packets: PacketBatch, cache: NodeCache) -> dict[str, Tensor]:
         cfg = self.config.model
         device = packets.residual.device
@@ -873,6 +1104,9 @@ class APSGNNModel(nn.Module):
         )
         hidden = torch.zeros_like(packets.residual)
         memory_update = torch.zeros_like(packets.residual)
+        retrieval_entropy = torch.zeros(packets.residual.size(0), device=device, dtype=packets.residual.dtype)
+        retrieval_top_mass = torch.zeros_like(retrieval_entropy)
+        retrieval_entry_count = torch.zeros_like(retrieval_entropy)
 
         grouped: dict[tuple[int, int], list[int]] = {}
         batch_index_cpu = packets.batch_index.detach().cpu().tolist()
@@ -918,42 +1152,16 @@ class APSGNNModel(nn.Module):
                 routing_key_tensor[group_idx, :count] = packets.routing_key[index_tensor]
 
             cache_tensor, cache_mask = cache.gather(group_batch_index, group_node_index)
-            rows_with_cache = cache_mask.any(dim=1)
-            if rows_with_cache.any():
-                query_mask = role_tensor[rows_with_cache] == ROLE_QUERY
-                if query_mask.any():
-                    cache_tensor_with_cache = cache_tensor[rows_with_cache]
-                    cache_mask_with_cache = cache_mask[rows_with_cache]
-                    routing_key_with_cache = routing_key_tensor[rows_with_cache]
-                    cache_keys = cache_tensor_with_cache[:, :, : cfg.key_dim]
-                    attention_scores = torch.einsum("gqk,gck->gqc", routing_key_with_cache, cache_keys) / math.sqrt(
-                        cfg.key_dim
-                    )
-                    attention_scores = attention_scores.masked_fill(~cache_mask_with_cache[:, None, :], -1.0e9)
-                    attention_weights = attention_scores.softmax(dim=-1)
-                    explicit_read = torch.einsum("gqc,gcd->gqd", attention_weights, cache_tensor_with_cache)
-                    packet_tensor = packet_tensor.clone()
-                    packet_tensor[rows_with_cache] = packet_tensor[rows_with_cache] + explicit_read * query_mask.unsqueeze(
-                        -1
-                    ).to(packet_tensor.dtype)
-                    full_explicit_read = torch.zeros(
-                        group_count,
-                        max_packets,
-                        cfg.d_model,
-                        device=device,
-                        dtype=packet_tensor.dtype,
-                    )
-                    full_explicit_read[rows_with_cache] = explicit_read * query_mask.unsqueeze(-1).to(packet_tensor.dtype)
-                else:
-                    full_explicit_read = torch.zeros(
-                        group_count,
-                        max_packets,
-                        cfg.d_model,
-                        device=device,
-                        dtype=packet_tensor.dtype,
-                    )
+            if self.uses_explicit_cache_read():
+                packet_tensor, full_memory_update = self._explicit_cache_read(
+                    packet_tensor=packet_tensor,
+                    role_tensor=role_tensor,
+                    routing_key_tensor=routing_key_tensor,
+                    cache_tensor=cache_tensor,
+                    cache_mask=cache_mask,
+                )
             else:
-                full_explicit_read = torch.zeros(
+                full_memory_update = torch.zeros(
                     group_count,
                     max_packets,
                     cfg.d_model,
@@ -961,12 +1169,32 @@ class APSGNNModel(nn.Module):
                     dtype=packet_tensor.dtype,
                 )
             outputs = cell(packet_tensor, packet_mask, cache_tensor, cache_mask)
+            if self.uses_learned_cache_read():
+                (
+                    full_memory_update,
+                    group_entropy,
+                    group_top_mass,
+                    group_entry_count,
+                ) = self._learned_cache_read(
+                    hidden_tensor=outputs["hidden"],
+                    role_tensor=role_tensor,
+                    routing_key_tensor=routing_key_tensor,
+                    cache_tensor=cache_tensor,
+                    cache_mask=cache_mask,
+                )
+            else:
+                group_entropy = torch.zeros(group_count, max_packets, device=device, dtype=packet_tensor.dtype)
+                group_top_mass = torch.zeros_like(group_entropy)
+                group_entry_count = torch.zeros_like(group_entropy)
 
             for group_idx, (_, indices) in enumerate(groups):
                 count = len(indices)
                 index_tensor = torch.tensor(indices, device=device, dtype=torch.long)
                 hidden[index_tensor] = outputs["hidden"][group_idx, :count].to(hidden.dtype)
-                memory_update[index_tensor] = full_explicit_read[group_idx, :count].to(memory_update.dtype)
+                memory_update[index_tensor] = full_memory_update[group_idx, :count].to(memory_update.dtype)
+                retrieval_entropy[index_tensor] = group_entropy[group_idx, :count].to(retrieval_entropy.dtype)
+                retrieval_top_mass[index_tensor] = group_top_mass[group_idx, :count].to(retrieval_top_mass.dtype)
+                retrieval_entry_count[index_tensor] = group_entry_count[group_idx, :count].to(retrieval_entry_count.dtype)
 
         delta = self.delta_head(hidden)
         direction = self.direction_head(hidden)
@@ -1043,6 +1271,9 @@ class APSGNNModel(nn.Module):
             "address_norm": address.norm(dim=-1),
             "first_hop_aux_prediction": first_hop_aux_prediction,
             "teacher_forced_mask": teacher_forced_mask,
+            "retrieval_entropy": retrieval_entropy,
+            "retrieval_top_mass": retrieval_top_mass,
+            "retrieval_entry_count": retrieval_entry_count,
         }
 
     def _schedule_packets(

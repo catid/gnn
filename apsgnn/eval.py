@@ -20,6 +20,10 @@ def is_first_hop_router_checkpoint_key(key: str) -> bool:
     return key.startswith("first_hop_router") or key.startswith("first_hop_router_ln")
 
 
+def is_cache_retriever_checkpoint_key(key: str) -> bool:
+    return key.startswith("cache_retriever")
+
+
 def accumulate_metric_sums(
     accumulator: dict[str, torch.Tensor],
     metric_sums: dict[str, torch.Tensor],
@@ -76,6 +80,19 @@ def finalize_metrics(metric_sums: dict[str, float]) -> dict[str, float]:
             metric_sums.get("cache_max_count", 0.0),
             1.0,
         )
+    if "retrieval_entropy_sum" in metric_sums:
+        metrics["retrieval_entropy"] = metric_sums.get("retrieval_entropy_sum", 0.0) / max(
+            metric_sums.get("retrieval_entropy_count", 0.0),
+            1.0,
+        )
+        metrics["retrieval_top_mass"] = metric_sums.get("retrieval_top_mass_sum", 0.0) / max(
+            metric_sums.get("retrieval_top_mass_count", 0.0),
+            1.0,
+        )
+        metrics["retrieval_cache_entries"] = metric_sums.get("retrieval_entry_sum", 0.0) / max(
+            metric_sums.get("retrieval_entry_count", 0.0),
+            1.0,
+        )
     metrics["packets_processed"] = metric_sums.get("packets_processed_sum", 0.0)
     return metrics
 
@@ -130,8 +147,16 @@ def _load_checkpoint(model: APSGNNModel, checkpoint_path: str | Path, device: to
     checkpoint = torch.load(checkpoint_path, map_location=device)
     state = checkpoint["model"]
     missing_keys, unexpected_keys = model.load_state_dict(state, strict=False)
-    disallowed_missing = [key for key in missing_keys if not is_first_hop_router_checkpoint_key(key)]
-    disallowed_unexpected = [key for key in unexpected_keys if not is_first_hop_router_checkpoint_key(key)]
+    disallowed_missing = [
+        key
+        for key in missing_keys
+        if not is_first_hop_router_checkpoint_key(key) and not is_cache_retriever_checkpoint_key(key)
+    ]
+    disallowed_unexpected = [
+        key
+        for key in unexpected_keys
+        if not is_first_hop_router_checkpoint_key(key) and not is_cache_retriever_checkpoint_key(key)
+    ]
     if disallowed_missing or disallowed_unexpected:
         raise RuntimeError(
             f"Checkpoint load mismatch: missing={missing_keys}, unexpected={unexpected_keys}",

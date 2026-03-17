@@ -1,0 +1,429 @@
+{
+  "visible_gpu_count": 2,
+  "visible_gpus": [
+    "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+    "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition"
+  ],
+  "selection": {
+    "implicit_search_step_600": {
+      "query_accuracy": 0.378125,
+      "query_first_hop_home_rate": 0.82734375,
+      "writer_first_hop_home_rate": 0.87421875,
+      "query_home_to_output_rate": 0.9689849624060152,
+      "retrieval_entropy": 0.0638943920468892,
+      "retrieval_top_mass": 0.9205984567341052,
+      "retrieval_cache_entries": 1.1494360902255638
+    },
+    "keycond_search_step_600": {
+      "query_accuracy": 0.37265625,
+      "query_first_hop_home_rate": 0.82734375,
+      "writer_first_hop_home_rate": 0.8743489583333334,
+      "query_home_to_output_rate": 0.9689849624060152,
+      "retrieval_entropy": 0.0688561711979406,
+      "retrieval_top_mass": 0.9187425419800264,
+      "retrieval_cache_entries": 1.1494360902255638
+    },
+    "selected_variant": "learned_implicit"
+  },
+  "comparison": {
+    "v3_best_cached_k6": {
+      "average_delay": 0.000390625,
+      "average_hops": 2.0,
+      "cache_max_occupancy": 2.25,
+      "cache_mean_occupancy": 0.16875,
+      "checkpoint_step": 1200,
+      "first_hop_teacher_force_ratio": 0.0,
+      "loss": 25781261.58572532,
+      "packets_processed": 10240.0,
+      "query_accuracy": 0.43359375,
+      "query_delivery_rate": 1.0,
+      "query_first_hop_home_rate": 0.80390625,
+      "query_home_to_output_rate": 0.9681467181467182,
+      "writer_first_hop_home_rate": 0.8583333333333333,
+      "writers_per_episode": 6
+    },
+    "v3_best_cached_k10": {
+      "average_delay": 0.0,
+      "average_hops": 2.0,
+      "cache_max_occupancy": 2.93625,
+      "cache_mean_occupancy": 0.28125,
+      "checkpoint_step": 1200,
+      "first_hop_teacher_force_ratio": 0.0,
+      "loss": 32031264.649466764,
+      "packets_processed": 15360.0,
+      "query_accuracy": 0.44765625,
+      "query_delivery_rate": 1.0,
+      "query_first_hop_home_rate": 0.80234375,
+      "query_home_to_output_rate": 0.960348162475822,
+      "writer_first_hop_home_rate": 0.860234375,
+      "writers_per_episode": 10
+    },
+    "v4_best_cached_k6": {
+      "config": {
+        "model": {
+          "address_dim": 128,
+          "cache_capacity": 64,
+          "cache_read_hidden_dim": 384,
+          "cache_read_layers": 3,
+          "cache_read_variant": "learned_implicit",
+          "d_model": 128,
+          "delay_bins": 8,
+          "delay_temperature": 0.7,
+          "dropout": 0.0,
+          "enable_cache": true,
+          "first_hop_hint_residual_scale": 0.25,
+          "first_hop_router_aux_type": "none",
+          "first_hop_router_hidden_dim": 384,
+          "first_hop_router_layers": 3,
+          "first_hop_router_residual_scale": 0.25,
+          "first_hop_router_separate_heads": true,
+          "first_hop_router_use_residual": false,
+          "first_hop_router_variant": "key_mlp_ce",
+          "key_dim": 32,
+          "max_ttl": 8,
+          "mlp_ratio": 4,
+          "nhead": 4,
+          "nodes_total": 32,
+          "num_classes": 32,
+          "packet_roles": 3,
+          "readout_class_scale": 8.0,
+          "route_temperature": 0.7,
+          "use_first_hop_key_hint": false,
+          "use_learned_first_hop_router": true
+        },
+        "runtime": {
+          "notes": "",
+          "output_root": "runs",
+          "report_root": "reports",
+          "run_name": "v4-retrieval-best"
+        },
+        "task": {
+          "hash_seed": 17,
+          "max_rollout_steps": 10,
+          "name": "memory",
+          "query_inject_step": 2,
+          "sanity_max_ttl": 4,
+          "sanity_min_ttl": 2,
+          "train_eval_writers": [
+            6,
+            10
+          ],
+          "writer_inject_step": 0,
+          "writers_per_episode": 6
+        },
+        "train": {
+          "address_aux_weight": 2.0,
+          "aux_home_out_weight": 1.0,
+          "aux_query_weight": 2.0,
+          "aux_writer_weight": 2.0,
+          "batch_size_per_gpu": 16,
+          "benchmark_steps": 100,
+          "benchmark_warmup_steps": 10,
+          "bf16": true,
+          "compile_model": false,
+          "delay_reg_weight": 0.05,
+          "eval_interval": 150,
+          "first_hop_router_aux_weight": 0.0,
+          "first_hop_teacher_force_anneal_steps": 1,
+          "first_hop_teacher_force_end": 0.0,
+          "first_hop_teacher_force_start": 0.0,
+          "freeze_first_hop_router": true,
+          "grad_clip": 1.0,
+          "gravity_weight": 0.01,
+          "init_checkpoint": "runs/20260317-055916-v3-router-best/best.pt",
+          "log_interval": 25,
+          "lr": 0.0002,
+          "missing_output_penalty": 0.5,
+          "sanity_delay_weight": 0.05,
+          "sanity_route_weight": 1.0,
+          "save_interval": 150,
+          "seed": 1234,
+          "train_steps": 1200,
+          "val_batches": 40,
+          "weight_decay": 0.01
+        }
+      },
+      "environment": {
+        "bf16_supported": true,
+        "cuda_available": true,
+        "cuda_device_count": 2,
+        "devices": [
+          "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+          "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition"
+        ],
+        "git": {
+          "commit": "28cd6e37c87fa7b3dec8bde1e28cfa904571f409",
+          "status": "M apsgnn/config.py\n M apsgnn/eval.py\n M apsgnn/model.py\n M apsgnn/train.py\n?? configs/v4_retrieval_best.yaml\n?? configs/v4_retrieval_best_no_cache.yaml\n?? configs/v4_retrieval_implicit_search.yaml\n?? configs/v4_retrieval_keycond_search.yaml\n?? scripts/ablate_v4_retrieval_no_cache.sh\n?? scripts/smoke_v4_retrieval_implicit.sh\n?? scripts/smoke_v4_retrieval_keycond.sh\n?? scripts/train_v4_retrieval.sh\n?? tests/test_v4_retrieval.py"
+        },
+        "hostname": "ripper2",
+        "python": "3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]",
+        "torch_version": "2.12.0.dev20260316+cu130"
+      },
+      "metrics": {
+        "average_delay": 0.0,
+        "average_hops": 2.0,
+        "cache_max_occupancy": 2.205,
+        "cache_mean_occupancy": 0.16875,
+        "checkpoint_step": 1200,
+        "first_hop_teacher_force_ratio": 0.0,
+        "loss": 25781259.355561703,
+        "packets_processed": 10240.0,
+        "query_accuracy": 0.61328125,
+        "query_delivery_rate": 1.0,
+        "query_first_hop_home_rate": 0.83515625,
+        "query_home_to_output_rate": 0.9692737430167597,
+        "retrieval_cache_entries": 1.1536312849162011,
+        "retrieval_entropy": 0.05495356698216978,
+        "retrieval_top_mass": 0.9303221800251824,
+        "writer_first_hop_home_rate": 0.87734375,
+        "writers_per_episode": 6
+      }
+    },
+    "v4_best_cached_k10": {
+      "config": {
+        "model": {
+          "address_dim": 128,
+          "cache_capacity": 64,
+          "cache_read_hidden_dim": 384,
+          "cache_read_layers": 3,
+          "cache_read_variant": "learned_implicit",
+          "d_model": 128,
+          "delay_bins": 8,
+          "delay_temperature": 0.7,
+          "dropout": 0.0,
+          "enable_cache": true,
+          "first_hop_hint_residual_scale": 0.25,
+          "first_hop_router_aux_type": "none",
+          "first_hop_router_hidden_dim": 384,
+          "first_hop_router_layers": 3,
+          "first_hop_router_residual_scale": 0.25,
+          "first_hop_router_separate_heads": true,
+          "first_hop_router_use_residual": false,
+          "first_hop_router_variant": "key_mlp_ce",
+          "key_dim": 32,
+          "max_ttl": 8,
+          "mlp_ratio": 4,
+          "nhead": 4,
+          "nodes_total": 32,
+          "num_classes": 32,
+          "packet_roles": 3,
+          "readout_class_scale": 8.0,
+          "route_temperature": 0.7,
+          "use_first_hop_key_hint": false,
+          "use_learned_first_hop_router": true
+        },
+        "runtime": {
+          "notes": "",
+          "output_root": "runs",
+          "report_root": "reports",
+          "run_name": "v4-retrieval-best"
+        },
+        "task": {
+          "hash_seed": 17,
+          "max_rollout_steps": 10,
+          "name": "memory",
+          "query_inject_step": 2,
+          "sanity_max_ttl": 4,
+          "sanity_min_ttl": 2,
+          "train_eval_writers": [
+            6,
+            10
+          ],
+          "writer_inject_step": 0,
+          "writers_per_episode": 6
+        },
+        "train": {
+          "address_aux_weight": 2.0,
+          "aux_home_out_weight": 1.0,
+          "aux_query_weight": 2.0,
+          "aux_writer_weight": 2.0,
+          "batch_size_per_gpu": 16,
+          "benchmark_steps": 100,
+          "benchmark_warmup_steps": 10,
+          "bf16": true,
+          "compile_model": false,
+          "delay_reg_weight": 0.05,
+          "eval_interval": 150,
+          "first_hop_router_aux_weight": 0.0,
+          "first_hop_teacher_force_anneal_steps": 1,
+          "first_hop_teacher_force_end": 0.0,
+          "first_hop_teacher_force_start": 0.0,
+          "freeze_first_hop_router": true,
+          "grad_clip": 1.0,
+          "gravity_weight": 0.01,
+          "init_checkpoint": "runs/20260317-055916-v3-router-best/best.pt",
+          "log_interval": 25,
+          "lr": 0.0002,
+          "missing_output_penalty": 0.5,
+          "sanity_delay_weight": 0.05,
+          "sanity_route_weight": 1.0,
+          "save_interval": 150,
+          "seed": 1234,
+          "train_steps": 1200,
+          "val_batches": 40,
+          "weight_decay": 0.01
+        }
+      },
+      "environment": {
+        "bf16_supported": true,
+        "cuda_available": true,
+        "cuda_device_count": 2,
+        "devices": [
+          "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+          "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition"
+        ],
+        "git": {
+          "commit": "28cd6e37c87fa7b3dec8bde1e28cfa904571f409",
+          "status": "M apsgnn/config.py\n M apsgnn/eval.py\n M apsgnn/model.py\n M apsgnn/train.py\n?? configs/v4_retrieval_best.yaml\n?? configs/v4_retrieval_best_no_cache.yaml\n?? configs/v4_retrieval_implicit_search.yaml\n?? configs/v4_retrieval_keycond_search.yaml\n?? scripts/ablate_v4_retrieval_no_cache.sh\n?? scripts/smoke_v4_retrieval_implicit.sh\n?? scripts/smoke_v4_retrieval_keycond.sh\n?? scripts/train_v4_retrieval.sh\n?? tests/test_v4_retrieval.py"
+        },
+        "hostname": "ripper2",
+        "python": "3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]",
+        "torch_version": "2.12.0.dev20260316+cu130"
+      },
+      "metrics": {
+        "average_delay": 0.0,
+        "average_hops": 2.0,
+        "cache_max_occupancy": 2.9025,
+        "cache_mean_occupancy": 0.28125,
+        "checkpoint_step": 1200,
+        "first_hop_teacher_force_ratio": 0.0,
+        "loss": 32031262.078350686,
+        "packets_processed": 15360.0,
+        "query_accuracy": 0.58359375,
+        "query_delivery_rate": 1.0,
+        "query_first_hop_home_rate": 0.8265625,
+        "query_home_to_output_rate": 0.9614661654135338,
+        "retrieval_cache_entries": 1.3486842105263157,
+        "retrieval_entropy": 0.0995662092000134,
+        "retrieval_top_mass": 0.927920018819938,
+        "writer_first_hop_home_rate": 0.878671875,
+        "writers_per_episode": 10
+      }
+    },
+    "v4_no_cache_step1200_k6": {
+      "config": {
+        "model": {
+          "address_dim": 128,
+          "cache_capacity": 64,
+          "cache_read_hidden_dim": 384,
+          "cache_read_layers": 3,
+          "cache_read_variant": "learned_implicit",
+          "d_model": 128,
+          "delay_bins": 8,
+          "delay_temperature": 0.7,
+          "dropout": 0.0,
+          "enable_cache": false,
+          "first_hop_hint_residual_scale": 0.25,
+          "first_hop_router_aux_type": "none",
+          "first_hop_router_hidden_dim": 384,
+          "first_hop_router_layers": 3,
+          "first_hop_router_residual_scale": 0.25,
+          "first_hop_router_separate_heads": true,
+          "first_hop_router_use_residual": false,
+          "first_hop_router_variant": "key_mlp_ce",
+          "key_dim": 32,
+          "max_ttl": 8,
+          "mlp_ratio": 4,
+          "nhead": 4,
+          "nodes_total": 32,
+          "num_classes": 32,
+          "packet_roles": 3,
+          "readout_class_scale": 8.0,
+          "route_temperature": 0.7,
+          "use_first_hop_key_hint": false,
+          "use_learned_first_hop_router": true
+        },
+        "runtime": {
+          "notes": "",
+          "output_root": "runs",
+          "report_root": "reports",
+          "run_name": "v4-retrieval-best-no-cache"
+        },
+        "task": {
+          "hash_seed": 17,
+          "max_rollout_steps": 10,
+          "name": "memory",
+          "query_inject_step": 2,
+          "sanity_max_ttl": 4,
+          "sanity_min_ttl": 2,
+          "train_eval_writers": [
+            6,
+            10
+          ],
+          "writer_inject_step": 0,
+          "writers_per_episode": 6
+        },
+        "train": {
+          "address_aux_weight": 2.0,
+          "aux_home_out_weight": 1.0,
+          "aux_query_weight": 2.0,
+          "aux_writer_weight": 2.0,
+          "batch_size_per_gpu": 16,
+          "benchmark_steps": 100,
+          "benchmark_warmup_steps": 10,
+          "bf16": true,
+          "compile_model": false,
+          "delay_reg_weight": 0.05,
+          "eval_interval": 150,
+          "first_hop_router_aux_weight": 0.0,
+          "first_hop_teacher_force_anneal_steps": 1,
+          "first_hop_teacher_force_end": 0.0,
+          "first_hop_teacher_force_start": 0.0,
+          "freeze_first_hop_router": true,
+          "grad_clip": 1.0,
+          "gravity_weight": 0.01,
+          "init_checkpoint": "runs/20260317-055916-v3-router-best/best.pt",
+          "log_interval": 25,
+          "lr": 0.0002,
+          "missing_output_penalty": 0.5,
+          "sanity_delay_weight": 0.05,
+          "sanity_route_weight": 1.0,
+          "save_interval": 150,
+          "seed": 1234,
+          "train_steps": 1200,
+          "val_batches": 40,
+          "weight_decay": 0.01
+        }
+      },
+      "environment": {
+        "bf16_supported": true,
+        "cuda_available": true,
+        "cuda_device_count": 2,
+        "devices": [
+          "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+          "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition"
+        ],
+        "git": {
+          "commit": "28cd6e37c87fa7b3dec8bde1e28cfa904571f409",
+          "status": "M apsgnn/config.py\n M apsgnn/eval.py\n M apsgnn/model.py\n M apsgnn/train.py\n?? configs/v4_retrieval_best.yaml\n?? configs/v4_retrieval_best_no_cache.yaml\n?? configs/v4_retrieval_implicit_search.yaml\n?? configs/v4_retrieval_keycond_search.yaml\n?? scripts/ablate_v4_retrieval_no_cache.sh\n?? scripts/smoke_v4_retrieval_implicit.sh\n?? scripts/smoke_v4_retrieval_keycond.sh\n?? scripts/train_v4_retrieval.sh\n?? tests/test_v4_retrieval.py"
+        },
+        "hostname": "ripper2",
+        "python": "3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]",
+        "torch_version": "2.12.0.dev20260316+cu130"
+      },
+      "metrics": {
+        "average_delay": 0.0,
+        "average_hops": 2.0,
+        "cache_max_occupancy": 0.0,
+        "cache_mean_occupancy": 0.0,
+        "checkpoint_step": 1200,
+        "first_hop_teacher_force_ratio": 0.0,
+        "loss": 25781262.068793476,
+        "packets_processed": 10240.0,
+        "query_accuracy": 0.03125,
+        "query_delivery_rate": 1.0,
+        "query_first_hop_home_rate": 0.83203125,
+        "query_home_to_output_rate": 0.9691588785046729,
+        "retrieval_cache_entries": 0.0,
+        "retrieval_entropy": 0.0,
+        "retrieval_top_mass": 0.0,
+        "writer_first_hop_home_rate": 0.8770833333333333,
+        "writers_per_episode": 6
+      }
+    }
+  },
+  "throughput_packets_per_second": {
+    "v4_cached_step_1200_train": 1493.435990379949,
+    "v4_no_cache_step_1200_train": 2315.330003121428
+  }
+}

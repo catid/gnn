@@ -23,9 +23,14 @@ This repo uses `bd` for task tracking.
 - V3 aux smoke: `bash scripts/smoke_v3_router_aux.sh`
 - V3 main training: `bash scripts/train_v3_router.sh`
 - V3 no-cache ablation: `bash scripts/ablate_v3_router_no_cache.sh`
+- V4 implicit retrieval smoke: `bash scripts/smoke_v4_retrieval_implicit.sh`
+- V4 key-conditioned retrieval smoke: `bash scripts/smoke_v4_retrieval_keycond.sh`
+- V4 main training: `bash scripts/train_v4_retrieval.sh`
+- V4 no-cache ablation: `bash scripts/ablate_v4_retrieval_no_cache.sh`
 
 ## Constraints
 
 - Keep the implementation in pure PyTorch
 - Preserve per-sample cache isolation
 - Prefer correctness and inspectability over aggressive optimization
+- Keep first-hop routing and retrieval changes isolated across experiment rounds

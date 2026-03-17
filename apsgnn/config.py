@@ -28,6 +28,9 @@ class ModelConfig:
     first_hop_router_residual_scale: float = 0.25
     first_hop_router_separate_heads: bool = False
     first_hop_router_aux_type: str = "none"
+    cache_read_variant: str = "explicit"
+    cache_read_hidden_dim: int = 256
+    cache_read_layers: int = 2
     first_hop_hint_residual_scale: float = 0.25
     readout_class_scale: float = 8.0
     num_classes: int = 32
@@ -83,6 +86,8 @@ class TrainConfig:
     first_hop_router_aux_weight: float = 0.0
     benchmark_warmup_steps: int = 10
     benchmark_steps: int = 100
+    init_checkpoint: str = ""
+    freeze_first_hop_router: bool = False
 
 
 @dataclass
