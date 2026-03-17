@@ -10,7 +10,7 @@ from torch import Tensor, nn
 from apsgnn.buffer import NodeCache, TemporalRingBuffer
 from apsgnn.config import ExperimentConfig
 from apsgnn.node import ComputeNodeCell
-from apsgnn.routing import build_address_table, route_from_address, sample_delay
+from apsgnn.routing import build_address_table, route_from_address, sample_delay, straight_through_sample
 from apsgnn.tasks import MemoryBatch, SanityBatch
 
 
@@ -147,6 +147,13 @@ class APSGNNModel(nn.Module):
         self.ttl_embed = nn.Embedding(model_cfg.max_ttl + 1, model_cfg.d_model)
         self.sanity_proj = nn.Linear(model_cfg.d_model, model_cfg.d_model)
         self.input_ln = nn.LayerNorm(model_cfg.d_model)
+        self.first_hop_router_ln = nn.LayerNorm(model_cfg.d_model)
+        self.first_hop_router = nn.Sequential(
+            nn.Linear(model_cfg.d_model, model_cfg.d_model),
+            nn.GELU(),
+            nn.Linear(model_cfg.d_model, model_cfg.num_compute_nodes),
+        )
+        self.first_hop_teacher_force_ratio = 0.0
 
         self.node_cells = nn.ModuleList(
             [
@@ -169,6 +176,9 @@ class APSGNNModel(nn.Module):
         nn.init.zeros_(self.delta_head.weight)
         nn.init.zeros_(self.delta_head.bias)
         nn.init.constant_(self.magnitude_head.bias, 2.5)
+
+    def set_first_hop_teacher_force_ratio(self, ratio: float) -> None:
+        self.first_hop_teacher_force_ratio = float(min(max(ratio, 0.0), 1.0))
 
     def encode_writers(self, batch: MemoryBatch) -> Tensor:
         writers = batch.writer_keys.size(1)
@@ -288,6 +298,8 @@ class APSGNNModel(nn.Module):
         query_hit_count = zero
         home_out_hit_sum = zero
         home_out_count = zero
+        teacher_force_sum = zero
+        teacher_force_count = zero
         delay_sum = zero
         delay_count = zero
         processed_packets_sum = zero
@@ -335,10 +347,12 @@ class APSGNNModel(nn.Module):
             route_logits = predictions["route_logits"]
             delay_logits = predictions["delay_logits"]
             dest_index = predictions["dest_index"]
+            predicted_dest_index = predictions["predicted_dest_index"]
             delay_index = predictions["delay_index"]
             next_residual = predictions["next_residual"]
             predicted_address = predictions["predicted_address"]
             address_norm = predictions["address_norm"]
+            teacher_forced_mask = predictions["teacher_forced_mask"]
 
             writer_first_mask = (active_packets.role == ROLE_WRITER) & (active_packets.hop_index == 0)
             if writer_first_mask.any():
@@ -350,8 +364,10 @@ class APSGNNModel(nn.Module):
                     self.address_table[writer_targets],
                     reduction="sum",
                 )
-                writer_hit_sum = writer_hit_sum + (dest_index[writer_first_mask] == writer_targets).sum()
+                writer_hit_sum = writer_hit_sum + (predicted_dest_index[writer_first_mask] == writer_targets).sum()
                 writer_hit_count = writer_hit_count + writer_targets.numel()
+                teacher_force_sum = teacher_force_sum + teacher_forced_mask[writer_first_mask].sum()
+                teacher_force_count = teacher_force_count + writer_targets.numel()
                 zeros = torch.zeros(writer_targets.numel(), device=device, dtype=torch.long)
                 loss_delay_sum = loss_delay_sum + F.cross_entropy(delay_logits[writer_first_mask], zeros, reduction="sum")
 
@@ -365,8 +381,10 @@ class APSGNNModel(nn.Module):
                     self.address_table[query_targets],
                     reduction="sum",
                 )
-                query_hit_sum = query_hit_sum + (dest_index[query_first_mask] == query_targets).sum()
+                query_hit_sum = query_hit_sum + (predicted_dest_index[query_first_mask] == query_targets).sum()
                 query_hit_count = query_hit_count + query_targets.numel()
+                teacher_force_sum = teacher_force_sum + teacher_forced_mask[query_first_mask].sum()
+                teacher_force_count = teacher_force_count + query_targets.numel()
                 zeros = torch.zeros(query_targets.numel(), device=device, dtype=torch.long)
                 loss_delay_sum = loss_delay_sum + F.cross_entropy(delay_logits[query_first_mask], zeros, reduction="sum")
 
@@ -488,6 +506,8 @@ class APSGNNModel(nn.Module):
                 "query_home_count": query_hit_count.detach().to(dtype),
                 "query_home_output_hit": home_out_hit_sum.detach().to(dtype),
                 "query_home_output_count": home_out_count.detach().to(dtype),
+                "first_hop_teacher_force_sum": teacher_force_sum.detach().to(dtype),
+                "first_hop_teacher_force_count": teacher_force_count.detach().to(dtype),
                 "avg_hops_sum": query_last_hops.to(dtype).sum(),
                 "avg_hops_count": torch.tensor(float(batch_size), device=device, dtype=dtype),
                 "delay_sum": delay_sum.detach().to(dtype),
@@ -760,7 +780,7 @@ class APSGNNModel(nn.Module):
         direction_norm = direction.norm(dim=-1, keepdim=True).clamp_min(1.0e-6)
         unit_direction = direction / direction_norm
         address = magnitude * unit_direction
-        if cfg.use_first_hop_key_hint:
+        if cfg.use_first_hop_key_hint and not cfg.use_learned_first_hop_router:
             first_hop_mask = (packets.hop_index == 0) & (
                 (packets.role == ROLE_WRITER) | (packets.role == ROLE_QUERY)
             )
@@ -774,6 +794,56 @@ class APSGNNModel(nn.Module):
             temperature=cfg.route_temperature,
             training=self.training,
         )
+        predicted_dest_index = dest_index
+        teacher_forced_mask = torch.zeros_like(dest_index, dtype=torch.bool)
+        if cfg.use_learned_first_hop_router:
+            first_hop_mask = (packets.hop_index == 0) & (
+                (packets.role == ROLE_WRITER) | (packets.role == ROLE_QUERY)
+            )
+            if first_hop_mask.any():
+                router_features = self.first_hop_router_ln(
+                    packets.residual[first_hop_mask]
+                    + self.key_proj(packets.routing_key[first_hop_mask])
+                    + self.role_embed(packets.role[first_hop_mask])
+                    + self.ttl_embed(packets.ttl[first_hop_mask].clamp(min=0, max=cfg.max_ttl))
+                    + self.start_node_embed(packets.current_node[first_hop_mask])
+                )
+                first_hop_logits_compute = self.first_hop_router(router_features)
+                first_hop_one_hot = straight_through_sample(
+                    first_hop_logits_compute,
+                    temperature=cfg.route_temperature,
+                    training=self.training,
+                )
+                first_hop_node_index = 1 + first_hop_one_hot.argmax(dim=-1)
+                first_hop_address = first_hop_one_hot @ self.address_table[1:].to(first_hop_one_hot.dtype)
+
+                first_hop_route_logits = torch.full(
+                    (first_hop_logits_compute.size(0), cfg.nodes_total),
+                    -1.0e9,
+                    device=device,
+                    dtype=route_logits.dtype,
+                )
+                first_hop_route_logits[:, 1:] = first_hop_logits_compute.to(route_logits.dtype)
+                route_logits = route_logits.clone()
+                route_logits[first_hop_mask] = first_hop_route_logits
+                address = address.clone()
+                address[first_hop_mask] = first_hop_address.to(address.dtype)
+                dest_index = dest_index.clone()
+                dest_index[first_hop_mask] = first_hop_node_index
+                predicted_dest_index = predicted_dest_index.clone()
+                predicted_dest_index[first_hop_mask] = first_hop_node_index
+
+                if self.training and self.first_hop_teacher_force_ratio > 0.0:
+                    force_mask_local = (
+                        torch.rand(first_hop_node_index.size(0), device=device) < self.first_hop_teacher_force_ratio
+                    )
+                    if force_mask_local.any():
+                        dest_index = dest_index.clone()
+                        teacher_forced_mask = teacher_forced_mask.clone()
+                        first_hop_indices = first_hop_mask.nonzero(as_tuple=False).squeeze(-1)
+                        forced_indices = first_hop_indices[force_mask_local]
+                        dest_index[forced_indices] = packets.target_home[forced_indices]
+                        teacher_forced_mask[forced_indices] = True
         _, delay_index = sample_delay(
             delay_logits,
             temperature=cfg.delay_temperature,
@@ -785,8 +855,10 @@ class APSGNNModel(nn.Module):
             "route_logits": route_logits,
             "delay_logits": delay_logits,
             "dest_index": dest_index,
+            "predicted_dest_index": predicted_dest_index,
             "delay_index": delay_index,
             "address_norm": address.norm(dim=-1),
+            "teacher_forced_mask": teacher_forced_mask,
         }
 
     def _schedule_packets(

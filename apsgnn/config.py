@@ -20,6 +20,7 @@ class ModelConfig:
     route_temperature: float = 0.7
     delay_temperature: float = 0.7
     use_first_hop_key_hint: bool = True
+    use_learned_first_hop_router: bool = False
     first_hop_hint_residual_scale: float = 0.25
     readout_class_scale: float = 8.0
     num_classes: int = 32
@@ -69,6 +70,9 @@ class TrainConfig:
     missing_output_penalty: float = 0.5
     sanity_route_weight: float = 1.0
     sanity_delay_weight: float = 0.05
+    first_hop_teacher_force_start: float = 0.0
+    first_hop_teacher_force_end: float = 0.0
+    first_hop_teacher_force_anneal_steps: int = 1
     benchmark_warmup_steps: int = 10
     benchmark_steps: int = 100
 

@@ -10,7 +10,7 @@ from torch import nn
 from torch.nn.parallel import DistributedDataParallel as DDP
 from tqdm import tqdm
 
-from apsgnn.config import dump_config, load_config
+from apsgnn.config import ExperimentConfig, dump_config, load_config
 from apsgnn.ddp_utils import cleanup_distributed, is_distributed, is_main_process, setup_distributed
 from apsgnn.eval import accumulate_metric_sums, finalize_metrics, reduce_metric_sums, run_evaluation
 from apsgnn.model import APSGNNModel
@@ -25,6 +25,20 @@ from apsgnn.utils import (
     save_run_metadata,
     seed_everything,
 )
+
+
+def unwrap_model(model: APSGNNModel | DDP) -> APSGNNModel:
+    return model.module if isinstance(model, DDP) else model
+
+
+def first_hop_teacher_force_ratio(config_step: int, config: ExperimentConfig) -> float:
+    anneal_steps = max(config.train.first_hop_teacher_force_anneal_steps, 1)
+    if anneal_steps == 1:
+        return float(config.train.first_hop_teacher_force_end)
+    progress = min(max((config_step - 1) / (anneal_steps - 1), 0.0), 1.0)
+    start = config.train.first_hop_teacher_force_start
+    end = config.train.first_hop_teacher_force_end
+    return float(start + (end - start) * progress)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -76,7 +90,19 @@ def maybe_load_checkpoint(
     if checkpoint_path is None:
         return 0, -math.inf
     checkpoint = torch.load(checkpoint_path, map_location=device)
-    model.load_state_dict(checkpoint["model"])
+    missing_keys, unexpected_keys = model.load_state_dict(checkpoint["model"], strict=False)
+    allowed_missing = {
+        "first_hop_router_ln.weight",
+        "first_hop_router_ln.bias",
+        "first_hop_router.0.weight",
+        "first_hop_router.0.bias",
+        "first_hop_router.2.weight",
+        "first_hop_router.2.bias",
+    }
+    if unexpected_keys or set(missing_keys) - allowed_missing:
+        raise RuntimeError(
+            f"Checkpoint load mismatch: missing={missing_keys}, unexpected={unexpected_keys}",
+        )
     optimizer.load_state_dict(checkpoint["optimizer"])
     return int(checkpoint["step"]), float(checkpoint.get("best_metric", -math.inf))
 
@@ -139,6 +165,7 @@ def main() -> None:
 
     for step in progress:
         model.train()
+        unwrap_model(model).set_first_hop_teacher_force_ratio(first_hop_teacher_force_ratio(step, config))
         optimizer.zero_grad(set_to_none=True)
         batch_seed = config.train.seed + rank * 100_000 + step
         if task_name == "memory":

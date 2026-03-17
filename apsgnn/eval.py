@@ -57,6 +57,10 @@ def finalize_metrics(metric_sums: dict[str, float]) -> dict[str, float]:
         metric_sums.get("query_home_output_hit", 0.0)
         / max(metric_sums.get("query_home_output_count", 0.0), 1.0)
     )
+    metrics["first_hop_teacher_force_ratio"] = (
+        metric_sums.get("first_hop_teacher_force_sum", 0.0)
+        / max(metric_sums.get("first_hop_teacher_force_count", 0.0), 1.0)
+    )
     metrics["average_hops"] = metric_sums.get("avg_hops_sum", 0.0) / max(metric_sums.get("avg_hops_count", 0.0), 1.0)
     metrics["average_delay"] = metric_sums.get("delay_sum", 0.0) / max(metric_sums.get("delay_count", 0.0), 1.0)
     if "cache_mean_sum" in metric_sums:
@@ -91,6 +95,8 @@ def run_evaluation(
 
     was_training = model.training
     model.eval()
+    unwrapped = model.module if isinstance(model, DDP) else model
+    unwrapped.set_first_hop_teacher_force_ratio(0.0)
     metric_sums: dict[str, torch.Tensor] = {}
     iterator = range(batches)
     if is_main_process():
@@ -119,7 +125,19 @@ def run_evaluation(
 def _load_checkpoint(model: APSGNNModel, checkpoint_path: str | Path, device: torch.device) -> dict[str, Any]:
     checkpoint = torch.load(checkpoint_path, map_location=device)
     state = checkpoint["model"]
-    model.load_state_dict(state)
+    missing_keys, unexpected_keys = model.load_state_dict(state, strict=False)
+    allowed_missing = {
+        "first_hop_router_ln.weight",
+        "first_hop_router_ln.bias",
+        "first_hop_router.0.weight",
+        "first_hop_router.0.bias",
+        "first_hop_router.2.weight",
+        "first_hop_router.2.bias",
+    }
+    if unexpected_keys or set(missing_keys) - allowed_missing:
+        raise RuntimeError(
+            f"Checkpoint load mismatch: missing={missing_keys}, unexpected={unexpected_keys}",
+        )
     return checkpoint
 
 

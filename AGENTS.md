@@ -16,6 +16,9 @@ This repo uses `bd` for task tracking.
 - Main training: `bash scripts/train_4gpu.sh`
 - No-cache ablation: `bash scripts/ablate_no_cache.sh`
 - Throughput benchmark: `bash scripts/benchmark_throughput.sh`
+- V2 smoke: `bash scripts/smoke_v2.sh`
+- V2 main training: `bash scripts/train_v2.sh`
+- V2 no-cache ablation: `bash scripts/ablate_v2_no_cache.sh`
 
 ## Constraints
 
