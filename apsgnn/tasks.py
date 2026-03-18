@@ -6,19 +6,35 @@ import torch
 from torch import Tensor
 
 from apsgnn.config import ExperimentConfig
-from apsgnn.growth import active_node_ids, project_home_leaves
+from apsgnn.growth import (
+    GrowthTopology,
+    active_node_ids,
+    active_node_ids_from_topology,
+    project_home_leaves,
+    project_home_leaves_topology,
+)
 
 
 def sample_start_nodes(
-    active_nodes: int,
+    active_nodes: int | None,
     pool_size: int,
     shape: tuple[int, ...],
     generator: torch.Generator,
+    *,
+    active_node_ids_tensor: Tensor | None = None,
 ) -> Tensor:
-    if pool_size <= 0 or pool_size >= active_nodes:
-        return torch.randint(1, active_nodes + 1, shape, generator=generator)
+    if active_node_ids_tensor is None:
+        if active_nodes is None:
+            raise ValueError("active_nodes is required when active_node_ids_tensor is not provided.")
+        active_ids = active_node_ids(active_nodes)
+    else:
+        active_ids = active_node_ids_tensor.to(dtype=torch.long).reshape(-1).cpu()
+        active_nodes = int(active_ids.numel())
 
-    active_ids = active_node_ids(active_nodes)
+    if pool_size <= 0 or pool_size >= active_nodes:
+        sampled = torch.randint(0, active_nodes, shape, generator=generator)
+        return active_ids[sampled]
+
     stride = active_nodes / float(pool_size)
     ingress_indices = torch.floor(torch.arange(pool_size, dtype=torch.float32) * stride).long()
     ingress_nodes = active_ids[ingress_indices.clamp_max(active_nodes - 1)]
@@ -98,6 +114,7 @@ class MemoryRoutingTask:
         writers_per_episode: int | None = None,
         active_compute_nodes: int | None = None,
         bootstrap_mode: bool = False,
+        topology: GrowthTopology | None = None,
     ) -> MemoryBatch:
         cfg = self.config
         writers = writers_per_episode or cfg.task.writers_per_episode
@@ -166,36 +183,46 @@ class GrowthMemoryRoutingTask:
         writers_per_episode: int | None = None,
         active_compute_nodes: int | None = None,
         bootstrap_mode: bool = False,
+        topology: GrowthTopology | None = None,
     ) -> MemoryBatch:
         cfg = self.config
         writers = writers_per_episode or cfg.task.writers_per_episode
         active_nodes = active_compute_nodes or self.final_compute_nodes
         generator = torch.Generator(device="cpu")
         generator.manual_seed(seed)
+        active_node_tensor = active_node_ids_from_topology(topology) if topology is not None else active_node_ids(active_nodes)
 
         writer_keys = torch.randn(batch_size, writers, cfg.model.key_dim, generator=generator)
         writer_labels = torch.randint(0, cfg.model.num_classes, (batch_size, writers), generator=generator)
         writer_scores = writer_keys @ self.home_hash
         writer_home_leaf = 1 + writer_scores.argmax(dim=-1)
-        writer_home_nodes = project_home_leaves(writer_home_leaf, active_nodes, self.final_compute_nodes)
+        if topology is None:
+            writer_home_nodes = project_home_leaves(writer_home_leaf, active_nodes, self.final_compute_nodes)
+        else:
+            writer_home_nodes = project_home_leaves_topology(writer_home_leaf, topology)
         writer_start_nodes = sample_start_nodes(
             active_nodes=active_nodes,
             pool_size=cfg.task.start_node_pool_size,
             shape=(batch_size, writers),
             generator=generator,
+            active_node_ids_tensor=active_node_tensor,
         )
 
         batch_indices = torch.arange(batch_size)
         query_writer_index = torch.randint(0, writers, (batch_size,), generator=generator)
         query_keys = writer_keys[batch_indices, query_writer_index].clone()
         query_home_leaf = writer_home_leaf[batch_indices, query_writer_index].clone()
-        query_home_nodes = project_home_leaves(query_home_leaf, active_nodes, self.final_compute_nodes)
+        if topology is None:
+            query_home_nodes = project_home_leaves(query_home_leaf, active_nodes, self.final_compute_nodes)
+        else:
+            query_home_nodes = project_home_leaves_topology(query_home_leaf, topology)
         query_labels = writer_labels[batch_indices, query_writer_index].clone()
         query_start_nodes = sample_start_nodes(
             active_nodes=active_nodes,
             pool_size=cfg.task.start_node_pool_size,
             shape=(batch_size,),
             generator=generator,
+            active_node_ids_tensor=active_node_tensor,
         )
         query_ttl = torch.randint(
             cfg.task.query_ttl_min,
@@ -207,7 +234,7 @@ class GrowthMemoryRoutingTask:
         bootstrap_start_nodes = None
         bootstrap_ttl = None
         if bootstrap_mode:
-            bootstrap_start_nodes = active_node_ids(active_nodes).unsqueeze(0).repeat(batch_size, 1)
+            bootstrap_start_nodes = active_node_tensor.unsqueeze(0).repeat(batch_size, 1)
             bootstrap_ttl = torch.full_like(bootstrap_start_nodes, fill_value=active_nodes)
 
         return MemoryBatch(

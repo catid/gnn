@@ -58,6 +58,18 @@ This repo uses `bd` for task tracking.
 - V7 growth clone hard training: `bash scripts/train_v7_growth_clone_hard.sh`
 - V7 growth mutate hard training: `bash scripts/train_v7_growth_mutate_hard.sh`
 - V7 growth mutate hard long training: `bash scripts/train_v7_growth_mutate_hard_long.sh`
+- V8 static bootstrap hard smoke: `bash scripts/smoke_v8_static_bootstrap_hard.sh`
+- V8 staged static selective hard smoke: `bash scripts/smoke_v8_staged_static_selective_hard.sh`
+- V8 clone selective hard smoke: `bash scripts/smoke_v8_clone_selective_hard.sh`
+- V8 random selective hard smoke: `bash scripts/smoke_v8_random_selective_hard.sh`
+- V8 utility selective hard smoke: `bash scripts/smoke_v8_utility_selective_hard.sh`
+- V8 utility mutate hard smoke: `bash scripts/smoke_v8_utility_mutate_hard.sh`
+- V8 static bootstrap hard training: `bash scripts/train_v8_static_bootstrap_hard.sh`
+- V8 staged static selective hard training: `bash scripts/train_v8_staged_static_selective_hard.sh`
+- V8 clone selective hard training: `bash scripts/train_v8_clone_selective_hard.sh`
+- V8 random selective hard training: `bash scripts/train_v8_random_selective_hard.sh`
+- V8 utility selective hard training: `bash scripts/train_v8_utility_selective_hard.sh`
+- V8 utility mutate hard training: `bash scripts/train_v8_utility_mutate_hard.sh`
 
 ## Constraints
 

@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from collections import Counter
 from copy import deepcopy
 from dataclasses import dataclass
+from functools import lru_cache
+from itertools import combinations
 import math
 from typing import TYPE_CHECKING, Any
 
@@ -99,11 +102,159 @@ class GrowthSchedule:
         raise ValueError(f"No growth stage covers training step {step}.")
 
 
+@dataclass(frozen=True)
+class LeafInterval:
+    start: int
+    end: int
+
+    @property
+    def size(self) -> int:
+        return self.end - self.start + 1
+
+    def split(self) -> tuple["LeafInterval", "LeafInterval"]:
+        if self.size <= 1:
+            raise ValueError("Cannot split a singleton leaf interval.")
+        midpoint = (self.start + self.end) // 2
+        return LeafInterval(self.start, midpoint), LeafInterval(midpoint + 1, self.end)
+
+
+@dataclass(frozen=True)
+class GrowthTopology:
+    final_compute_nodes: int
+    ring_node_ids: tuple[int, ...]
+    node_intervals: dict[int, LeafInterval]
+    inactive_node_ids: tuple[int, ...]
+
+    @property
+    def active_compute_nodes(self) -> int:
+        return len(self.ring_node_ids)
+
+    def active_node_tensor(self, *, device: torch.device | None = None) -> Tensor:
+        return torch.tensor(self.ring_node_ids, device=device, dtype=torch.long)
+
+    def successor_lookup(self, *, device: torch.device | None = None) -> Tensor:
+        lookup = torch.zeros(self.final_compute_nodes + 1, device=device, dtype=torch.long)
+        for index, node_id in enumerate(self.ring_node_ids):
+            lookup[node_id] = self.ring_node_ids[(index + 1) % len(self.ring_node_ids)]
+        return lookup
+
+    def interval_size(self, node_id: int) -> int:
+        return self.node_intervals[node_id].size
+
+    def ring_index(self, node_id: int) -> int:
+        return self.ring_node_ids.index(node_id)
+
+    def eligible_split_parents(self) -> list[int]:
+        return [node_id for node_id in self.ring_node_ids if self.interval_size(node_id) > 1]
+
+    def project_home_leaves(self, home_leaf: Tensor) -> Tensor:
+        flat_home = home_leaf.reshape(-1)
+        projected = torch.empty_like(flat_home)
+        for node_id in self.ring_node_ids:
+            interval = self.node_intervals[node_id]
+            mask = (flat_home >= interval.start) & (flat_home <= interval.end)
+            projected[mask] = node_id
+        return projected.view_as(home_leaf)
+
+    def split_selected(
+        self,
+        selected_parents: list[int],
+    ) -> tuple["GrowthTopology", dict[int, int], dict[int, list[int]], dict[int, tuple[int, int]]]:
+        if not selected_parents:
+            return self, {}, {}, {}
+
+        available_children = list(self.inactive_node_ids)
+        if len(available_children) < len(selected_parents):
+            raise ValueError("Not enough inactive nodes available for selective growth.")
+
+        selected_set = set(selected_parents)
+        new_ring: list[int] = []
+        new_intervals: dict[int, LeafInterval] = {}
+        parent_to_child: dict[int, int] = {}
+        parent_to_children: dict[int, list[int]] = {}
+        child_intervals: dict[int, tuple[int, int]] = {}
+
+        for node_id in self.ring_node_ids:
+            interval = self.node_intervals[node_id]
+            if node_id not in selected_set:
+                new_ring.append(node_id)
+                new_intervals[node_id] = interval
+                continue
+
+            left_interval, right_interval = interval.split()
+            child_id = available_children.pop(0)
+            new_ring.extend([node_id, child_id])
+            new_intervals[node_id] = left_interval
+            new_intervals[child_id] = right_interval
+            parent_to_child[node_id] = child_id
+            parent_to_children[node_id] = [node_id, child_id]
+            child_intervals[child_id] = (right_interval.start, right_interval.end)
+
+        return (
+            GrowthTopology(
+                final_compute_nodes=self.final_compute_nodes,
+                ring_node_ids=tuple(new_ring),
+                node_intervals=new_intervals,
+                inactive_node_ids=tuple(available_children),
+            ),
+            parent_to_child,
+            parent_to_children,
+            child_intervals,
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "final_compute_nodes": self.final_compute_nodes,
+            "ring_node_ids": list(self.ring_node_ids),
+            "node_intervals": {
+                str(node_id): {"start": interval.start, "end": interval.end}
+                for node_id, interval in self.node_intervals.items()
+            },
+            "inactive_node_ids": list(self.inactive_node_ids),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, Any]) -> "GrowthTopology":
+        return cls(
+            final_compute_nodes=int(payload["final_compute_nodes"]),
+            ring_node_ids=tuple(int(node_id) for node_id in payload["ring_node_ids"]),
+            node_intervals={
+                int(node_id): LeafInterval(int(interval["start"]), int(interval["end"]))
+                for node_id, interval in payload["node_intervals"].items()
+            },
+            inactive_node_ids=tuple(int(node_id) for node_id in payload["inactive_node_ids"]),
+        )
+
+
+def build_uniform_topology(final_compute_nodes: int, active_compute_nodes: int) -> GrowthTopology:
+    if final_compute_nodes % active_compute_nodes != 0:
+        raise ValueError("final_compute_nodes must be divisible by active_compute_nodes.")
+    bucket_size = final_compute_nodes // active_compute_nodes
+    intervals = {
+        node_id: LeafInterval((node_id - 1) * bucket_size + 1, node_id * bucket_size)
+        for node_id in range(1, active_compute_nodes + 1)
+    }
+    return GrowthTopology(
+        final_compute_nodes=final_compute_nodes,
+        ring_node_ids=tuple(range(1, active_compute_nodes + 1)),
+        node_intervals=intervals,
+        inactive_node_ids=tuple(range(active_compute_nodes + 1, final_compute_nodes + 1)),
+    )
+
+
+def build_initial_topology(config: ExperimentConfig, active_compute_nodes: int) -> GrowthTopology:
+    return build_uniform_topology(config.model.num_compute_nodes, active_compute_nodes)
+
+
 def project_home_leaves(home_leaf: Tensor, active_compute_nodes: int, final_compute_nodes: int) -> Tensor:
     if final_compute_nodes % active_compute_nodes != 0:
         raise ValueError("final_compute_nodes must be divisible by active_compute_nodes.")
     bucket_size = final_compute_nodes // active_compute_nodes
     return 1 + (home_leaf - 1) // bucket_size
+
+
+def project_home_leaves_topology(home_leaf: Tensor, topology: GrowthTopology) -> Tensor:
+    return topology.project_home_leaves(home_leaf)
 
 
 def clockwise_successor(current_node: Tensor, active_compute_nodes: int) -> Tensor:
@@ -115,6 +266,204 @@ def clockwise_successor(current_node: Tensor, active_compute_nodes: int) -> Tens
 
 def active_node_ids(active_compute_nodes: int) -> Tensor:
     return torch.arange(1, active_compute_nodes + 1, dtype=torch.long)
+
+
+def active_node_ids_from_topology(topology: GrowthTopology) -> Tensor:
+    return torch.tensor(topology.ring_node_ids, dtype=torch.long)
+
+
+def _zscore_dict(values: dict[int, float]) -> dict[int, float]:
+    if not values:
+        return {}
+    tensor = torch.tensor(list(values.values()), dtype=torch.float64)
+    mean = float(tensor.mean().item())
+    std = float(tensor.std(unbiased=False).item())
+    if std < 1.0e-9:
+        return {node_id: 0.0 for node_id in values}
+    return {node_id: (value - mean) / std for node_id, value in values.items()}
+
+
+def _topology_state(topology: GrowthTopology) -> tuple[int, ...]:
+    return tuple(sorted((topology.interval_size(node_id) for node_id in topology.ring_node_ids), reverse=True))
+
+
+def _split_interval_size(size: int) -> tuple[int, int]:
+    if size <= 1:
+        raise ValueError("Cannot split a singleton interval size.")
+    return (size + 1) // 2, size // 2
+
+
+def _split_state(state: tuple[int, ...], selected_sizes: tuple[int, ...]) -> tuple[int, ...]:
+    counts = Counter(state)
+    for size in selected_sizes:
+        if counts[size] <= 0:
+            raise ValueError("Selected split sizes do not match current topology state.")
+        counts[size] -= 1
+        if counts[size] == 0:
+            del counts[size]
+        left_size, right_size = _split_interval_size(size)
+        counts[left_size] += 1
+        counts[right_size] += 1
+    expanded: list[int] = []
+    for size, count in counts.items():
+        expanded.extend([size] * count)
+    return tuple(sorted(expanded, reverse=True))
+
+
+@lru_cache(maxsize=None)
+def _is_schedule_feasible(state: tuple[int, ...], remaining_active_counts: tuple[int, ...]) -> bool:
+    if not remaining_active_counts:
+        return True
+    next_active = remaining_active_counts[0]
+    if next_active < len(state):
+        return False
+    delta = next_active - len(state)
+    eligible_indices = tuple(index for index, size in enumerate(state) if size > 1)
+    if delta > len(eligible_indices):
+        return False
+    if delta == 0:
+        return _is_schedule_feasible(state, remaining_active_counts[1:])
+    for selected_indices in combinations(eligible_indices, delta):
+        selected_sizes = tuple(state[index] for index in selected_indices)
+        if _is_schedule_feasible(_split_state(state, selected_sizes), remaining_active_counts[1:]):
+            return True
+    return False
+
+
+def _feasible_parent_subsets(
+    topology: GrowthTopology,
+    count: int,
+    *,
+    remaining_active_counts: tuple[int, ...],
+) -> list[tuple[int, ...]]:
+    eligible = topology.eligible_split_parents()
+    if count > len(eligible):
+        return []
+    if count == 0:
+        return [tuple()]
+    state = _topology_state(topology)
+    feasible: list[tuple[int, ...]] = []
+    for selected_indices in combinations(range(len(eligible)), count):
+        selected = tuple(eligible[index] for index in selected_indices)
+        selected_sizes = tuple(topology.interval_size(node_id) for node_id in selected)
+        next_state = _split_state(state, selected_sizes)
+        if _is_schedule_feasible(next_state, remaining_active_counts):
+            feasible.append(selected)
+    return feasible
+
+
+def _balanced_subset_key(topology: GrowthTopology, subset: tuple[int, ...]) -> tuple[tuple[int, int], ...]:
+    ordered = sorted(
+        subset,
+        key=lambda node_id: (-topology.interval_size(node_id), topology.ring_index(node_id)),
+    )
+    return tuple((-topology.interval_size(node_id), topology.ring_index(node_id)) for node_id in ordered)
+
+
+def balanced_split_parents(topology: GrowthTopology, feasible_subsets: list[tuple[int, ...]]) -> list[int]:
+    if not feasible_subsets:
+        raise ValueError("Balanced split requested with no feasible parent subsets.")
+    selected = min(feasible_subsets, key=lambda subset: _balanced_subset_key(topology, subset))
+    return list(selected)
+
+
+def random_split_parents(topology: GrowthTopology, feasible_subsets: list[tuple[int, ...]], *, seed: int) -> list[int]:
+    if not feasible_subsets:
+        raise ValueError("Random split requested with no feasible parent subsets.")
+    generator = torch.Generator(device="cpu")
+    generator.manual_seed(seed)
+    choice = int(torch.randint(len(feasible_subsets), (1,), generator=generator).item())
+    return list(feasible_subsets[choice])
+
+
+def utility_split_parents(
+    topology: GrowthTopology,
+    feasible_subsets: list[tuple[int, ...]],
+    *,
+    utility_scores: dict[int, float],
+) -> list[int]:
+    if not feasible_subsets:
+        raise ValueError("Utility split requested with no feasible parent subsets.")
+    selected = min(
+        feasible_subsets,
+        key=lambda subset: (
+            -sum(utility_scores.get(node_id, 0.0) for node_id in subset),
+            _balanced_subset_key(topology, subset),
+        ),
+    )
+    return list(selected)
+
+
+def transition_topology_for_growth(
+    topology: GrowthTopology,
+    next_active_compute_nodes: int,
+    *,
+    split_parent_policy: str,
+    utility_components: dict[int, dict[str, float]] | None,
+    utility_alpha: float,
+    seed: int,
+    future_active_counts: list[int] | tuple[int, ...] = (),
+) -> tuple[GrowthTopology, dict[str, Any]]:
+    if next_active_compute_nodes <= topology.active_compute_nodes:
+        return topology, default_split_stats()
+
+    delta = next_active_compute_nodes - topology.active_compute_nodes
+    eligible = topology.eligible_split_parents()
+    if delta > len(eligible):
+        raise ValueError("Selective growth requested more splits than eligible parents.")
+    future_active_counts_tuple = tuple(int(count) for count in future_active_counts)
+    feasible_subsets = _feasible_parent_subsets(
+        topology,
+        delta,
+        remaining_active_counts=future_active_counts_tuple,
+    )
+    if not feasible_subsets:
+        raise ValueError("No schedule-feasible selective split set exists for the requested transition.")
+
+    utility_components = utility_components or {}
+    utility_scores = {
+        node_id: utility_components.get(node_id, {}).get("score", 0.0)
+        for node_id in eligible
+    }
+
+    if split_parent_policy == "balanced":
+        selected = balanced_split_parents(topology, feasible_subsets)
+    elif split_parent_policy == "random":
+        selected = random_split_parents(topology, feasible_subsets, seed=seed)
+    elif split_parent_policy == "utility":
+        selected = utility_split_parents(topology, feasible_subsets, utility_scores=utility_scores)
+    else:
+        raise ValueError(f"Unsupported growth.split_parent_policy: {split_parent_policy}")
+
+    selected_set = set(selected)
+    new_topology, parent_to_child, parent_to_children, child_intervals = topology.split_selected(selected)
+    selected_scores = {node_id: utility_scores.get(node_id, 0.0) for node_id in selected}
+    unselected = [node_id for node_id in eligible if node_id not in selected_set]
+    unselected_scores = {node_id: utility_scores.get(node_id, 0.0) for node_id in unselected}
+
+    split_stats = {
+        "selection_policy": split_parent_policy,
+        "utility_alpha": utility_alpha,
+        "eligible_parents": eligible,
+        "selected_parents": selected,
+        "unselected_parents": unselected,
+        "remaining_future_active_counts": list(future_active_counts_tuple),
+        "feasible_parent_subset_count": len(feasible_subsets),
+        "selected_parent_scores": selected_scores,
+        "unselected_parent_scores": unselected_scores,
+        "parent_components": {
+            node_id: utility_components.get(node_id, {"visit": 0.0, "grad": 0.0, "success": 0.0, "score": 0.0})
+            for node_id in eligible
+        },
+        "random_seed": seed if split_parent_policy == "random" else None,
+        "parent_to_child": parent_to_child,
+        "parent_to_children": parent_to_children,
+        "child_intervals": child_intervals,
+        "ring_node_ids_before": list(topology.ring_node_ids),
+        "ring_node_ids_after": list(new_topology.ring_node_ids),
+        "sibling_pairs": [(parent_id, child_id) for parent_id, child_id in parent_to_child.items()],
+    }
+    return new_topology, split_stats
 
 
 def _noise_like(reference: Tensor, generator: torch.Generator, scale: float) -> Tensor:
@@ -241,6 +590,86 @@ def split_model_for_growth(
     }
 
 
+def selective_split_model_for_growth(
+    model: APSGNNModel,
+    *,
+    parent_child_pairs: list[tuple[int, int]],
+    split_mode: str,
+    mutation_scale: float,
+    seed: int,
+) -> dict[str, Any]:
+    if not parent_child_pairs:
+        return default_split_stats()
+
+    generator = torch.Generator(device="cpu")
+    generator.manual_seed(seed)
+    mutated_children: list[int] = []
+    sibling_divergence = 0.0
+
+    for parent_node_id, child_node_id in parent_child_pairs:
+        parent_index = parent_node_id - 1
+        child_index = child_node_id - 1
+        source_cell = deepcopy(model.node_cells[parent_index].state_dict())
+        model.node_cells[child_index].load_state_dict(source_cell)
+        model.start_node_embed.weight.data[child_node_id].copy_(model.start_node_embed.weight.data[parent_node_id].detach())
+        for head in _router_heads(model):
+            head.weight.data[child_index].copy_(head.weight.data[parent_index].detach())
+            if head.bias is not None:
+                head.bias.data[child_index].copy_(head.bias.data[parent_index].detach())
+
+        if split_mode != "mutate":
+            continue
+
+        mutated_children.append(child_node_id)
+        divergence_terms: list[Tensor] = []
+        mutated_cell = model.node_cells[child_index]
+        sibling_cell = model.node_cells[parent_index]
+        sibling_parameters = dict(sibling_cell.named_parameters())
+        for name, parameter in mutated_cell.named_parameters():
+            if "ff.net" not in name:
+                continue
+            parameter.data.add_(_noise_like(parameter.data, generator, mutation_scale))
+            divergence_terms.append((parameter.detach() - sibling_parameters[name].detach()).float().pow(2).mean())
+
+        model.start_node_embed.weight.data[child_node_id].add_(
+            _noise_like(model.start_node_embed.weight.data[child_node_id], generator, mutation_scale)
+        )
+        divergence_terms.append(
+            (
+                model.start_node_embed.weight.data[child_node_id].detach()
+                - model.start_node_embed.weight.data[parent_node_id].detach()
+            ).float().pow(2).mean()
+        )
+
+        for head in _router_heads(model):
+            head.weight.data[child_index].add_(_noise_like(head.weight.data[child_index], generator, mutation_scale))
+            divergence_terms.append(
+                (
+                    head.weight.data[child_index].detach()
+                    - head.weight.data[parent_index].detach()
+                ).float().pow(2).mean()
+            )
+            if head.bias is not None:
+                head.bias.data[child_index].add_(_noise_like(head.bias.data[child_index], generator, mutation_scale))
+                divergence_terms.append(
+                    (
+                        head.bias.data[child_index].detach()
+                        - head.bias.data[parent_index].detach()
+                    ).float().pow(2).mean()
+                )
+
+        sibling_divergence += float(torch.stack(divergence_terms).mean().sqrt().item())
+
+    if mutated_children:
+        sibling_divergence /= len(mutated_children)
+
+    return {
+        "sibling_divergence": sibling_divergence,
+        "sibling_pairs": parent_child_pairs,
+        "mutated_children": mutated_children,
+    }
+
+
 def default_split_stats() -> dict[str, Any]:
     return {
         "sibling_divergence": 0.0,
@@ -258,9 +687,30 @@ def transition_model_for_growth(
     split_mode: str,
     mutation_scale: float,
     seed: int,
+    selective_parent_child_pairs: list[tuple[int, int]] | None = None,
+    transition_stats: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if next_active_compute_nodes <= previous_active_compute_nodes:
         return default_split_stats()
+    if selective_parent_child_pairs is not None:
+        base_stats = transition_stats or {}
+        if transition_mode == "activate":
+            return {
+                **default_split_stats(),
+                **base_stats,
+                "sibling_pairs": selective_parent_child_pairs,
+                "mutated_children": [],
+            }
+        if transition_mode != "split":
+            raise ValueError(f"Unsupported growth.transition_mode: {transition_mode}")
+        model_stats = selective_split_model_for_growth(
+            model,
+            parent_child_pairs=selective_parent_child_pairs,
+            split_mode=split_mode,
+            mutation_scale=mutation_scale,
+            seed=seed,
+        )
+        return {**base_stats, **model_stats}
     if transition_mode == "activate":
         return default_split_stats()
     if transition_mode != "split":
@@ -307,33 +757,42 @@ class CoverageTracker:
         self.current_stage_summary: dict[str, Any] | None = None
 
     @staticmethod
-    def _coverage_fraction(values: Tensor, active: int, *, threshold: float) -> float:
-        if active <= 0:
+    def _active_view(values: Tensor, active_node_ids: list[int]) -> Tensor:
+        if not active_node_ids:
+            return values.new_zeros((0,))
+        indices = torch.tensor([node_id - 1 for node_id in active_node_ids], dtype=torch.long)
+        return values.index_select(0, indices)
+
+    @classmethod
+    def _coverage_fraction(cls, values: Tensor, active_node_ids: list[int], *, threshold: float) -> float:
+        active_values = cls._active_view(values, active_node_ids)
+        if active_values.numel() == 0:
             return 0.0
-        return float((values[:active] > threshold).to(torch.float32).mean().item())
+        return float((active_values > threshold).to(torch.float32).mean().item())
 
     @staticmethod
-    def _count_fraction(values: Tensor, active: int, *, threshold: float) -> float:
-        if active <= 0:
+    def _count_fraction(values: Tensor, active_node_ids: list[int], *, threshold: float) -> float:
+        active_values = CoverageTracker._active_view(values, active_node_ids)
+        if active_values.numel() == 0:
             return 0.0
-        return float((values[:active] >= threshold).to(torch.float32).mean().item())
+        return float((active_values >= threshold).to(torch.float32).mean().item())
 
     @staticmethod
-    def _normalized_entropy(values: Tensor, active: int) -> float:
-        trimmed = values[:active].clamp_min(0.0)
+    def _normalized_entropy(values: Tensor, active_node_ids: list[int]) -> float:
+        trimmed = CoverageTracker._active_view(values, active_node_ids).clamp_min(0.0)
         total = float(trimmed.sum().item())
-        if total <= 0.0 or active <= 1:
+        if total <= 0.0 or trimmed.numel() <= 1:
             return 0.0
         probabilities = trimmed / total
         safe = probabilities.clamp_min(1.0e-12)
         entropy = -(probabilities * safe.log()).sum()
-        return float((entropy / math.log(active)).item())
+        return float((entropy / math.log(trimmed.numel())).item())
 
     @staticmethod
-    def _gini(values: Tensor, active: int) -> float:
-        trimmed = values[:active].clamp_min(0.0)
+    def _gini(values: Tensor, active_node_ids: list[int]) -> float:
+        trimmed = CoverageTracker._active_view(values, active_node_ids).clamp_min(0.0)
         total = float(trimmed.sum().item())
-        if total <= 0.0 or active <= 1:
+        if total <= 0.0 or trimmed.numel() <= 1:
             return 0.0
         sorted_values = torch.sort(trimmed).values
         n = sorted_values.numel()
@@ -368,13 +827,21 @@ class CoverageTracker:
             if thresholds[key] is None and value >= level:
                 thresholds[key] = post_bootstrap_step
 
-    def start_stage(self, stage: GrowthStage, *, split_stats: dict[str, Any] | None = None) -> None:
+    def start_stage(
+        self,
+        stage: GrowthStage,
+        *,
+        split_stats: dict[str, Any] | None = None,
+        topology: GrowthTopology | None = None,
+    ) -> None:
         if self.current_stage_summary is not None:
             self.completed_stages.append(self._finalize_stage())
+        active_node_ids = list(topology.ring_node_ids) if topology is not None else list(range(1, stage.active_compute_nodes + 1))
         self.current_stage_summary = {
             "stage_index": stage.index,
             "stage_name": stage.name,
             "active_compute_nodes": stage.active_compute_nodes,
+            "active_node_ids": active_node_ids,
             "start_step": stage.start_step,
             "bootstrap_steps": stage.bootstrap_steps,
             "all_visit_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
@@ -387,6 +854,7 @@ class CoverageTracker:
             "bootstrap_grad_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
             "task_visit_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
             "task_grad_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "task_success_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
             "visit_coverage_at": {},
             "grad_coverage_at": {},
             "all_visit_coverage_at": {},
@@ -425,13 +893,14 @@ class CoverageTracker:
         task_gradient_signal: Tensor | None = None,
         query_gradient_signal: Tensor | None = None,
         bootstrap_gradient_signal: Tensor | None = None,
+        success_visit_counts: Tensor | None = None,
     ) -> dict[str, float | int]:
         if self.current_stage_summary is None or self.current_stage_summary["stage_index"] != stage.index:
             self.start_stage(stage)
         summary = self.current_stage_summary
         assert summary is not None
 
-        active = stage.active_compute_nodes
+        active_node_ids = list(summary["active_node_ids"])
         local_step = stage.local_step(step)
         if all_visit_counts is None:
             if visit_counts is None:
@@ -453,6 +922,8 @@ class CoverageTracker:
             query_gradient_signal = torch.zeros_like(task_gradient_signal)
         if bootstrap_gradient_signal is None:
             bootstrap_gradient_signal = (all_gradient_signal - task_gradient_signal).clamp_min(0.0)
+        if success_visit_counts is None:
+            success_visit_counts = torch.zeros_like(task_visit_counts)
 
         all_visit_counts = all_visit_counts.detach().cpu().to(torch.float64)
         task_visit_counts = task_visit_counts.detach().cpu().to(torch.float64)
@@ -462,44 +933,43 @@ class CoverageTracker:
         task_gradient_signal = task_gradient_signal.detach().cpu().to(torch.float64)
         query_gradient_signal = query_gradient_signal.detach().cpu().to(torch.float64)
         bootstrap_gradient_signal = bootstrap_gradient_signal.detach().cpu().to(torch.float64)
+        success_visit_counts = success_visit_counts.detach().cpu().to(torch.float64)
 
-        summary["all_visit_histogram"][:active] += all_visit_counts[:active]
-        summary["task_visit_histogram"][:active] += task_visit_counts[:active]
-        summary["query_visit_histogram"][:active] += query_visit_counts[:active]
-        summary["bootstrap_visit_histogram"][:active] += bootstrap_visit_counts[:active]
-        summary["all_grad_histogram"][:active] += all_gradient_signal[:active]
-        summary["task_grad_histogram"][:active] += task_gradient_signal[:active]
-        summary["query_grad_histogram"][:active] += query_gradient_signal[:active]
-        summary["bootstrap_grad_histogram"][:active] += bootstrap_gradient_signal[:active]
+        summary["all_visit_histogram"] += all_visit_counts
+        summary["task_visit_histogram"] += task_visit_counts
+        summary["query_visit_histogram"] += query_visit_counts
+        summary["bootstrap_visit_histogram"] += bootstrap_visit_counts
+        summary["all_grad_histogram"] += all_gradient_signal
+        summary["task_grad_histogram"] += task_gradient_signal
+        summary["query_grad_histogram"] += query_gradient_signal
+        summary["bootstrap_grad_histogram"] += bootstrap_gradient_signal
         decay = self.utility_ema_decay
-        summary["task_visit_ema"][:active] = (
-            decay * summary["task_visit_ema"][:active] + (1.0 - decay) * task_visit_counts[:active]
-        )
-        summary["task_grad_ema"][:active] = (
-            decay * summary["task_grad_ema"][:active] + (1.0 - decay) * task_gradient_signal[:active]
-        )
+        if not stage.bootstrap_active(step):
+            summary["task_visit_ema"] = decay * summary["task_visit_ema"] + (1.0 - decay) * task_visit_counts
+            summary["task_grad_ema"] = decay * summary["task_grad_ema"] + (1.0 - decay) * task_gradient_signal
+            summary["task_success_ema"] = decay * summary["task_success_ema"] + (1.0 - decay) * success_visit_counts
 
-        all_visit_fraction = self._coverage_fraction(summary["all_visit_histogram"], active, threshold=0.0)
-        task_visit_fraction = self._coverage_fraction(summary["task_visit_histogram"], active, threshold=0.0)
-        query_visit_fraction = self._coverage_fraction(summary["query_visit_histogram"], active, threshold=0.0)
+        all_visit_fraction = self._coverage_fraction(summary["all_visit_histogram"], active_node_ids, threshold=0.0)
+        task_visit_fraction = self._coverage_fraction(summary["task_visit_histogram"], active_node_ids, threshold=0.0)
+        query_visit_fraction = self._coverage_fraction(summary["query_visit_histogram"], active_node_ids, threshold=0.0)
         all_grad_fraction = self._coverage_fraction(
             summary["all_grad_histogram"],
-            active,
+            active_node_ids,
             threshold=self.gradient_norm_threshold,
         )
         task_grad_fraction = self._coverage_fraction(
             summary["task_grad_histogram"],
-            active,
+            active_node_ids,
             threshold=self.gradient_norm_threshold,
         )
         query_grad_fraction = self._coverage_fraction(
             summary["query_grad_histogram"],
-            active,
+            active_node_ids,
             threshold=self.gradient_norm_threshold,
         )
-        task_visit_ge5_fraction = self._count_fraction(summary["task_visit_histogram"], active, threshold=5.0)
-        task_visit_entropy = self._normalized_entropy(summary["task_visit_histogram"], active)
-        task_visit_gini = self._gini(summary["task_visit_histogram"], active)
+        task_visit_ge5_fraction = self._count_fraction(summary["task_visit_histogram"], active_node_ids, threshold=5.0)
+        task_visit_entropy = self._normalized_entropy(summary["task_visit_histogram"], active_node_ids)
+        task_visit_gini = self._gini(summary["task_visit_histogram"], active_node_ids)
 
         for checkpoint in self.CHECKPOINTS:
             key = str(checkpoint)
@@ -537,7 +1007,7 @@ class CoverageTracker:
         history_row = {
             "step": step,
             "stage_index": stage.index,
-            "active_compute_nodes": active,
+            "active_compute_nodes": len(active_node_ids),
             "stage_local_step": local_step,
             "bootstrap_active": int(stage.bootstrap_active(step)),
             "post_bootstrap_step": max(local_step - stage.bootstrap_steps, 0),
@@ -560,7 +1030,7 @@ class CoverageTracker:
     def _finalize_stage(self) -> dict[str, Any]:
         assert self.current_stage_summary is not None
         summary = self.current_stage_summary
-        active = summary["active_compute_nodes"]
+        active_node_ids: list[int] = list(summary["active_node_ids"])
         split_stats = summary["split_stats"]
         sibling_pairs: list[tuple[int, int]] = split_stats.get("sibling_pairs", [])
         mutated_children = set(split_stats.get("mutated_children", []))
@@ -577,10 +1047,53 @@ class CoverageTracker:
             if summary["task_grad_ema"][right_child - 1] > summary["task_grad_ema"][left_child - 1]:
                 mutated_grad_wins += 1
 
+        utility_parent_components = split_stats.get("parent_components", {})
+        parent_to_children = split_stats.get("parent_to_children", {})
+        eligible_parents = split_stats.get("eligible_parents", [])
+        utility_alpha = float(split_stats.get("utility_alpha", 1.0))
+        child_usefulness: dict[int, float] = {}
+        for parent_id in eligible_parents:
+            child_ids = parent_to_children.get(parent_id, [parent_id])
+            usefulness = 0.0
+            for child_id in child_ids:
+                usefulness += float(summary["task_visit_ema"][child_id - 1].item())
+                usefulness += float(summary["task_grad_ema"][child_id - 1].item())
+                usefulness += utility_alpha * float(summary["task_success_ema"][child_id - 1].item())
+            child_usefulness[parent_id] = usefulness
+
+        selected = split_stats.get("selected_parents", [])
+        unselected = split_stats.get("unselected_parents", [])
+        selected_usefulness = [child_usefulness[parent_id] for parent_id in selected]
+        unselected_usefulness = [child_usefulness[parent_id] for parent_id in unselected]
+        selected_parent_utility = [
+            float(utility_parent_components.get(parent_id, {}).get("score", 0.0)) for parent_id in selected
+        ]
+        unselected_parent_utility = [
+            float(utility_parent_components.get(parent_id, {}).get("score", 0.0)) for parent_id in unselected
+        ]
+        parent_utility = [
+            float(utility_parent_components.get(parent_id, {}).get("score", 0.0)) for parent_id in eligible_parents
+        ]
+        later_usefulness = [child_usefulness[parent_id] for parent_id in eligible_parents]
+        utility_usefulness_correlation = 0.0
+        if len(parent_utility) >= 2:
+            utility_tensor = torch.tensor(parent_utility, dtype=torch.float64)
+            usefulness_tensor = torch.tensor(later_usefulness, dtype=torch.float64)
+            utility_std = float(utility_tensor.std(unbiased=False).item())
+            usefulness_std = float(usefulness_tensor.std(unbiased=False).item())
+            if utility_std > 1.0e-12 and usefulness_std > 1.0e-12:
+                utility_usefulness_correlation = float(
+                    ((utility_tensor - utility_tensor.mean()) * (usefulness_tensor - usefulness_tensor.mean())).mean()
+                    / (utility_std * usefulness_std)
+                )
+
+        active = len(active_node_ids)
+
         return {
             "stage_index": summary["stage_index"],
             "stage_name": summary["stage_name"],
             "active_compute_nodes": active,
+            "active_node_ids": active_node_ids,
             "start_step": summary["start_step"],
             "bootstrap_steps": summary["bootstrap_steps"],
             "visit_coverage_at": summary["visit_coverage_at"],
@@ -600,20 +1113,21 @@ class CoverageTracker:
             "task_time_to_grad": summary["task_time_to_grad"],
             "post_bootstrap_visit_slope": self._post_bootstrap_slope(summary["history"], "task_visit_coverage"),
             "post_bootstrap_grad_slope": self._post_bootstrap_slope(summary["history"], "task_gradient_coverage"),
-            "visit_histogram": summary["all_visit_histogram"][:active].tolist(),
-            "grad_histogram": summary["all_grad_histogram"][:active].tolist(),
-            "all_visit_histogram": summary["all_visit_histogram"][:active].tolist(),
-            "task_visit_histogram": summary["task_visit_histogram"][:active].tolist(),
-            "query_visit_histogram": summary["query_visit_histogram"][:active].tolist(),
-            "bootstrap_visit_histogram": summary["bootstrap_visit_histogram"][:active].tolist(),
-            "all_grad_histogram": summary["all_grad_histogram"][:active].tolist(),
-            "task_grad_histogram": summary["task_grad_histogram"][:active].tolist(),
-            "query_grad_histogram": summary["query_grad_histogram"][:active].tolist(),
-            "bootstrap_grad_histogram": summary["bootstrap_grad_histogram"][:active].tolist(),
-            "visit_ema": summary["task_visit_ema"][:active].tolist(),
-            "grad_ema": summary["task_grad_ema"][:active].tolist(),
-            "task_visit_ema": summary["task_visit_ema"][:active].tolist(),
-            "task_grad_ema": summary["task_grad_ema"][:active].tolist(),
+            "visit_histogram": self._active_view(summary["all_visit_histogram"], active_node_ids).tolist(),
+            "grad_histogram": self._active_view(summary["all_grad_histogram"], active_node_ids).tolist(),
+            "all_visit_histogram": self._active_view(summary["all_visit_histogram"], active_node_ids).tolist(),
+            "task_visit_histogram": self._active_view(summary["task_visit_histogram"], active_node_ids).tolist(),
+            "query_visit_histogram": self._active_view(summary["query_visit_histogram"], active_node_ids).tolist(),
+            "bootstrap_visit_histogram": self._active_view(summary["bootstrap_visit_histogram"], active_node_ids).tolist(),
+            "all_grad_histogram": self._active_view(summary["all_grad_histogram"], active_node_ids).tolist(),
+            "task_grad_histogram": self._active_view(summary["task_grad_histogram"], active_node_ids).tolist(),
+            "query_grad_histogram": self._active_view(summary["query_grad_histogram"], active_node_ids).tolist(),
+            "bootstrap_grad_histogram": self._active_view(summary["bootstrap_grad_histogram"], active_node_ids).tolist(),
+            "visit_ema": self._active_view(summary["task_visit_ema"], active_node_ids).tolist(),
+            "grad_ema": self._active_view(summary["task_grad_ema"], active_node_ids).tolist(),
+            "task_visit_ema": self._active_view(summary["task_visit_ema"], active_node_ids).tolist(),
+            "task_grad_ema": self._active_view(summary["task_grad_ema"], active_node_ids).tolist(),
+            "task_success_ema": self._active_view(summary["task_success_ema"], active_node_ids).tolist(),
             "split_stats": {
                 "sibling_divergence": split_stats.get("sibling_divergence", 0.0),
                 "sibling_pairs": sibling_pairs,
@@ -621,6 +1135,22 @@ class CoverageTracker:
                 "mutated_children_with_traffic": mutated_children_with_traffic,
                 "mutated_child_more_traffic_pairs": mutated_traffic_wins,
                 "mutated_child_more_gradient_pairs": mutated_grad_wins,
+                "selection_policy": split_stats.get("selection_policy"),
+                "eligible_parents": eligible_parents,
+                "selected_parents": selected,
+                "unselected_parents": unselected,
+                "selected_parent_scores": split_stats.get("selected_parent_scores", {}),
+                "unselected_parent_scores": split_stats.get("unselected_parent_scores", {}),
+                "selected_parent_utility_mean": float(torch.tensor(selected_parent_utility, dtype=torch.float64).mean().item()) if selected_parent_utility else 0.0,
+                "unselected_parent_utility_mean": float(torch.tensor(unselected_parent_utility, dtype=torch.float64).mean().item()) if unselected_parent_utility else 0.0,
+                "selected_parent_child_usefulness_mean": float(torch.tensor(selected_usefulness, dtype=torch.float64).mean().item()) if selected_usefulness else 0.0,
+                "unselected_parent_child_usefulness_mean": float(torch.tensor(unselected_usefulness, dtype=torch.float64).mean().item()) if unselected_usefulness else 0.0,
+                "utility_usefulness_correlation": utility_usefulness_correlation,
+                "parent_child_usefulness": child_usefulness,
+                "parent_components": utility_parent_components,
+                "parent_to_child": split_stats.get("parent_to_child", {}),
+                "parent_to_children": parent_to_children,
+                "child_intervals": split_stats.get("child_intervals", {}),
             },
         }
 
@@ -633,22 +1163,22 @@ class CoverageTracker:
         if self.current_stage_summary is None:
             return {}
         summary = self.current_stage_summary
-        active = summary["active_compute_nodes"]
-        visit_fraction = self._coverage_fraction(summary["all_visit_histogram"], active, threshold=0.0)
+        active_node_ids: list[int] = list(summary["active_node_ids"])
+        visit_fraction = self._coverage_fraction(summary["all_visit_histogram"], active_node_ids, threshold=0.0)
         grad_fraction = self._coverage_fraction(
             summary["all_grad_histogram"],
-            active,
+            active_node_ids,
             threshold=self.gradient_norm_threshold,
         )
-        task_visit_fraction = self._coverage_fraction(summary["task_visit_histogram"], active, threshold=0.0)
+        task_visit_fraction = self._coverage_fraction(summary["task_visit_histogram"], active_node_ids, threshold=0.0)
         task_grad_fraction = self._coverage_fraction(
             summary["task_grad_histogram"],
-            active,
+            active_node_ids,
             threshold=self.gradient_norm_threshold,
         )
-        task_visit_ge5_fraction = self._count_fraction(summary["task_visit_histogram"], active, threshold=5.0)
-        task_visit_entropy = self._normalized_entropy(summary["task_visit_histogram"], active)
-        task_visit_gini = self._gini(summary["task_visit_histogram"], active)
+        task_visit_ge5_fraction = self._count_fraction(summary["task_visit_histogram"], active_node_ids, threshold=5.0)
+        task_visit_entropy = self._normalized_entropy(summary["task_visit_histogram"], active_node_ids)
+        task_visit_gini = self._gini(summary["task_visit_histogram"], active_node_ids)
         return {
             "active_node_visit_coverage": visit_fraction,
             "active_node_gradient_coverage": grad_fraction,
@@ -657,9 +1187,45 @@ class CoverageTracker:
             "task_nodes_ge5_visit_fraction": task_visit_ge5_fraction,
             "task_visit_entropy": task_visit_entropy,
             "task_visit_gini": task_visit_gini,
-            "active_compute_nodes": active,
+            "active_compute_nodes": len(active_node_ids),
             "stage_index": int(summary["stage_index"]),
         }
+
+    def selection_components(self, topology: GrowthTopology, *, utility_alpha: float) -> dict[int, dict[str, float]]:
+        if self.current_stage_summary is None:
+            return {}
+        summary = self.current_stage_summary
+        active_node_ids = set(summary["active_node_ids"])
+        visit_values = {
+            node_id: float(summary["task_visit_ema"][node_id - 1].item())
+            for node_id in topology.eligible_split_parents()
+            if node_id in active_node_ids
+        }
+        grad_values = {
+            node_id: float(summary["task_grad_ema"][node_id - 1].item())
+            for node_id in visit_values
+        }
+        success_values = {
+            node_id: float(summary["task_success_ema"][node_id - 1].item())
+            for node_id in visit_values
+        }
+        visit_z = _zscore_dict(visit_values)
+        grad_z = _zscore_dict(grad_values)
+        success_z = _zscore_dict(success_values)
+        components: dict[int, dict[str, float]] = {}
+        for node_id in visit_values:
+            score = (
+                visit_z.get(node_id, 0.0)
+                + grad_z.get(node_id, 0.0)
+                + float(utility_alpha) * success_z.get(node_id, 0.0)
+            )
+            components[node_id] = {
+                "visit": visit_values[node_id],
+                "grad": grad_values[node_id],
+                "success": success_values[node_id],
+                "score": score,
+            }
+        return components
 
     def to_dict(self) -> dict[str, Any]:
         self.finalize()

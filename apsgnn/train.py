@@ -13,7 +13,14 @@ from tqdm import tqdm
 from apsgnn.config import ExperimentConfig, dump_config, load_config
 from apsgnn.ddp_utils import cleanup_distributed, is_distributed, is_main_process, setup_distributed
 from apsgnn.eval import accumulate_metric_sums, finalize_metrics, reduce_metric_sums, run_evaluation
-from apsgnn.growth import CoverageTracker, GrowthSchedule, transition_model_for_growth
+from apsgnn.growth import (
+    CoverageTracker,
+    GrowthSchedule,
+    GrowthTopology,
+    build_initial_topology,
+    transition_model_for_growth,
+    transition_topology_for_growth,
+)
 from apsgnn.model import APSGNNModel
 from apsgnn.tasks import GrowthMemoryRoutingTask, MemoryRoutingTask, SanityRoutingTask
 from apsgnn.utils import (
@@ -128,18 +135,20 @@ def save_checkpoint(
     step: int,
     best_metric: float,
     name: str,
+    *,
+    growth_topology: GrowthTopology | None = None,
 ) -> Path:
     unwrapped = model.module if isinstance(model, DDP) else model
     path = run_dir / f"{name}.pt"
-    torch.save(
-        {
-            "step": step,
-            "best_metric": best_metric,
-            "model": unwrapped.state_dict(),
-            "optimizer": optimizer.state_dict(),
-        },
-        path,
-    )
+    payload = {
+        "step": step,
+        "best_metric": best_metric,
+        "model": unwrapped.state_dict(),
+        "optimizer": optimizer.state_dict(),
+    }
+    if growth_topology is not None:
+        payload["growth_topology"] = growth_topology.to_dict()
+    torch.save(payload, path)
     return path
 
 
@@ -148,9 +157,9 @@ def maybe_load_checkpoint(
     optimizer: torch.optim.Optimizer,
     checkpoint_path: str | None,
     device: torch.device,
-) -> tuple[int, float]:
+) -> tuple[int, float, GrowthTopology | None]:
     if checkpoint_path is None:
-        return 0, -math.inf
+        return 0, -math.inf, None
     checkpoint, _, _ = load_model_weights(
         model,
         checkpoint_path,
@@ -158,7 +167,9 @@ def maybe_load_checkpoint(
         allow_cache_retriever_mismatch=False,
     )
     optimizer.load_state_dict(checkpoint["optimizer"])
-    return int(checkpoint["step"]), float(checkpoint.get("best_metric", -math.inf))
+    topology_payload = checkpoint.get("growth_topology")
+    topology = GrowthTopology.from_dict(topology_payload) if topology_payload is not None else None
+    return int(checkpoint["step"]), float(checkpoint.get("best_metric", -math.inf)), topology
 
 
 def main() -> None:
@@ -205,7 +216,7 @@ def main() -> None:
         lr=config.train.lr,
         weight_decay=config.train.weight_decay,
     )
-    start_step, best_metric = maybe_load_checkpoint(model, optimizer, args.checkpoint, device)
+    start_step, best_metric, resumed_topology = maybe_load_checkpoint(model, optimizer, args.checkpoint, device)
 
     if config.train.compile_model and hasattr(torch, "compile"):
         model = torch.compile(model)  # type: ignore[assignment]
@@ -228,9 +239,15 @@ def main() -> None:
             gradient_norm_threshold=config.growth.gradient_norm_threshold,
             utility_ema_decay=config.growth.utility_ema_decay,
         )
-        if config.growth.enabled and is_main_process()
+        if config.growth.enabled
         else None
     )
+    selective_topology = config.growth.enabled and config.growth.topology_mode == "selective"
+    topology: GrowthTopology | None = resumed_topology
+    if selective_topology and topology is None:
+        if start_step > 0:
+            raise RuntimeError("Selective growth resume requires checkpoint topology metadata.")
+        topology = build_initial_topology(config, growth_schedule.stages[0].active_compute_nodes)
     interval_metric_sums: dict[str, torch.Tensor] = {}
     interval_start_time = time.perf_counter()
     current_stage = None
@@ -246,20 +263,56 @@ def main() -> None:
         if current_stage is None or stage.index != current_stage.index:
             split_stats = None
             if current_stage is not None and stage.active_compute_nodes > current_stage.active_compute_nodes:
-                split_stats = transition_model_for_growth(
-                    unwrap_model(model),
-                    current_stage.active_compute_nodes,
-                    stage.active_compute_nodes,
-                    transition_mode=config.growth.transition_mode,
-                    split_mode=config.growth.split_mode,
-                    mutation_scale=config.growth.split_mutation_scale,
-                    seed=config.train.seed + stage.index,
-                )
+                if selective_topology:
+                    assert topology is not None
+                    utility_components = (
+                        coverage_tracker.selection_components(
+                            topology,
+                            utility_alpha=config.growth.utility_success_alpha,
+                        )
+                        if coverage_tracker is not None
+                        else {}
+                    )
+                    topology, topology_stats = transition_topology_for_growth(
+                        topology,
+                        stage.active_compute_nodes,
+                        split_parent_policy=config.growth.split_parent_policy,
+                        utility_components=utility_components,
+                        utility_alpha=config.growth.utility_success_alpha,
+                        seed=config.train.seed + stage.index,
+                        future_active_counts=[
+                            future_stage.active_compute_nodes
+                            for future_stage in growth_schedule.stages[stage.index + 1 :]
+                        ],
+                    )
+                    split_stats = transition_model_for_growth(
+                        unwrap_model(model),
+                        current_stage.active_compute_nodes,
+                        stage.active_compute_nodes,
+                        transition_mode=config.growth.transition_mode,
+                        split_mode=config.growth.split_mode,
+                        mutation_scale=config.growth.split_mutation_scale,
+                        seed=config.train.seed + stage.index,
+                        selective_parent_child_pairs=topology_stats.get("sibling_pairs", []),
+                        transition_stats=topology_stats,
+                    )
+                else:
+                    split_stats = transition_model_for_growth(
+                        unwrap_model(model),
+                        current_stage.active_compute_nodes,
+                        stage.active_compute_nodes,
+                        transition_mode=config.growth.transition_mode,
+                        split_mode=config.growth.split_mode,
+                        mutation_scale=config.growth.split_mutation_scale,
+                        seed=config.train.seed + stage.index,
+                    )
                 if is_distributed():
                     torch.distributed.barrier()
+            elif selective_topology and topology is None:
+                topology = build_initial_topology(config, stage.active_compute_nodes)
             current_stage = stage
             if coverage_tracker is not None:
-                coverage_tracker.start_stage(stage, split_stats=split_stats)
+                coverage_tracker.start_stage(stage, split_stats=split_stats, topology=topology)
 
         model.train()
         unwrapped_model = unwrap_model(model)
@@ -267,6 +320,8 @@ def main() -> None:
         unwrapped_model.set_growth_context(
             active_compute_nodes=stage.active_compute_nodes,
             bootstrap_active=stage.bootstrap_active(step),
+            active_node_ids=None if topology is None else topology.active_node_tensor(),
+            clockwise_successor_lookup=None if topology is None else topology.successor_lookup(),
         )
         optimizer.zero_grad(set_to_none=True)
         batch_seed = config.train.seed + rank * 100_000 + step
@@ -276,6 +331,7 @@ def main() -> None:
                 batch_seed,
                 active_compute_nodes=stage.active_compute_nodes,
                 bootstrap_mode=stage.bootstrap_active(step),
+                topology=topology,
             ).to(device)
         elif task_name == "memory":
             batch = task.generate(config.train.batch_size_per_gpu, batch_seed).to(device)
@@ -309,6 +365,10 @@ def main() -> None:
                         torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
                     ).to(device=device, dtype=torch.float64),
                     diagnostics.get(
+                        "success_visit_counts",
+                        torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
+                    ).to(device=device, dtype=torch.float64),
+                    diagnostics.get(
                         "all_gradient_signal",
                         torch.zeros(config.model.num_compute_nodes, device=device, dtype=torch.float32),
                     ).to(device=device, dtype=torch.float64),
@@ -337,10 +397,11 @@ def main() -> None:
                     task_visit_counts=stacked_signals[1],
                     query_visit_counts=stacked_signals[2],
                     bootstrap_visit_counts=stacked_signals[3],
-                    all_gradient_signal=stacked_signals[4],
-                    task_gradient_signal=stacked_signals[5],
-                    query_gradient_signal=stacked_signals[6],
-                    bootstrap_gradient_signal=stacked_signals[7],
+                    success_visit_counts=stacked_signals[4],
+                    all_gradient_signal=stacked_signals[5],
+                    task_gradient_signal=stacked_signals[6],
+                    query_gradient_signal=stacked_signals[7],
+                    bootstrap_gradient_signal=stacked_signals[8],
                 )
 
         torch.nn.utils.clip_grad_norm_(model.parameters(), config.train.grad_clip)
@@ -386,6 +447,7 @@ def main() -> None:
                 rank=rank,
                 writers_per_episode=config.task.writers_per_episode if task_name == "memory" else None,
                 desc="val",
+                topology=topology,
             )
             if is_main_process():
                 row = row or {"step": step}
@@ -393,9 +455,21 @@ def main() -> None:
                 for key, value in val_metrics.items():
                     row[f"val/{key}"] = float(value)
                 primary_metric = val_metrics["query_accuracy"] if task_name == "memory" else val_metrics["query_delivery_rate"]
-                if primary_metric >= best_metric:
+                allow_best_update = (
+                    not config.growth.best_metric_final_stage_only
+                    or stage.active_compute_nodes == growth_schedule.final_active_compute_nodes
+                )
+                if allow_best_update and primary_metric >= best_metric:
                     best_metric = primary_metric
-                    best_path = save_checkpoint(run_dir, model, optimizer, step, best_metric, "best")
+                    best_path = save_checkpoint(
+                        run_dir,
+                        model,
+                        optimizer,
+                        step,
+                        best_metric,
+                        "best",
+                        growth_topology=topology,
+                    )
                     row["best_checkpoint"] = str(best_path)
 
         if is_main_process() and row is not None:
@@ -406,7 +480,7 @@ def main() -> None:
         if is_main_process() and not args.benchmark_only and (
             step % config.train.save_interval == 0 or step == config.train.train_steps
         ):
-            save_checkpoint(run_dir, model, optimizer, step, best_metric, "last")
+            save_checkpoint(run_dir, model, optimizer, step, best_metric, "last", growth_topology=topology)
 
     if args.benchmark_only and is_main_process():
         csv_path = metrics_writer.flush_csv()
@@ -417,7 +491,15 @@ def main() -> None:
     elif is_main_process():
         csv_path = metrics_writer.flush_csv()
         plot_metrics(csv_path, run_dir / "training")
-        save_checkpoint(run_dir, model, optimizer, config.train.train_steps, best_metric, "last")
+        save_checkpoint(
+            run_dir,
+            model,
+            optimizer,
+            config.train.train_steps,
+            best_metric,
+            "last",
+            growth_topology=topology,
+        )
         if coverage_tracker is not None:
             save_json(coverage_tracker.to_dict(), run_dir / "coverage_summary.json")
         print(f"Training run written to {run_dir}")

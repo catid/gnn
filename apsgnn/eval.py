@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from apsgnn.config import dump_config, load_config
 from apsgnn.ddp_utils import cleanup_distributed, is_distributed, is_main_process, setup_distributed
-from apsgnn.growth import GrowthSchedule
+from apsgnn.growth import GrowthSchedule, GrowthTopology
 from apsgnn.model import APSGNNModel
 from apsgnn.tasks import GrowthMemoryRoutingTask, MemoryRoutingTask, SanityRoutingTask
 from apsgnn.utils import ensure_dir, environment_info, save_json, seed_everything
@@ -107,6 +107,7 @@ def run_evaluation(
     rank: int,
     writers_per_episode: int | None = None,
     desc: str = "eval",
+    topology: GrowthTopology | None = None,
 ) -> dict[str, float]:
     config = load_config(config_path)
     task_name = config.task.name
@@ -117,14 +118,17 @@ def run_evaluation(
     else:
         task = SanityRoutingTask(config)
     growth_schedule = GrowthSchedule.from_config(config)
+    eval_active_compute_nodes = topology.active_compute_nodes if topology is not None else growth_schedule.final_active_compute_nodes
 
     was_training = model.training
     model.eval()
     unwrapped = model.module if isinstance(model, DDP) else model
     unwrapped.set_first_hop_teacher_force_ratio(0.0)
     unwrapped.set_growth_context(
-        active_compute_nodes=growth_schedule.final_active_compute_nodes,
+        active_compute_nodes=eval_active_compute_nodes,
         bootstrap_active=False,
+        active_node_ids=None if topology is None else topology.active_node_tensor(),
+        clockwise_successor_lookup=None if topology is None else topology.successor_lookup(),
     )
     metric_sums: dict[str, torch.Tensor] = {}
     iterator = range(batches)
@@ -138,8 +142,9 @@ def run_evaluation(
                 batch_size=config.train.batch_size_per_gpu,
                 seed=seed,
                 writers_per_episode=writers_per_episode,
-                active_compute_nodes=growth_schedule.final_active_compute_nodes,
+                active_compute_nodes=eval_active_compute_nodes,
                 bootstrap_mode=False,
+                topology=topology,
             ).to(device)
         elif task_name == "memory":
             batch = task.generate(
@@ -209,6 +214,7 @@ def main() -> None:
         rank=rank,
         writers_per_episode=args.writers_per_episode,
         desc=args.tag,
+        topology=GrowthTopology.from_dict(checkpoint["growth_topology"]) if "growth_topology" in checkpoint else None,
     )
     metrics["checkpoint_step"] = int(checkpoint.get("step", -1))
     metrics["writers_per_episode"] = args.writers_per_episode or config.task.writers_per_episode

@@ -381,6 +381,8 @@ class APSGNNModel(nn.Module):
         self.first_hop_teacher_force_ratio = 0.0
         self.active_compute_nodes = model_cfg.num_compute_nodes
         self.bootstrap_active = False
+        self.active_node_ids_tensor: Tensor | None = None
+        self.clockwise_successor_lookup_tensor: Tensor | None = None
 
         self.node_cells = nn.ModuleList(
             [
@@ -407,12 +409,23 @@ class APSGNNModel(nn.Module):
     def set_first_hop_teacher_force_ratio(self, ratio: float) -> None:
         self.first_hop_teacher_force_ratio = float(min(max(ratio, 0.0), 1.0))
 
-    def set_growth_context(self, *, active_compute_nodes: int | None = None, bootstrap_active: bool = False) -> None:
+    def set_growth_context(
+        self,
+        *,
+        active_compute_nodes: int | None = None,
+        bootstrap_active: bool = False,
+        active_node_ids: Tensor | None = None,
+        clockwise_successor_lookup: Tensor | None = None,
+    ) -> None:
         if active_compute_nodes is None:
             self.active_compute_nodes = self.config.model.num_compute_nodes
         else:
             self.active_compute_nodes = int(active_compute_nodes)
         self.bootstrap_active = bool(bootstrap_active)
+        self.active_node_ids_tensor = None if active_node_ids is None else active_node_ids.detach().to(dtype=torch.long)
+        self.clockwise_successor_lookup_tensor = (
+            None if clockwise_successor_lookup is None else clockwise_successor_lookup.detach().to(dtype=torch.long)
+        )
 
     def uses_legacy_first_hop_router(self) -> bool:
         return self.config.model.first_hop_router_variant == "legacy"
@@ -437,10 +450,22 @@ class APSGNNModel(nn.Module):
     def _active_node_mask(self, device: torch.device, dtype: torch.dtype) -> Tensor:
         mask = torch.zeros(self.config.model.nodes_total, device=device, dtype=dtype)
         mask[0] = 1.0
-        mask[1 : self.active_compute_nodes + 1] = 1.0
+        if self.active_node_ids_tensor is None:
+            mask[1 : self.active_compute_nodes + 1] = 1.0
+        else:
+            mask[self.active_node_ids_tensor.to(device=device)] = 1.0
         return mask
 
     def _clockwise_target(self, current_node: Tensor) -> Tensor:
+        if self.clockwise_successor_lookup_tensor is not None:
+            lookup = self.clockwise_successor_lookup_tensor.to(device=current_node.device)
+            successor = lookup[current_node]
+            fallback_mask = successor == 0
+            if fallback_mask.any():
+                fallback = clockwise_successor(current_node[fallback_mask], self.active_compute_nodes)
+                successor = successor.clone()
+                successor[fallback_mask] = fallback
+            return successor
         return clockwise_successor(current_node, self.active_compute_nodes)
 
     def _coverage_packet_residual(
@@ -884,6 +909,8 @@ class APSGNNModel(nn.Module):
         else:
             query_correct = zero
         loss_missing_sum = (~query_delivered).to(dtype).sum() * cfg.train.missing_output_penalty
+        success_ratio = query_correct / max(float(delivered_mask.sum().item()), 1.0)
+        success_visit_counts_sum = query_visit_counts_sum * success_ratio
 
         total_loss_sum = (
             loss_main_sum
@@ -947,6 +974,7 @@ class APSGNNModel(nn.Module):
                 "task_visit_counts": task_visit_counts_sum.detach(),
                 "query_visit_counts": query_visit_counts_sum.detach(),
                 "bootstrap_visit_counts": bootstrap_visit_counts_sum.detach(),
+                "success_visit_counts": success_visit_counts_sum.detach(),
                 "all_gradient_signal": gradient_buffers["all"],
                 "task_gradient_signal": gradient_buffers["task"],
                 "query_gradient_signal": gradient_buffers["query"],
@@ -1438,8 +1466,8 @@ class APSGNNModel(nn.Module):
                         teacher_forced_mask[forced_indices] = True
         if self.uses_growth_curriculum():
             route_logits = route_logits.clone()
-            if self.active_compute_nodes < cfg.num_compute_nodes:
-                route_logits[:, self.active_compute_nodes + 1 :] = -1.0e9
+            active_mask = self._active_node_mask(device=device, dtype=route_logits.dtype)
+            route_logits = route_logits.masked_fill(active_mask.unsqueeze(0) == 0, -1.0e9)
 
             compute_mask = packets.current_node > 0
             if compute_mask.any() and self.config.growth.clock_prior_bias > 0.0:

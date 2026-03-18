@@ -107,6 +107,7 @@ class GrowthConfig:
     stage_active_counts: list[int] = field(default_factory=list)
     stage_steps: list[int] = field(default_factory=list)
     transition_mode: str = "split"
+    topology_mode: str = "uniform"
     bootstrap_steps: int = 0
     clock_prior_bias: float = 0.0
     delay_zero_bias: float = 0.0
@@ -117,9 +118,12 @@ class GrowthConfig:
     bootstrap_force_clockwise: bool = True
     bootstrap_force_delay_zero: bool = True
     split_mode: str = "none"
+    split_parent_policy: str = "balanced"
     split_mutation_scale: float = 0.02
     gradient_norm_threshold: float = 1.0e-12
     utility_ema_decay: float = 0.95
+    utility_success_alpha: float = 0.75
+    best_metric_final_stage_only: bool = False
 
 
 @dataclass

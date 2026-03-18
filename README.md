@@ -296,6 +296,78 @@ V7 growth mutate hard long training:
 bash scripts/train_v7_growth_mutate_hard_long.sh
 ```
 
+V8 static bootstrap hard smoke:
+
+```bash
+bash scripts/smoke_v8_static_bootstrap_hard.sh
+```
+
+V8 staged static selective hard smoke:
+
+```bash
+bash scripts/smoke_v8_staged_static_selective_hard.sh
+```
+
+V8 clone selective hard smoke:
+
+```bash
+bash scripts/smoke_v8_clone_selective_hard.sh
+```
+
+V8 random selective hard smoke:
+
+```bash
+bash scripts/smoke_v8_random_selective_hard.sh
+```
+
+V8 utility selective hard smoke:
+
+```bash
+bash scripts/smoke_v8_utility_selective_hard.sh
+```
+
+V8 utility mutate hard smoke:
+
+```bash
+bash scripts/smoke_v8_utility_mutate_hard.sh
+```
+
+V8 static bootstrap hard training:
+
+```bash
+bash scripts/train_v8_static_bootstrap_hard.sh
+```
+
+V8 staged static selective hard training:
+
+```bash
+bash scripts/train_v8_staged_static_selective_hard.sh
+```
+
+V8 clone selective hard training:
+
+```bash
+bash scripts/train_v8_clone_selective_hard.sh
+```
+
+V8 random selective hard training:
+
+```bash
+bash scripts/train_v8_random_selective_hard.sh
+```
+
+V8 utility selective hard training:
+
+```bash
+bash scripts/train_v8_utility_selective_hard.sh
+```
+
+V8 utility mutate hard training:
+
+```bash
+bash scripts/train_v8_utility_mutate_hard.sh
+```
+
 Manual evaluation of a checkpoint:
 
 ```bash
@@ -331,6 +403,7 @@ torchrun --standalone --nproc_per_node=2 -m apsgnn.eval \
 - APSGNN v5 keeps the v4 memory path and v3-style router family, but tests a reduced 16-leaf benchmark with a clockwise transport prior, stage bootstraps, and 4->8->16 growth via clone or mutate splitting.
 - APSGNN v6 scales the growth study to a harder 32-leaf benchmark, uses task-packet-only coverage metrics, hardens ingress coverage with a restricted start-node pool, and compares static, static+bootstrap, growth clone, and mutate follow-up runs across moderate and hard regimes.
 - APSGNN v7 keeps the v6 hard 32-leaf benchmark and adds the key staged-static curriculum control so the main comparison is now static+bootstrap vs staged-static vs growth-clone across multiple seeds.
+- APSGNN v8 keeps the hard 32-leaf setup, replaces pure doubling growth with a selective `4->6->8->12->16->24->32` schedule, and compares staged-static, deterministic clone, random selective clone, and utility-ranked selective clone growth.
 - Scripts requesting 4 GPUs automatically fall back to the available GPU count.
 - Metrics and checkpoints are written to `runs/<timestamp>-<name>/`.
 - Final report and summary plots are written to `reports/`.
