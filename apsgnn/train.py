@@ -18,6 +18,7 @@ from apsgnn.growth import (
     GrowthSchedule,
     GrowthTopology,
     build_initial_topology,
+    mutation_stagnation_info,
     transition_model_for_growth,
     transition_topology_for_growth,
 )
@@ -238,6 +239,7 @@ def main() -> None:
             num_compute_nodes=config.model.num_compute_nodes,
             gradient_norm_threshold=config.growth.gradient_norm_threshold,
             utility_ema_decay=config.growth.utility_ema_decay,
+            utility_tail_fraction=config.growth.utility_tail_fraction,
         )
         if config.growth.enabled
         else None
@@ -251,6 +253,7 @@ def main() -> None:
     interval_metric_sums: dict[str, torch.Tensor] = {}
     interval_start_time = time.perf_counter()
     current_stage = None
+    stage_val_history: dict[int, list[float]] = {}
     progress = range(start_step + 1, config.train.train_steps + 1)
     if is_main_process() and not args.benchmark_only:
         progress = tqdm(progress, desc=config.runtime.run_name)
@@ -263,12 +266,21 @@ def main() -> None:
         if current_stage is None or stage.index != current_stage.index:
             split_stats = None
             if current_stage is not None and stage.active_compute_nodes > current_stage.active_compute_nodes:
+                stage_transition_stats = mutation_stagnation_info(
+                    stage_val_history.get(current_stage.index, []),
+                    window=config.growth.mutation_stagnation_window,
+                    delta=config.growth.mutation_stagnation_delta,
+                )
                 if selective_topology:
                     assert topology is not None
                     utility_components = (
                         coverage_tracker.selection_components(
                             topology,
                             utility_alpha=config.growth.utility_success_alpha,
+                            utility_visit_weight=config.growth.utility_visit_weight,
+                            utility_grad_weight=config.growth.utility_grad_weight,
+                            utility_query_visit_weight=config.growth.utility_query_visit_weight,
+                            utility_query_grad_weight=config.growth.utility_query_grad_weight,
                         )
                         if coverage_tracker is not None
                         else {}
@@ -279,11 +291,24 @@ def main() -> None:
                         split_parent_policy=config.growth.split_parent_policy,
                         utility_components=utility_components,
                         utility_alpha=config.growth.utility_success_alpha,
+                        utility_visit_weight=config.growth.utility_visit_weight,
+                        utility_grad_weight=config.growth.utility_grad_weight,
+                        utility_query_visit_weight=config.growth.utility_query_visit_weight,
+                        utility_query_grad_weight=config.growth.utility_query_grad_weight,
                         seed=config.train.seed + stage.index,
                         future_active_counts=[
                             future_stage.active_compute_nodes
                             for future_stage in growth_schedule.stages[stage.index + 1 :]
                         ],
+                    )
+                    topology_stats.update(
+                        {
+                            "stage_stagnated": stage_transition_stats["stagnated"],
+                            "stage_stagnation_window": stage_transition_stats["window"],
+                            "stage_stagnation_delta": stage_transition_stats["delta"],
+                            "stage_val_tail": stage_transition_stats["tail_values"],
+                            "stage_val_range": stage_transition_stats["range"],
+                        }
                     )
                     split_stats = transition_model_for_growth(
                         unwrap_model(model),
@@ -295,6 +320,13 @@ def main() -> None:
                         seed=config.train.seed + stage.index,
                         selective_parent_child_pairs=topology_stats.get("sibling_pairs", []),
                         transition_stats=topology_stats,
+                        next_stage_index=stage.index,
+                        mutation_stage_index_min=config.growth.mutation_stage_index_min,
+                        mutation_selected_fraction=config.growth.mutation_selected_fraction,
+                        mutation_score_margin=config.growth.mutation_score_margin,
+                        mutation_min_visit_z=config.growth.mutation_min_visit_z,
+                        mutation_min_query_grad_z=config.growth.mutation_min_query_grad_z,
+                        mutation_require_stagnation=config.growth.mutation_require_stagnation,
                     )
                 else:
                     split_stats = transition_model_for_growth(
@@ -305,6 +337,20 @@ def main() -> None:
                         split_mode=config.growth.split_mode,
                         mutation_scale=config.growth.split_mutation_scale,
                         seed=config.train.seed + stage.index,
+                        next_stage_index=stage.index,
+                        mutation_stage_index_min=config.growth.mutation_stage_index_min,
+                        mutation_selected_fraction=config.growth.mutation_selected_fraction,
+                        mutation_score_margin=config.growth.mutation_score_margin,
+                        mutation_min_visit_z=config.growth.mutation_min_visit_z,
+                        mutation_min_query_grad_z=config.growth.mutation_min_query_grad_z,
+                        mutation_require_stagnation=config.growth.mutation_require_stagnation,
+                        transition_stats={
+                            "stage_stagnated": stage_transition_stats["stagnated"],
+                            "stage_stagnation_window": stage_transition_stats["window"],
+                            "stage_stagnation_delta": stage_transition_stats["delta"],
+                            "stage_val_tail": stage_transition_stats["tail_values"],
+                            "stage_val_range": stage_transition_stats["range"],
+                        },
                     )
                 if is_distributed():
                     torch.distributed.barrier()
@@ -448,6 +494,9 @@ def main() -> None:
                 writers_per_episode=config.task.writers_per_episode if task_name == "memory" else None,
                 desc="val",
                 topology=topology,
+            )
+            stage_val_history.setdefault(stage.index, []).append(
+                float(val_metrics.get("query_accuracy", val_metrics.get("query_delivery_rate", 0.0)))
             )
             if is_main_process():
                 row = row or {"step": step}

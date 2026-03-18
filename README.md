@@ -368,6 +368,78 @@ V8 utility mutate hard training:
 bash scripts/train_v8_utility_mutate_hard.sh
 ```
 
+V9 staged static selective long smoke:
+
+```bash
+bash scripts/smoke_v9_staged_static_selective_long.sh
+```
+
+V9 clone selective long smoke:
+
+```bash
+bash scripts/smoke_v9_clone_selective_long.sh
+```
+
+V9 utility selective long smoke:
+
+```bash
+bash scripts/smoke_v9_utility_selective_long.sh
+```
+
+V9 utility mutate long smoke:
+
+```bash
+bash scripts/smoke_v9_utility_mutate_long.sh
+```
+
+V9 utility no-success long smoke:
+
+```bash
+bash scripts/smoke_v9_utility_nosuccess_long.sh
+```
+
+V9 utility no-grad long smoke:
+
+```bash
+bash scripts/smoke_v9_utility_nograd_long.sh
+```
+
+V9 staged static selective long training:
+
+```bash
+bash scripts/train_v9_staged_static_selective_long.sh
+```
+
+V9 clone selective long training:
+
+```bash
+bash scripts/train_v9_clone_selective_long.sh
+```
+
+V9 utility selective long training:
+
+```bash
+bash scripts/train_v9_utility_selective_long.sh
+```
+
+V9 utility mutate long training:
+
+```bash
+bash scripts/train_v9_utility_mutate_long.sh
+```
+
+V9 utility no-success long training:
+
+```bash
+bash scripts/train_v9_utility_nosuccess_long.sh
+```
+
+V9 utility no-grad long training:
+
+```bash
+bash scripts/train_v9_utility_nograd_long.sh
+```
+
 Manual evaluation of a checkpoint:
 
 ```bash

@@ -120,9 +120,22 @@ class GrowthConfig:
     split_mode: str = "none"
     split_parent_policy: str = "balanced"
     split_mutation_scale: float = 0.02
+    mutation_stage_index_min: int = 0
+    mutation_selected_fraction: float = 1.0
+    mutation_score_margin: float = -1.0e9
+    mutation_min_visit_z: float = -1.0e9
+    mutation_min_query_grad_z: float = -1.0e9
+    mutation_require_stagnation: bool = False
+    mutation_stagnation_window: int = 2
+    mutation_stagnation_delta: float = 0.0
     gradient_norm_threshold: float = 1.0e-12
     utility_ema_decay: float = 0.95
+    utility_visit_weight: float = 1.0
+    utility_grad_weight: float = 1.0
     utility_success_alpha: float = 0.75
+    utility_query_visit_weight: float = 0.0
+    utility_query_grad_weight: float = 0.0
+    utility_tail_fraction: float = 1.0
     best_metric_final_stage_only: bool = False
 
 

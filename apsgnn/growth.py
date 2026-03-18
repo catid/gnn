@@ -401,6 +401,10 @@ def transition_topology_for_growth(
     split_parent_policy: str,
     utility_components: dict[int, dict[str, float]] | None,
     utility_alpha: float,
+    utility_visit_weight: float = 1.0,
+    utility_grad_weight: float = 1.0,
+    utility_query_visit_weight: float = 0.0,
+    utility_query_grad_weight: float = 0.0,
     seed: int,
     future_active_counts: list[int] | tuple[int, ...] = (),
 ) -> tuple[GrowthTopology, dict[str, Any]]:
@@ -444,6 +448,10 @@ def transition_topology_for_growth(
     split_stats = {
         "selection_policy": split_parent_policy,
         "utility_alpha": utility_alpha,
+        "utility_visit_weight": utility_visit_weight,
+        "utility_grad_weight": utility_grad_weight,
+        "utility_query_visit_weight": utility_query_visit_weight,
+        "utility_query_grad_weight": utility_query_grad_weight,
         "eligible_parents": eligible,
         "selected_parents": selected,
         "unselected_parents": unselected,
@@ -452,7 +460,22 @@ def transition_topology_for_growth(
         "selected_parent_scores": selected_scores,
         "unselected_parent_scores": unselected_scores,
         "parent_components": {
-            node_id: utility_components.get(node_id, {"visit": 0.0, "grad": 0.0, "success": 0.0, "score": 0.0})
+            node_id: utility_components.get(
+                node_id,
+                {
+                    "visit": 0.0,
+                    "grad": 0.0,
+                    "success": 0.0,
+                    "query_visit": 0.0,
+                    "query_grad": 0.0,
+                    "visit_z": 0.0,
+                    "grad_z": 0.0,
+                    "success_z": 0.0,
+                    "query_visit_z": 0.0,
+                    "query_grad_z": 0.0,
+                    "score": 0.0,
+                },
+            )
             for node_id in eligible
         },
         "random_seed": seed if split_parent_policy == "random" else None,
@@ -597,6 +620,7 @@ def selective_split_model_for_growth(
     split_mode: str,
     mutation_scale: float,
     seed: int,
+    mutate_parent_ids: set[int] | None = None,
 ) -> dict[str, Any]:
     if not parent_child_pairs:
         return default_split_stats()
@@ -618,6 +642,8 @@ def selective_split_model_for_growth(
                 head.bias.data[child_index].copy_(head.bias.data[parent_index].detach())
 
         if split_mode != "mutate":
+            continue
+        if mutate_parent_ids is not None and parent_node_id not in mutate_parent_ids:
             continue
 
         mutated_children.append(child_node_id)
@@ -667,6 +693,7 @@ def selective_split_model_for_growth(
         "sibling_divergence": sibling_divergence,
         "sibling_pairs": parent_child_pairs,
         "mutated_children": mutated_children,
+        "mutated_parent_ids": sorted((mutate_parent_ids or set()) & {parent_id for parent_id, _ in parent_child_pairs}),
     }
 
 
@@ -675,7 +702,124 @@ def default_split_stats() -> dict[str, Any]:
         "sibling_divergence": 0.0,
         "sibling_pairs": [],
         "mutated_children": [],
+        "mutated_parent_ids": [],
+        "mutation_score_margin": None,
+        "mutation_reference_score": None,
+        "mutation_reference_kind": None,
+        "mutation_requires_stagnation": False,
+        "mutation_stagnated": None,
+        "mutation_stagnation_window": None,
+        "mutation_stagnation_delta": None,
+        "mutation_stage_val_tail": [],
+        "mutation_stage_val_range": None,
     }
+
+
+def mutation_stagnation_info(
+    stage_val_history: list[float],
+    *,
+    window: int,
+    delta: float,
+) -> dict[str, Any]:
+    effective_window = max(int(window), 2)
+    tail = [float(value) for value in stage_val_history[-effective_window:]]
+    if len(tail) < 2:
+        return {
+            "window": effective_window,
+            "delta": float(delta),
+            "tail_values": tail,
+            "range": None,
+            "stagnated": False,
+        }
+    value_range = max(tail) - min(tail)
+    return {
+        "window": effective_window,
+        "delta": float(delta),
+        "tail_values": tail,
+        "range": float(value_range),
+        "stagnated": bool(value_range <= float(delta)),
+    }
+
+
+def _select_mutated_parents(
+    parent_child_pairs: list[tuple[int, int]],
+    *,
+    split_mode: str,
+    next_stage_index: int | None,
+    mutation_stage_index_min: int,
+    mutation_selected_fraction: float,
+    mutation_score_margin: float,
+    mutation_min_visit_z: float,
+    mutation_min_query_grad_z: float,
+    mutation_require_stagnation: bool,
+    transition_stats: dict[str, Any] | None,
+) -> tuple[set[int], float | None, str | None]:
+    if split_mode != "mutate":
+        return set(), None, None
+    if next_stage_index is not None and next_stage_index < mutation_stage_index_min:
+        return set(), None, None
+    if mutation_require_stagnation:
+        if transition_stats is None or not bool(transition_stats.get("stage_stagnated", False)):
+            return set(), None, None
+
+    parent_ids = [parent_id for parent_id, _ in parent_child_pairs]
+    if not parent_ids:
+        return set(), None, None
+
+    fraction = float(mutation_selected_fraction)
+    if fraction <= 0.0:
+        return set(), None, None
+
+    parent_scores = {}
+    unselected_scores = {}
+    if transition_stats is not None:
+        parent_scores = {
+            int(parent_id): float(score)
+            for parent_id, score in transition_stats.get("selected_parent_scores", {}).items()
+        }
+        unselected_scores = {
+            int(parent_id): float(score)
+            for parent_id, score in transition_stats.get("unselected_parent_scores", {}).items()
+        }
+    ordered = sorted(parent_ids, key=lambda parent_id: (-parent_scores.get(parent_id, 0.0), parent_id))
+    reference_score: float | None = None
+    reference_kind: str | None = None
+    filtered = ordered
+    if float(mutation_score_margin) > -1.0e8 and ordered:
+        if unselected_scores:
+            reference_score = max(unselected_scores.values())
+            reference_kind = "best_unselected"
+        else:
+            reference_score = sum(parent_scores.get(parent_id, 0.0) for parent_id in ordered) / float(len(ordered))
+            reference_kind = "selected_mean"
+        threshold = reference_score + float(mutation_score_margin)
+        filtered = [parent_id for parent_id in ordered if parent_scores.get(parent_id, 0.0) >= threshold]
+        if not filtered:
+            return set(), reference_score, reference_kind
+    if transition_stats is not None and (
+        float(mutation_min_visit_z) > -1.0e8 or float(mutation_min_query_grad_z) > -1.0e8
+    ):
+        parent_components = {
+            int(parent_id): components
+            for parent_id, components in transition_stats.get("parent_components", {}).items()
+        }
+        component_filtered = []
+        for parent_id in filtered:
+            components = parent_components.get(parent_id, {})
+            visit_z = float(components.get("visit_z", 0.0))
+            query_grad_z = float(components.get("query_grad_z", 0.0))
+            if visit_z < float(mutation_min_visit_z):
+                continue
+            if query_grad_z < float(mutation_min_query_grad_z):
+                continue
+            component_filtered.append(parent_id)
+        filtered = component_filtered
+        if not filtered:
+            return set(), reference_score, reference_kind
+    if fraction >= 1.0:
+        return set(filtered), reference_score, reference_kind
+    keep = max(1, math.ceil(len(filtered) * fraction))
+    return set(filtered[:keep]), reference_score, reference_kind
 
 
 def transition_model_for_growth(
@@ -689,6 +833,13 @@ def transition_model_for_growth(
     seed: int,
     selective_parent_child_pairs: list[tuple[int, int]] | None = None,
     transition_stats: dict[str, Any] | None = None,
+    next_stage_index: int | None = None,
+    mutation_stage_index_min: int = 0,
+    mutation_selected_fraction: float = 1.0,
+    mutation_score_margin: float = -1.0e9,
+    mutation_min_visit_z: float = -1.0e9,
+    mutation_min_query_grad_z: float = -1.0e9,
+    mutation_require_stagnation: bool = False,
 ) -> dict[str, Any]:
     if next_active_compute_nodes <= previous_active_compute_nodes:
         return default_split_stats()
@@ -700,17 +851,48 @@ def transition_model_for_growth(
                 **base_stats,
                 "sibling_pairs": selective_parent_child_pairs,
                 "mutated_children": [],
+                "mutated_parent_ids": [],
             }
         if transition_mode != "split":
             raise ValueError(f"Unsupported growth.transition_mode: {transition_mode}")
+        mutate_parent_ids, mutation_reference_score, mutation_reference_kind = _select_mutated_parents(
+            selective_parent_child_pairs,
+            split_mode=split_mode,
+            next_stage_index=next_stage_index,
+            mutation_stage_index_min=mutation_stage_index_min,
+            mutation_selected_fraction=mutation_selected_fraction,
+            mutation_score_margin=mutation_score_margin,
+            mutation_min_visit_z=mutation_min_visit_z,
+            mutation_min_query_grad_z=mutation_min_query_grad_z,
+            mutation_require_stagnation=mutation_require_stagnation,
+            transition_stats=transition_stats,
+        )
         model_stats = selective_split_model_for_growth(
             model,
             parent_child_pairs=selective_parent_child_pairs,
             split_mode=split_mode,
             mutation_scale=mutation_scale,
             seed=seed,
+            mutate_parent_ids=mutate_parent_ids,
         )
-        return {**base_stats, **model_stats}
+        return {
+            **base_stats,
+            **model_stats,
+            "mutation_stage_index_min": mutation_stage_index_min,
+            "mutation_selected_fraction": mutation_selected_fraction,
+            "mutation_score_margin": mutation_score_margin,
+            "mutation_min_visit_z": mutation_min_visit_z,
+            "mutation_min_query_grad_z": mutation_min_query_grad_z,
+            "mutation_requires_stagnation": mutation_require_stagnation,
+            "mutation_stagnated": None if transition_stats is None else transition_stats.get("stage_stagnated"),
+            "mutation_stagnation_window": None if transition_stats is None else transition_stats.get("stage_stagnation_window"),
+            "mutation_stagnation_delta": None if transition_stats is None else transition_stats.get("stage_stagnation_delta"),
+            "mutation_stage_val_tail": [] if transition_stats is None else transition_stats.get("stage_val_tail", []),
+            "mutation_stage_val_range": None if transition_stats is None else transition_stats.get("stage_val_range"),
+            "mutation_reference_score": mutation_reference_score,
+            "mutation_reference_kind": mutation_reference_kind,
+            "next_stage_index": next_stage_index,
+        }
     if transition_mode == "activate":
         return default_split_stats()
     if transition_mode != "split":
@@ -748,10 +930,12 @@ class CoverageTracker:
         num_compute_nodes: int,
         gradient_norm_threshold: float,
         utility_ema_decay: float,
+        utility_tail_fraction: float = 1.0,
     ) -> None:
         self.num_compute_nodes = num_compute_nodes
         self.gradient_norm_threshold = gradient_norm_threshold
         self.utility_ema_decay = utility_ema_decay
+        self.utility_tail_fraction = min(max(utility_tail_fraction, 1.0e-6), 1.0)
         self.completed_stages: list[dict[str, Any]] = []
         self.history: list[dict[str, Any]] = []
         self.current_stage_summary: dict[str, Any] | None = None
@@ -837,6 +1021,9 @@ class CoverageTracker:
         if self.current_stage_summary is not None:
             self.completed_stages.append(self._finalize_stage())
         active_node_ids = list(topology.ring_node_ids) if topology is not None else list(range(1, stage.active_compute_nodes + 1))
+        non_bootstrap_steps = max(stage.end_step - stage.start_step + 1 - stage.bootstrap_steps, 1)
+        tail_steps = max(1, math.ceil(non_bootstrap_steps * self.utility_tail_fraction))
+        tail_start_local_step = stage.bootstrap_steps + max(1, non_bootstrap_steps - tail_steps + 1)
         self.current_stage_summary = {
             "stage_index": stage.index,
             "stage_name": stage.name,
@@ -844,6 +1031,7 @@ class CoverageTracker:
             "active_node_ids": active_node_ids,
             "start_step": stage.start_step,
             "bootstrap_steps": stage.bootstrap_steps,
+            "utility_tail_start_local_step": tail_start_local_step,
             "all_visit_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
             "task_visit_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
             "query_visit_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
@@ -854,7 +1042,14 @@ class CoverageTracker:
             "bootstrap_grad_histogram": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
             "task_visit_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
             "task_grad_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "query_visit_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "query_grad_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
             "task_success_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "utility_tail_visit_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "utility_tail_grad_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "utility_tail_success_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "utility_tail_query_visit_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
+            "utility_tail_query_grad_ema": torch.zeros(self.num_compute_nodes, dtype=torch.float64),
             "visit_coverage_at": {},
             "grad_coverage_at": {},
             "all_visit_coverage_at": {},
@@ -947,7 +1142,15 @@ class CoverageTracker:
         if not stage.bootstrap_active(step):
             summary["task_visit_ema"] = decay * summary["task_visit_ema"] + (1.0 - decay) * task_visit_counts
             summary["task_grad_ema"] = decay * summary["task_grad_ema"] + (1.0 - decay) * task_gradient_signal
+            summary["query_visit_ema"] = decay * summary["query_visit_ema"] + (1.0 - decay) * query_visit_counts
+            summary["query_grad_ema"] = decay * summary["query_grad_ema"] + (1.0 - decay) * query_gradient_signal
             summary["task_success_ema"] = decay * summary["task_success_ema"] + (1.0 - decay) * success_visit_counts
+            if local_step >= int(summary["utility_tail_start_local_step"]):
+                summary["utility_tail_visit_ema"] = decay * summary["utility_tail_visit_ema"] + (1.0 - decay) * task_visit_counts
+                summary["utility_tail_grad_ema"] = decay * summary["utility_tail_grad_ema"] + (1.0 - decay) * task_gradient_signal
+                summary["utility_tail_success_ema"] = decay * summary["utility_tail_success_ema"] + (1.0 - decay) * success_visit_counts
+                summary["utility_tail_query_visit_ema"] = decay * summary["utility_tail_query_visit_ema"] + (1.0 - decay) * query_visit_counts
+                summary["utility_tail_query_grad_ema"] = decay * summary["utility_tail_query_grad_ema"] + (1.0 - decay) * query_gradient_signal
 
         all_visit_fraction = self._coverage_fraction(summary["all_visit_histogram"], active_node_ids, threshold=0.0)
         task_visit_fraction = self._coverage_fraction(summary["task_visit_histogram"], active_node_ids, threshold=0.0)
@@ -1032,33 +1235,84 @@ class CoverageTracker:
         summary = self.current_stage_summary
         active_node_ids: list[int] = list(summary["active_node_ids"])
         split_stats = summary["split_stats"]
+        utility_alpha = float(split_stats.get("utility_alpha", 1.0))
+        utility_visit_weight = float(split_stats.get("utility_visit_weight", 1.0))
+        utility_grad_weight = float(split_stats.get("utility_grad_weight", 1.0))
+        utility_query_visit_weight = float(split_stats.get("utility_query_visit_weight", 0.0))
+        utility_query_grad_weight = float(split_stats.get("utility_query_grad_weight", 0.0))
         sibling_pairs: list[tuple[int, int]] = split_stats.get("sibling_pairs", [])
         mutated_children = set(split_stats.get("mutated_children", []))
         mutated_traffic_wins = 0
         mutated_grad_wins = 0
+        mutated_usefulness_wins = 0
         mutated_children_with_traffic = 0
+        child_visit_share: dict[int, float] = {}
+        child_grad_share: dict[int, float] = {}
+        child_usefulness_share: dict[int, float] = {}
+        mutated_visit_shares: list[float] = []
+        mutated_grad_shares: list[float] = []
+        mutated_usefulness_shares: list[float] = []
         for left_child, right_child in sibling_pairs:
+            left_visit = float(summary["task_visit_ema"][left_child - 1].item())
+            right_visit = float(summary["task_visit_ema"][right_child - 1].item())
+            total_visit = max(left_visit + right_visit, 1.0e-12)
+            child_visit_share[left_child] = left_visit / total_visit
+            child_visit_share[right_child] = right_visit / total_visit
+
+            left_grad = float(summary["task_grad_ema"][left_child - 1].item())
+            right_grad = float(summary["task_grad_ema"][right_child - 1].item())
+            left_query_visit = float(summary["query_visit_ema"][left_child - 1].item())
+            right_query_visit = float(summary["query_visit_ema"][right_child - 1].item())
+            left_query_grad = float(summary["query_grad_ema"][left_child - 1].item())
+            right_query_grad = float(summary["query_grad_ema"][right_child - 1].item())
+            total_grad = max(left_grad + right_grad, 1.0e-12)
+            child_grad_share[left_child] = left_grad / total_grad
+            child_grad_share[right_child] = right_grad / total_grad
+
+            left_usefulness = (
+                utility_visit_weight * left_visit
+                + utility_grad_weight * left_grad
+                + utility_alpha * float(summary["task_success_ema"][left_child - 1].item())
+                + utility_query_visit_weight * left_query_visit
+                + utility_query_grad_weight * left_query_grad
+            )
+            right_usefulness = (
+                utility_visit_weight * right_visit
+                + utility_grad_weight * right_grad
+                + utility_alpha * float(summary["task_success_ema"][right_child - 1].item())
+                + utility_query_visit_weight * right_query_visit
+                + utility_query_grad_weight * right_query_grad
+            )
+            total_usefulness = max(left_usefulness + right_usefulness, 1.0e-12)
+            child_usefulness_share[left_child] = left_usefulness / total_usefulness
+            child_usefulness_share[right_child] = right_usefulness / total_usefulness
             if right_child not in mutated_children:
                 continue
             if summary["task_visit_histogram"][right_child - 1] > 0:
                 mutated_children_with_traffic += 1
-            if summary["task_visit_ema"][right_child - 1] > summary["task_visit_ema"][left_child - 1]:
+            if right_visit > left_visit:
                 mutated_traffic_wins += 1
-            if summary["task_grad_ema"][right_child - 1] > summary["task_grad_ema"][left_child - 1]:
+            if right_grad > left_grad:
                 mutated_grad_wins += 1
+            if right_usefulness > left_usefulness:
+                mutated_usefulness_wins += 1
+            mutated_visit_shares.append(child_visit_share[right_child])
+            mutated_grad_shares.append(child_grad_share[right_child])
+            mutated_usefulness_shares.append(child_usefulness_share[right_child])
 
         utility_parent_components = split_stats.get("parent_components", {})
         parent_to_children = split_stats.get("parent_to_children", {})
         eligible_parents = split_stats.get("eligible_parents", [])
-        utility_alpha = float(split_stats.get("utility_alpha", 1.0))
         child_usefulness: dict[int, float] = {}
         for parent_id in eligible_parents:
             child_ids = parent_to_children.get(parent_id, [parent_id])
             usefulness = 0.0
             for child_id in child_ids:
-                usefulness += float(summary["task_visit_ema"][child_id - 1].item())
-                usefulness += float(summary["task_grad_ema"][child_id - 1].item())
+                usefulness += utility_visit_weight * float(summary["task_visit_ema"][child_id - 1].item())
+                usefulness += utility_grad_weight * float(summary["task_grad_ema"][child_id - 1].item())
                 usefulness += utility_alpha * float(summary["task_success_ema"][child_id - 1].item())
+                usefulness += utility_query_visit_weight * float(summary["query_visit_ema"][child_id - 1].item())
+                usefulness += utility_query_grad_weight * float(summary["query_grad_ema"][child_id - 1].item())
             child_usefulness[parent_id] = usefulness
 
         selected = split_stats.get("selected_parents", [])
@@ -1127,15 +1381,49 @@ class CoverageTracker:
             "grad_ema": self._active_view(summary["task_grad_ema"], active_node_ids).tolist(),
             "task_visit_ema": self._active_view(summary["task_visit_ema"], active_node_ids).tolist(),
             "task_grad_ema": self._active_view(summary["task_grad_ema"], active_node_ids).tolist(),
+            "query_visit_ema": self._active_view(summary["query_visit_ema"], active_node_ids).tolist(),
+            "query_grad_ema": self._active_view(summary["query_grad_ema"], active_node_ids).tolist(),
             "task_success_ema": self._active_view(summary["task_success_ema"], active_node_ids).tolist(),
+            "utility_tail_visit_ema": self._active_view(summary["utility_tail_visit_ema"], active_node_ids).tolist(),
+            "utility_tail_grad_ema": self._active_view(summary["utility_tail_grad_ema"], active_node_ids).tolist(),
+            "utility_tail_success_ema": self._active_view(summary["utility_tail_success_ema"], active_node_ids).tolist(),
+            "utility_tail_query_visit_ema": self._active_view(summary["utility_tail_query_visit_ema"], active_node_ids).tolist(),
+            "utility_tail_query_grad_ema": self._active_view(summary["utility_tail_query_grad_ema"], active_node_ids).tolist(),
             "split_stats": {
                 "sibling_divergence": split_stats.get("sibling_divergence", 0.0),
                 "sibling_pairs": sibling_pairs,
                 "mutated_children": split_stats.get("mutated_children", []),
+                "mutated_parent_ids": split_stats.get("mutated_parent_ids", []),
                 "mutated_children_with_traffic": mutated_children_with_traffic,
                 "mutated_child_more_traffic_pairs": mutated_traffic_wins,
                 "mutated_child_more_gradient_pairs": mutated_grad_wins,
+                "mutated_child_more_usefulness_pairs": mutated_usefulness_wins,
+                "mutated_child_usefulness_win_rate": (
+                    float(mutated_usefulness_wins / len(mutated_usefulness_shares)) if mutated_usefulness_shares else 0.0
+                ),
+                "mutated_child_visit_share_mean": (
+                    float(torch.tensor(mutated_visit_shares, dtype=torch.float64).mean().item()) if mutated_visit_shares else 0.0
+                ),
+                "mutated_child_grad_share_mean": (
+                    float(torch.tensor(mutated_grad_shares, dtype=torch.float64).mean().item()) if mutated_grad_shares else 0.0
+                ),
+                "mutated_child_usefulness_share_mean": (
+                    float(torch.tensor(mutated_usefulness_shares, dtype=torch.float64).mean().item()) if mutated_usefulness_shares else 0.0
+                ),
                 "selection_policy": split_stats.get("selection_policy"),
+                "mutation_stage_index_min": split_stats.get("mutation_stage_index_min"),
+                "mutation_selected_fraction": split_stats.get("mutation_selected_fraction"),
+                "mutation_score_margin": split_stats.get("mutation_score_margin"),
+                "mutation_min_visit_z": split_stats.get("mutation_min_visit_z"),
+                "mutation_min_query_grad_z": split_stats.get("mutation_min_query_grad_z"),
+                "mutation_requires_stagnation": split_stats.get("mutation_requires_stagnation"),
+                "mutation_stagnated": split_stats.get("mutation_stagnated"),
+                "mutation_stagnation_window": split_stats.get("mutation_stagnation_window"),
+                "mutation_stagnation_delta": split_stats.get("mutation_stagnation_delta"),
+                "mutation_stage_val_tail": split_stats.get("mutation_stage_val_tail"),
+                "mutation_stage_val_range": split_stats.get("mutation_stage_val_range"),
+                "mutation_reference_score": split_stats.get("mutation_reference_score"),
+                "mutation_reference_kind": split_stats.get("mutation_reference_kind"),
                 "eligible_parents": eligible_parents,
                 "selected_parents": selected,
                 "unselected_parents": unselected,
@@ -1151,6 +1439,9 @@ class CoverageTracker:
                 "parent_to_child": split_stats.get("parent_to_child", {}),
                 "parent_to_children": parent_to_children,
                 "child_intervals": split_stats.get("child_intervals", {}),
+                "child_visit_share": child_visit_share,
+                "child_grad_share": child_grad_share,
+                "child_usefulness_share": child_usefulness_share,
             },
         }
 
@@ -1191,38 +1482,66 @@ class CoverageTracker:
             "stage_index": int(summary["stage_index"]),
         }
 
-    def selection_components(self, topology: GrowthTopology, *, utility_alpha: float) -> dict[int, dict[str, float]]:
+    def selection_components(
+        self,
+        topology: GrowthTopology,
+        *,
+        utility_alpha: float,
+        utility_visit_weight: float = 1.0,
+        utility_grad_weight: float = 1.0,
+        utility_query_visit_weight: float = 0.0,
+        utility_query_grad_weight: float = 0.0,
+    ) -> dict[int, dict[str, float]]:
         if self.current_stage_summary is None:
             return {}
         summary = self.current_stage_summary
         active_node_ids = set(summary["active_node_ids"])
         visit_values = {
-            node_id: float(summary["task_visit_ema"][node_id - 1].item())
+            node_id: float(summary["utility_tail_visit_ema"][node_id - 1].item())
             for node_id in topology.eligible_split_parents()
             if node_id in active_node_ids
         }
         grad_values = {
-            node_id: float(summary["task_grad_ema"][node_id - 1].item())
+            node_id: float(summary["utility_tail_grad_ema"][node_id - 1].item())
             for node_id in visit_values
         }
         success_values = {
-            node_id: float(summary["task_success_ema"][node_id - 1].item())
+            node_id: float(summary["utility_tail_success_ema"][node_id - 1].item())
+            for node_id in visit_values
+        }
+        query_visit_values = {
+            node_id: float(summary["utility_tail_query_visit_ema"][node_id - 1].item())
+            for node_id in visit_values
+        }
+        query_grad_values = {
+            node_id: float(summary["utility_tail_query_grad_ema"][node_id - 1].item())
             for node_id in visit_values
         }
         visit_z = _zscore_dict(visit_values)
         grad_z = _zscore_dict(grad_values)
         success_z = _zscore_dict(success_values)
+        query_visit_z = _zscore_dict(query_visit_values)
+        query_grad_z = _zscore_dict(query_grad_values)
         components: dict[int, dict[str, float]] = {}
         for node_id in visit_values:
             score = (
-                visit_z.get(node_id, 0.0)
-                + grad_z.get(node_id, 0.0)
+                float(utility_visit_weight) * visit_z.get(node_id, 0.0)
+                + float(utility_grad_weight) * grad_z.get(node_id, 0.0)
                 + float(utility_alpha) * success_z.get(node_id, 0.0)
+                + float(utility_query_visit_weight) * query_visit_z.get(node_id, 0.0)
+                + float(utility_query_grad_weight) * query_grad_z.get(node_id, 0.0)
             )
             components[node_id] = {
                 "visit": visit_values[node_id],
                 "grad": grad_values[node_id],
                 "success": success_values[node_id],
+                "query_visit": query_visit_values[node_id],
+                "query_grad": query_grad_values[node_id],
+                "visit_z": visit_z.get(node_id, 0.0),
+                "grad_z": grad_z.get(node_id, 0.0),
+                "success_z": success_z.get(node_id, 0.0),
+                "query_visit_z": query_visit_z.get(node_id, 0.0),
+                "query_grad_z": query_grad_z.get(node_id, 0.0),
                 "score": score,
             }
         return components

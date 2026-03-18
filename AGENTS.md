@@ -70,6 +70,21 @@ This repo uses `bd` for task tracking.
 - V8 random selective hard training: `bash scripts/train_v8_random_selective_hard.sh`
 - V8 utility selective hard training: `bash scripts/train_v8_utility_selective_hard.sh`
 - V8 utility mutate hard training: `bash scripts/train_v8_utility_mutate_hard.sh`
+- V9 staged static selective long smoke: `bash scripts/smoke_v9_staged_static_selective_long.sh`
+- V9 clone selective long smoke: `bash scripts/smoke_v9_clone_selective_long.sh`
+- V9 utility selective long smoke: `bash scripts/smoke_v9_utility_selective_long.sh`
+- V9 utility mutate long smoke: `bash scripts/smoke_v9_utility_mutate_long.sh`
+- V9 utility no-success long smoke: `bash scripts/smoke_v9_utility_nosuccess_long.sh`
+- V9 utility no-grad long smoke: `bash scripts/smoke_v9_utility_nograd_long.sh`
+- V9 staged static selective long training: `bash scripts/train_v9_staged_static_selective_long.sh`
+- V9 clone selective long training: `bash scripts/train_v9_clone_selective_long.sh`
+- V9 utility selective long training: `bash scripts/train_v9_utility_selective_long.sh`
+- V9 utility mutate long training: `bash scripts/train_v9_utility_mutate_long.sh`
+- V9 utility no-success long training: `bash scripts/train_v9_utility_nosuccess_long.sh`
+- V9 utility no-grad long training: `bash scripts/train_v9_utility_nograd_long.sh`
+- V9 random mutate long training: `bash scripts/train_v9_random_mutate_long.sh`
+- V9 transfer H1 utility long training: `bash scripts/train_v9_transfer_h1_utility_long.sh`
+- V9 transfer H1 utility-mutate long training: `bash scripts/train_v9_transfer_h1_utility_mutate_long.sh`
 
 ## Constraints
 

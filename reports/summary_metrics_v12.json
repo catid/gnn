@@ -1,0 +1,115 @@
+{
+  "core": {
+    "v10_querygrad": {
+      "seeds": 4,
+      "best_val_mean": 0.692708,
+      "best_val_std": 0.057763,
+      "last_val_mean": 0.567708,
+      "last_val_std": 0.040006,
+      "k2_mean": 0.613281,
+      "k2_std": 0.053131,
+      "k6_mean": 0.519531,
+      "k6_std": 0.054548,
+      "k10_mean": 0.486328,
+      "k10_std": 0.034665
+    },
+    "v10_querygrad_mutate": {
+      "seeds": 4,
+      "best_val_mean": 0.6875,
+      "best_val_std": 0.073657,
+      "last_val_mean": 0.598958,
+      "last_val_std": 0.051822,
+      "k2_mean": 0.646484,
+      "k2_std": 0.045344,
+      "k6_mean": 0.519531,
+      "k6_std": 0.030509,
+      "k10_mean": 0.517578,
+      "k10_std": 0.022355
+    },
+    "v11_conditional_mutation": {
+      "seeds": 4,
+      "best_val_mean": 0.666667,
+      "best_val_std": 0.044194,
+      "last_val_mean": 0.5625,
+      "last_val_std": 0.10623,
+      "k2_mean": 0.619141,
+      "k2_std": 0.090331,
+      "k6_mean": 0.533203,
+      "k6_std": 0.050139,
+      "k10_mean": 0.494141,
+      "k10_std": 0.017794
+    },
+    "v12_adaptive_mutation": {
+      "seeds": 4,
+      "best_val_mean": 0.666667,
+      "best_val_std": 0.03294,
+      "last_val_mean": 0.588542,
+      "last_val_std": 0.064843,
+      "k2_mean": 0.628906,
+      "k2_std": 0.04189,
+      "k6_mean": 0.519531,
+      "k6_std": 0.033375,
+      "k10_mean": 0.509766,
+      "k10_std": 0.038422
+    }
+  },
+  "transfer_h1": {
+    "v10_querygrad": {
+      "seeds": 2,
+      "best_val_mean": 0.65625,
+      "best_val_std": 0.072917,
+      "k4_mean": 0.535156,
+      "k4_std": 0.128906,
+      "k8_mean": 0.445312,
+      "k8_std": 0.101562,
+      "k12_mean": 0.425781,
+      "k12_std": 0.035156,
+      "k14_mean": 0.414062,
+      "k14_std": 0.09375
+    },
+    "v10_querygrad_mutate": {
+      "seeds": 2,
+      "best_val_mean": 0.552083,
+      "best_val_std": 0.010417,
+      "k4_mean": 0.425781,
+      "k4_std": 0.027344,
+      "k8_mean": 0.394531,
+      "k8_std": 0.058594,
+      "k12_mean": 0.386719,
+      "k12_std": 0.003906,
+      "k14_mean": 0.402344,
+      "k14_std": 0.019531
+    },
+    "v11_conditional_mutation": {
+      "seeds": 2,
+      "best_val_mean": 0.583333,
+      "best_val_std": 0.104167,
+      "k4_mean": 0.542969,
+      "k4_std": 0.105469,
+      "k8_mean": 0.425781,
+      "k8_std": 0.066406,
+      "k12_mean": 0.417969,
+      "k12_std": 0.003906,
+      "k14_mean": 0.40625,
+      "k14_std": 0.0625
+    },
+    "v12_adaptive_mutation": {
+      "seeds": 2,
+      "best_val_mean": 0.583333,
+      "best_val_std": 0.0625,
+      "k4_mean": 0.503906,
+      "k4_std": 0.074219,
+      "k8_mean": 0.433594,
+      "k8_std": 0.097656,
+      "k12_mean": 0.394531,
+      "k12_std": 0.003906,
+      "k14_mean": 0.378906,
+      "k14_std": 0.042969
+    }
+  },
+  "conclusion": {
+    "default": "v10_querygrad",
+    "adaptive_mutation_status": "same-tier core variant with partial transfer damage reduction, not a new default",
+    "next_move": "higher-confidence or uncertainty-aware mutation gating"
+  }
+}

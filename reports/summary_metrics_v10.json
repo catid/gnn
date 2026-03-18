@@ -1,0 +1,653 @@
+{
+  "summary": {
+    "querygrad": {
+      "count": 4,
+      "best_val": {
+        "mean": 0.6927083333333334,
+        "std": 0.06669921080659216
+      },
+      "last_val": {
+        "mean": 0.5677083333333334,
+        "std": 0.046194912137673856
+      },
+      "best_k2": {
+        "mean": 0.61328125,
+        "std": 0.061350098903071595
+      },
+      "best_k6": {
+        "mean": 0.51953125,
+        "std": 0.06298638865858242
+      },
+      "best_k10": {
+        "mean": 0.486328125,
+        "std": 0.04002715142952968
+      },
+      "best_k4": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k8": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k12": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k14": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "utility_usefulness_correlation": {
+        "mean": 0.7670256313095505,
+        "std": 0.052276473214861764
+      },
+      "selected_child_usefulness": {
+        "mean": 2.5033646109483594,
+        "std": 0.11853964287058144
+      },
+      "unselected_child_usefulness": {
+        "mean": 0.4726900811650715,
+        "std": 0.03890684044687981
+      },
+      "mutation_win_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "querygrad_mutate": {
+      "count": 4,
+      "best_val": {
+        "mean": 0.6875,
+        "std": 0.08505172717997143
+      },
+      "last_val": {
+        "mean": 0.5989583333333333,
+        "std": 0.0598391942347711
+      },
+      "best_k2": {
+        "mean": 0.646484375,
+        "std": 0.05235929495542474
+      },
+      "best_k6": {
+        "mean": 0.51953125,
+        "std": 0.03522851369392886
+      },
+      "best_k10": {
+        "mean": 0.517578125,
+        "std": 0.02581279635624871
+      },
+      "best_k4": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k8": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k12": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k14": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "utility_usefulness_correlation": {
+        "mean": 0.7680896974456265,
+        "std": 0.04259714577489112
+      },
+      "selected_child_usefulness": {
+        "mean": 2.504190043212006,
+        "std": 0.11687161998879182
+      },
+      "unselected_child_usefulness": {
+        "mean": 0.474178924719735,
+        "std": 0.040215954739914704
+      },
+      "mutation_win_rate": {
+        "mean": 0.25625,
+        "std": 0.10282468899377555
+      }
+    },
+    "querymix": {
+      "count": 2,
+      "best_val": {
+        "mean": 0.6354166666666667,
+        "std": 0.014731391274719766
+      },
+      "last_val": {
+        "mean": 0.5729166666666667,
+        "std": 0.07365695637359868
+      },
+      "best_k2": {
+        "mean": 0.61328125,
+        "std": 0.09391261937633834
+      },
+      "best_k6": {
+        "mean": 0.5,
+        "std": 0.07733980419227864
+      },
+      "best_k10": {
+        "mean": 0.49609375,
+        "std": 0.005524271728019903
+      },
+      "best_k4": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k8": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k12": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k14": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "utility_usefulness_correlation": {
+        "mean": 0.8001019642743501,
+        "std": 0.003451431668687965
+      },
+      "selected_child_usefulness": {
+        "mean": 3.066175665127441,
+        "std": 0.160890274069416
+      },
+      "unselected_child_usefulness": {
+        "mean": 0.6519482207403211,
+        "std": 0.02989615435401792
+      },
+      "mutation_win_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "transfer_querygrad": {
+      "count": 2,
+      "best_val": {
+        "mean": 0.65625,
+        "std": 0.10311973892303813
+      },
+      "last_val": {
+        "mean": 0.5833333333333333,
+        "std": 0.20623947784607632
+      },
+      "best_k2": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k6": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k10": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k4": {
+        "mean": 0.53515625,
+        "std": 0.18230096702465678
+      },
+      "best_k8": {
+        "mean": 0.4453125,
+        "std": 0.14363106492851746
+      },
+      "best_k12": {
+        "mean": 0.42578125,
+        "std": 0.04971844555217912
+      },
+      "best_k14": {
+        "mean": 0.4140625,
+        "std": 0.13258252147247765
+      },
+      "utility_usefulness_correlation": {
+        "mean": 0.8022308251251877,
+        "std": 0.030530609852615957
+      },
+      "selected_child_usefulness": {
+        "mean": 3.634065659459555,
+        "std": 0.1723934748435067
+      },
+      "unselected_child_usefulness": {
+        "mean": 0.4208518799330035,
+        "std": 0.018017687350489246
+      },
+      "mutation_win_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "transfer_querygrad_mutate": {
+      "count": 2,
+      "best_val": {
+        "mean": 0.5520833333333333,
+        "std": 0.014731391274719766
+      },
+      "last_val": {
+        "mean": 0.4375,
+        "std": 0.08838834764831845
+      },
+      "best_k2": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k6": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k10": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "best_k4": {
+        "mean": 0.42578125,
+        "std": 0.03866990209613932
+      },
+      "best_k8": {
+        "mean": 0.39453125,
+        "std": 0.08286407592029854
+      },
+      "best_k12": {
+        "mean": 0.38671875,
+        "std": 0.005524271728019903
+      },
+      "best_k14": {
+        "mean": 0.40234375,
+        "std": 0.027621358640099514
+      },
+      "utility_usefulness_correlation": {
+        "mean": 0.8237068463741166,
+        "std": 0.0024156151351419648
+      },
+      "selected_child_usefulness": {
+        "mean": 3.6205213376469265,
+        "std": 0.20521637291931502
+      },
+      "unselected_child_usefulness": {
+        "mean": 0.42791396659847386,
+        "std": 0.011009123846027214
+      },
+      "mutation_win_rate": {
+        "mean": 0.25,
+        "std": 0.03535533905932739
+      }
+    },
+    "v9_U": {
+      "count": 6,
+      "best_val": {
+        "mean": 0.5694444444444444,
+        "std": 0.10262751778839536
+      },
+      "last_val": {
+        "mean": 0.5555555555555556,
+        "std": 0.1099768494157175
+      },
+      "best_k2": {
+        "mean": 0.5364583333333334,
+        "std": 0.06604528118394733
+      },
+      "best_k6": {
+        "mean": 0.4713541666666667,
+        "std": 0.07222514350395343
+      },
+      "best_k10": {
+        "mean": 0.4140625,
+        "std": 0.13861409447635548
+      }
+    },
+    "v9_US": {
+      "count": 4,
+      "best_val": {
+        "mean": 0.5677083333333334,
+        "std": 0.054790742493262164
+      },
+      "last_val": {
+        "mean": 0.53125,
+        "std": 0.08589803386703461
+      },
+      "best_k2": {
+        "mean": 0.5234375,
+        "std": 0.09418302770846419
+      },
+      "best_k6": {
+        "mean": 0.44921875,
+        "std": 0.07799468297849968
+      },
+      "best_k10": {
+        "mean": 0.46484375,
+        "std": 0.13997244427475716
+      }
+    }
+  },
+  "runs": [
+    {
+      "arm": "querygrad",
+      "seed": 1234,
+      "run": "20260318-064017-v10-utility-querygrad-longplus-s1234",
+      "run_dir": "/home/catid/gnn/runs/20260318-064017-v10-utility-querygrad-longplus-s1234",
+      "best_val": 0.625,
+      "last_val": 0.625,
+      "best_query_first_hop": 0.6458333333333334,
+      "best_writer_first_hop": 0.6979166666666666,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9393939393939394,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k2": 0.6796875,
+        "best_k6": 0.5546875,
+        "best_k10": 0.4921875
+      },
+      "utility_usefulness_correlation": 0.7969800198067964,
+      "selected_child_usefulness": 2.467810828939138,
+      "unselected_child_usefulness": 0.5088117308844454,
+      "mutation_win_rate": 0.0
+    },
+    {
+      "arm": "querygrad",
+      "seed": 2234,
+      "run": "20260318-065327-v10-utility-querygrad-longplus-s2234",
+      "run_dir": "/home/catid/gnn/runs/20260318-065327-v10-utility-querygrad-longplus-s2234",
+      "best_val": 0.6458333333333334,
+      "last_val": 0.5208333333333334,
+      "best_query_first_hop": 0.7083333333333334,
+      "best_writer_first_hop": 0.6666666666666666,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9444444444444444,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k2": 0.546875,
+        "best_k6": 0.4453125,
+        "best_k10": 0.5
+      },
+      "utility_usefulness_correlation": 0.7905207752437016,
+      "selected_child_usefulness": 2.6528051364010183,
+      "unselected_child_usefulness": 0.46456971975237177,
+      "mutation_win_rate": 0.0
+    },
+    {
+      "arm": "querygrad",
+      "seed": 3234,
+      "run": "20260318-071110-v10-utility-querygrad-longplus-s3234",
+      "run_dir": "/home/catid/gnn/runs/20260318-071110-v10-utility-querygrad-longplus-s3234",
+      "best_val": 0.75,
+      "last_val": 0.5833333333333334,
+      "best_query_first_hop": 0.6458333333333334,
+      "best_writer_first_hop": 0.7083333333333334,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9393939393939394,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k2": 0.6484375,
+        "best_k6": 0.5859375,
+        "best_k10": 0.5234375
+      },
+      "utility_usefulness_correlation": 0.7918798119523066,
+      "selected_child_usefulness": 2.3687253462629414,
+      "unselected_child_usefulness": 0.49596192538679545,
+      "mutation_win_rate": 0.0
+    },
+    {
+      "arm": "querygrad",
+      "seed": 4234,
+      "run": "20260318-071745-v10-utility-querygrad-longplus-s4234",
+      "run_dir": "/home/catid/gnn/runs/20260318-071745-v10-utility-querygrad-longplus-s4234",
+      "best_val": 0.75,
+      "last_val": 0.5416666666666666,
+      "best_query_first_hop": 0.7083333333333334,
+      "best_writer_first_hop": 0.6666666666666666,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9444444444444444,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k2": 0.578125,
+        "best_k6": 0.4921875,
+        "best_k10": 0.4296875
+      },
+      "utility_usefulness_correlation": 0.6887219182353973,
+      "selected_child_usefulness": 2.5241171321903404,
+      "unselected_child_usefulness": 0.4214169486366732,
+      "mutation_win_rate": 0.0
+    },
+    {
+      "arm": "querymix",
+      "seed": 1234,
+      "run": "20260318-064652-v10-utility-querymix-longplus-s1234",
+      "run_dir": "/home/catid/gnn/runs/20260318-064652-v10-utility-querymix-longplus-s1234",
+      "best_val": 0.625,
+      "last_val": 0.625,
+      "best_query_first_hop": 0.6458333333333334,
+      "best_writer_first_hop": 0.6979166666666666,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9393939393939394,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k2": 0.6796875,
+        "best_k6": 0.5546875,
+        "best_k10": 0.4921875
+      },
+      "utility_usefulness_correlation": 0.8025424950120813,
+      "selected_child_usefulness": 2.952409061305995,
+      "unselected_child_usefulness": 0.6730879942154468,
+      "mutation_win_rate": 0.0
+    },
+    {
+      "arm": "querymix",
+      "seed": 2234,
+      "run": "20260318-070005-v10-utility-querymix-longplus-s2234",
+      "run_dir": "/home/catid/gnn/runs/20260318-070005-v10-utility-querymix-longplus-s2234",
+      "best_val": 0.6458333333333334,
+      "last_val": 0.5208333333333334,
+      "best_query_first_hop": 0.7083333333333334,
+      "best_writer_first_hop": 0.6666666666666666,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9444444444444444,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k2": 0.546875,
+        "best_k6": 0.4453125,
+        "best_k10": 0.5
+      },
+      "utility_usefulness_correlation": 0.7976614335366188,
+      "selected_child_usefulness": 3.179942268948887,
+      "unselected_child_usefulness": 0.6308084472651952,
+      "mutation_win_rate": 0.0
+    },
+    {
+      "arm": "querygrad_mutate",
+      "seed": 1234,
+      "run": "20260318-072423-v10-utility-querygrad-mutate-longplus-s1234",
+      "run_dir": "/home/catid/gnn/runs/20260318-072423-v10-utility-querygrad-mutate-longplus-s1234",
+      "best_val": 0.6875,
+      "last_val": 0.6041666666666666,
+      "best_query_first_hop": 0.5833333333333334,
+      "best_writer_first_hop": 0.6770833333333334,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9285714285714286,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k2": 0.6640625,
+        "best_k6": 0.5625,
+        "best_k10": 0.484375
+      },
+      "utility_usefulness_correlation": 0.7812191607923792,
+      "selected_child_usefulness": 2.4713343552863316,
+      "unselected_child_usefulness": 0.5120263611526236,
+      "mutation_win_rate": 0.275
+    },
+    {
+      "arm": "querygrad_mutate",
+      "seed": 2234,
+      "run": "20260318-073059-v10-utility-querygrad-mutate-longplus-s2234",
+      "run_dir": "/home/catid/gnn/runs/20260318-073059-v10-utility-querygrad-mutate-longplus-s2234",
+      "best_val": 0.5833333333333334,
+      "last_val": 0.5208333333333334,
+      "best_query_first_hop": 0.625,
+      "best_writer_first_hop": 0.6458333333333334,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9354838709677419,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k2": 0.578125,
+        "best_k6": 0.515625,
+        "best_k10": 0.5234375
+      },
+      "utility_usefulness_correlation": 0.7926386101435866,
+      "selected_child_usefulness": 2.6502555220364803,
+      "unselected_child_usefulness": 0.46583500340163714,
+      "mutation_win_rate": 0.25
+    },
+    {
+      "arm": "querygrad_mutate",
+      "seed": 3234,
+      "run": "20260318-073738-v10-utility-querygrad-mutate-longplus-s3234",
+      "run_dir": "/home/catid/gnn/runs/20260318-073738-v10-utility-querygrad-mutate-longplus-s3234",
+      "best_val": 0.7916666666666666,
+      "last_val": 0.6666666666666666,
+      "best_query_first_hop": 0.7291666666666666,
+      "best_writer_first_hop": 0.6041666666666666,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9459459459459459,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k2": 0.703125,
+        "best_k6": 0.5234375,
+        "best_k10": 0.546875
+      },
+      "utility_usefulness_correlation": 0.7937403315817863,
+      "selected_child_usefulness": 2.3696297824390875,
+      "unselected_child_usefulness": 0.49760236118516105,
+      "mutation_win_rate": 0.125
+    },
+    {
+      "arm": "querygrad_mutate",
+      "seed": 4234,
+      "run": "20260318-074414-v10-utility-querygrad-mutate-longplus-s4234",
+      "run_dir": "/home/catid/gnn/runs/20260318-074414-v10-utility-querygrad-mutate-longplus-s4234",
+      "best_val": 0.6875,
+      "last_val": 0.6041666666666666,
+      "best_query_first_hop": 0.7083333333333334,
+      "best_writer_first_hop": 0.65625,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9444444444444444,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k2": 0.640625,
+        "best_k6": 0.4765625,
+        "best_k10": 0.515625
+      },
+      "utility_usefulness_correlation": 0.7047606872647539,
+      "selected_child_usefulness": 2.5255405130861237,
+      "unselected_child_usefulness": 0.4212519731395183,
+      "mutation_win_rate": 0.375
+    },
+    {
+      "arm": "transfer_querygrad",
+      "seed": 1234,
+      "run": "20260318-075401-v10-transfer-h1-utility-querygrad-longplus-s1234",
+      "run_dir": "/home/catid/gnn/runs/20260318-075401-v10-transfer-h1-utility-querygrad-longplus-s1234",
+      "best_val": 0.5833333333333334,
+      "last_val": 0.4375,
+      "best_query_first_hop": 0.7291666666666666,
+      "best_writer_first_hop": 0.7864583333333334,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9714285714285714,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k4": 0.40625,
+        "best_k8": 0.34375,
+        "best_k12": 0.4609375,
+        "best_k14": 0.3203125
+      },
+      "utility_usefulness_correlation": 0.8238192263857333,
+      "selected_child_usefulness": 3.7559662545537114,
+      "unselected_child_usefulness": 0.4335923088398335,
+      "mutation_win_rate": 0.0
+    },
+    {
+      "arm": "transfer_querygrad",
+      "seed": 2234,
+      "run": "20260318-080752-v10-transfer-h1-utility-querygrad-longplus-s2234",
+      "run_dir": "/home/catid/gnn/runs/20260318-080752-v10-transfer-h1-utility-querygrad-longplus-s2234",
+      "best_val": 0.7291666666666666,
+      "last_val": 0.7291666666666666,
+      "best_query_first_hop": 0.6875,
+      "best_writer_first_hop": 0.671875,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9696969696969697,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k4": 0.6640625,
+        "best_k8": 0.546875,
+        "best_k12": 0.390625,
+        "best_k14": 0.5078125
+      },
+      "utility_usefulness_correlation": 0.7806424238646422,
+      "selected_child_usefulness": 3.512165064365399,
+      "unselected_child_usefulness": 0.40811145102617347,
+      "mutation_win_rate": 0.0
+    },
+    {
+      "arm": "transfer_querygrad_mutate",
+      "seed": 1234,
+      "run": "20260318-080056-v10-transfer-h1-utility-querygrad-mutate-longplus-s1234",
+      "run_dir": "/home/catid/gnn/runs/20260318-080056-v10-transfer-h1-utility-querygrad-mutate-longplus-s1234",
+      "best_val": 0.5625,
+      "last_val": 0.375,
+      "best_query_first_hop": 0.7291666666666666,
+      "best_writer_first_hop": 0.78125,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9714285714285714,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k4": 0.3984375,
+        "best_k8": 0.3359375,
+        "best_k12": 0.3828125,
+        "best_k14": 0.3828125
+      },
+      "utility_usefulness_correlation": 0.8219987485313208,
+      "selected_child_usefulness": 3.7656312265486815,
+      "unselected_child_usefulness": 0.43569859272492223,
+      "mutation_win_rate": 0.275
+    },
+    {
+      "arm": "transfer_querygrad_mutate",
+      "seed": 2234,
+      "run": "20260318-081448-v10-transfer-h1-utility-querygrad-mutate-longplus-s2234",
+      "run_dir": "/home/catid/gnn/runs/20260318-081448-v10-transfer-h1-utility-querygrad-mutate-longplus-s2234",
+      "best_val": 0.5416666666666666,
+      "last_val": 0.5,
+      "best_query_first_hop": 0.5833333333333334,
+      "best_writer_first_hop": 0.734375,
+      "best_delivery": 1.0,
+      "best_home_to_output": 0.9642857142857143,
+      "task_visit_10": 1.0,
+      "task_grad_10": 1.0,
+      "evals": {
+        "best_k4": 0.453125,
+        "best_k8": 0.453125,
+        "best_k12": 0.390625,
+        "best_k14": 0.421875
+      },
+      "utility_usefulness_correlation": 0.8254149442169123,
+      "selected_child_usefulness": 3.4754114487451715,
+      "unselected_child_usefulness": 0.4201293404720255,
+      "mutation_win_rate": 0.225
+    }
+  ]
+}

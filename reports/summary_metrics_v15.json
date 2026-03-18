@@ -1,0 +1,96 @@
+{
+  "core": {
+    "v10_querygrad": {
+      "seeds": 4,
+      "best_val_mean": 0.6927083333333334,
+      "best_val_std": 0.05776321097088238,
+      "last_val_mean": 0.5677083333333334,
+      "last_val_std": 0.04000596743681566,
+      "k2_mean": 0.61328125,
+      "k2_std": 0.05313074417474783,
+      "k6_mean": 0.51953125,
+      "k6_std": 0.054547812670972425,
+      "k10_mean": 0.486328125,
+      "k10_std": 0.034664529979099315
+    },
+    "v13_high_confidence_mutation": {
+      "seeds": 4,
+      "best_val_mean": 0.6822916666666667,
+      "best_val_std": 0.04619491213767344,
+      "last_val_mean": 0.5833333333333334,
+      "last_val_std": 0.12266334536566458,
+      "k6_mean": 0.5234375,
+      "k6_std": 0.050624517734464954,
+      "k10_mean": 0.513671875,
+      "k10_std": 0.01171875
+    },
+    "v14_component_agreement_mutation": {
+      "seeds": 4,
+      "best_val_mean": 0.6822916666666667,
+      "best_val_std": 0.05738146359640403,
+      "last_val_mean": 0.609375,
+      "last_val_std": 0.052083333333333336,
+      "k6_mean": 0.517578125,
+      "k6_std": 0.04829113450229942,
+      "k10_mean": 0.505859375,
+      "k10_std": 0.017259707768788078
+    },
+    "v15_stagnation_gated_mutation": {
+      "seeds": 3,
+      "best_val_mean": 0.6736111111111112,
+      "best_val_std": 0.054680610236193125,
+      "last_val_mean": 0.576388888888889,
+      "last_val_std": 0.04280843057617344,
+      "k2_mean": 0.625,
+      "k2_std": 0.05669672150280532,
+      "k6_mean": 0.5286458333333334,
+      "k6_std": 0.06029081720203243,
+      "k10_mean": 0.5052083333333334,
+      "k10_std": 0.01327869664998121
+    }
+  },
+  "runs": [
+    {
+      "run": "20260318-124259-v15-utility-querygrad-stagnate-longplus-s1234",
+      "seed": 1234,
+      "status": "completed",
+      "best_val": 0.625,
+      "last_val": 0.625,
+      "k2": 0.6796875,
+      "k6": 0.5546875,
+      "k10": 0.4921875
+    },
+    {
+      "run": "20260318-124936-v15-utility-querygrad-stagnate-longplus-s2234",
+      "seed": 2234,
+      "status": "completed",
+      "best_val": 0.6458333333333334,
+      "last_val": 0.5208333333333334,
+      "k2": 0.546875,
+      "k6": 0.4453125,
+      "k10": 0.5
+    },
+    {
+      "run": "20260318-125613-v15-utility-querygrad-stagnate-longplus-s3234",
+      "seed": 3234,
+      "status": "completed",
+      "best_val": 0.75,
+      "last_val": 0.5833333333333334,
+      "k2": 0.6484375,
+      "k6": 0.5859375,
+      "k10": 0.5234375
+    },
+    {
+      "run": "20260318-130250-v15-utility-querygrad-stagnate-longplus-s4234",
+      "seed": 4234,
+      "status": "interrupted",
+      "best_val_so_far": 0.08333333333333333,
+      "last_val_so_far": 0.0625,
+      "completed_val_evals": 7
+    }
+  ],
+  "conclusion": {
+    "transfer_run": false,
+    "reason": "The completed core seeds were competitive but did not beat the plain querygrad baseline clearly enough to justify H1 transfer compute."
+  }
+}
