@@ -1,0 +1,84 @@
+{
+  "status": "stopped_at_budget_gate",
+  "date_utc": "2026-03-19",
+  "visible_gpu_count": 2,
+  "candidate_scales_profiled": [64, 48, 40, 32],
+  "chosen_feasible_scale": null,
+  "largest_technically_runnable_scale": 32,
+  "reason_no_scale_selected": "Even the 32-leaf hardened regime projected an impractical 50-run campaign wall-clock under the required S/M/L schedules on this 2-GPU machine.",
+  "schedule_minutes_per_run": {
+    "64": {"S": 34.5, "M": 51.8, "L": 69.0},
+    "48": {"S": 27.0, "M": 40.5, "L": 54.0},
+    "40": {"S": 23.1, "M": 34.7, "L": 46.2},
+    "32": {"S": 18.3, "M": 27.5, "L": 36.6}
+  },
+  "campaign_projection_hours": {
+    "64": {"ddp_two_gpu_single_run": 40.8, "optimistic_two_single_gpu_parallel": 20.4},
+    "48": {"ddp_two_gpu_single_run": 31.9, "optimistic_two_single_gpu_parallel": 16.0},
+    "40": {"ddp_two_gpu_single_run": 27.3, "optimistic_two_single_gpu_parallel": 13.7},
+    "32": {"ddp_two_gpu_single_run": 21.7, "optimistic_two_single_gpu_parallel": 10.9}
+  },
+  "gate_profiles": [
+    {
+      "scale": 64,
+      "config": "configs/v20_gate_core_visitonly_64.yaml",
+      "run_dir": "runs/20260319-043232-v20-gate-core-visitonly-64-s1234",
+      "runtime_seconds_approx": 115,
+      "train_steps_run": 100,
+      "active_compute_nodes_at_step_100": 64,
+      "stage_index_at_step_100": 8,
+      "stage_local_step_at_step_100": 55,
+      "task_visit_coverage_at_step_100": 0.96875,
+      "task_gradient_coverage_at_step_100": 0.96875,
+      "task_nodes_ge5_visit_fraction_at_step_100": 0.234375,
+      "packets_per_second_at_step_100": 1147.989608823476,
+      "max_memory_gb_at_step_100": 0.6187663078308105
+    },
+    {
+      "scale": 48,
+      "config": "configs/v20_gate_core_visitonly_48.yaml",
+      "run_dir": "runs/20260319-043433-v20-gate-core-visitonly-48-s1234",
+      "runtime_seconds_approx": 90,
+      "train_steps_run": 100,
+      "active_compute_nodes_at_step_100": 48,
+      "stage_index_at_step_100": 7,
+      "stage_local_step_at_step_100": 57,
+      "task_visit_coverage_at_step_100": 0.9791666865348816,
+      "task_gradient_coverage_at_step_100": 0.9791666865348816,
+      "task_nodes_ge5_visit_fraction_at_step_100": 0.4583333432674408,
+      "packets_per_second_at_step_100": 1134.6131639992136,
+      "max_memory_gb_at_step_100": 0.4849414825439453
+    },
+    {
+      "scale": 40,
+      "config": "configs/v20_core_visitonly_40_s.yaml",
+      "run_dir": "runs/20260319-043608-v20-gate-core-visitonly-40-s1234",
+      "runtime_seconds_approx": 77,
+      "train_steps_run": 100,
+      "active_compute_nodes_at_step_100": 40,
+      "stage_index_at_step_100": 7,
+      "stage_local_step_at_step_100": 57,
+      "task_visit_coverage_at_step_100": 1.0,
+      "task_gradient_coverage_at_step_100": 1.0,
+      "task_nodes_ge5_visit_fraction_at_step_100": 0.5,
+      "packets_per_second_at_step_100": 1153.0072197955776,
+      "max_memory_gb_at_step_100": 0.4167637825012207
+    },
+    {
+      "scale": 32,
+      "config": "configs/v20_core_visitonly_32_s.yaml",
+      "run_dir": "runs/20260319-043731-v20-gate-core-visitonly-32-s1234",
+      "runtime_seconds_approx": 61,
+      "train_steps_run": 100,
+      "active_compute_nodes_at_step_100": 32,
+      "stage_index_at_step_100": 6,
+      "stage_local_step_at_step_100": 56,
+      "task_visit_coverage_at_step_100": 0.9375,
+      "task_gradient_coverage_at_step_100": 0.9375,
+      "task_nodes_ge5_visit_fraction_at_step_100": 0.84375,
+      "packets_per_second_at_step_100": 1114.0460701887646,
+      "max_memory_gb_at_step_100": 0.34948158264160156
+    }
+  ],
+  "next_step": "If selector-family scale work resumes on this machine, reduce the mandated run count and/or schedule lengths first; otherwise keep v18 visitonly as the working default."
+}
