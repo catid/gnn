@@ -92,3 +92,8 @@ This repo uses `bd` for task tracking.
 - Preserve per-sample cache isolation
 - Prefer correctness and inspectability over aggressive optimization
 - Keep first-hop routing and retrieval changes isolated across experiment rounds
+- Prefer single-GPU runs when that is the fairest way to execute matched experiment sweeps on this machine
+- For git pushes on this machine, prefer the current forwarded SSH agent over local keys:
+  if `SSH_AUTH_SOCK` is stale, locate the newest `/tmp/ssh-*/agent*` socket, confirm it with
+  `ssh-add -L` or `ssh -T git@github.com`, and use that socket for `git pull --rebase`, `bd sync`,
+  and `git push`; do not fall back to stale local GitHub keys unless explicitly requested
