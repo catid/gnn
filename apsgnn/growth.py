@@ -352,6 +352,192 @@ def _feasible_parent_subsets(
     return feasible
 
 
+def _eligible_nodes_by_size(topology: GrowthTopology) -> dict[int, list[int]]:
+    grouped: dict[int, list[int]] = {}
+    for node_id in topology.ring_node_ids:
+        size = topology.interval_size(node_id)
+        if size <= 1:
+            continue
+        grouped.setdefault(size, []).append(node_id)
+    return grouped
+
+
+def _expand_selected_sizes(selection_counts: dict[int, int]) -> tuple[int, ...]:
+    expanded: list[int] = []
+    for size, count in selection_counts.items():
+        expanded.extend([size] * count)
+    return tuple(expanded)
+
+
+def _feasible_size_count_allocations(
+    topology: GrowthTopology,
+    count: int,
+    *,
+    remaining_active_counts: tuple[int, ...],
+) -> list[dict[int, int]]:
+    eligible_by_size = _eligible_nodes_by_size(topology)
+    sizes = sorted(eligible_by_size, reverse=True)
+    if not sizes:
+        return []
+    suffix_capacity = [0] * (len(sizes) + 1)
+    for index in range(len(sizes) - 1, -1, -1):
+        suffix_capacity[index] = suffix_capacity[index + 1] + len(eligible_by_size[sizes[index]])
+
+    state = _topology_state(topology)
+    feasible: list[dict[int, int]] = []
+    current: dict[int, int] = {}
+
+    def dfs(index: int, remaining: int) -> None:
+        if remaining == 0:
+            selected_sizes = _expand_selected_sizes(current)
+            next_state = _split_state(state, selected_sizes)
+            if _is_schedule_feasible(next_state, remaining_active_counts):
+                feasible.append({size: pick for size, pick in current.items() if pick > 0})
+            return
+        if index >= len(sizes) or remaining > suffix_capacity[index]:
+            return
+        size = sizes[index]
+        max_pick = min(remaining, len(eligible_by_size[size]))
+        for pick in range(max_pick, -1, -1):
+            if remaining - pick > suffix_capacity[index + 1]:
+                continue
+            if pick > 0:
+                current[size] = pick
+            elif size in current:
+                del current[size]
+            dfs(index + 1, remaining - pick)
+        current.pop(size, None)
+
+    dfs(0, count)
+    return feasible
+
+
+def _allocation_subset_count(eligible_by_size: dict[int, list[int]], selection_counts: dict[int, int]) -> int:
+    total = 1
+    for size, pick in selection_counts.items():
+        total *= math.comb(len(eligible_by_size[size]), pick)
+    return total
+
+
+def _select_nodes_from_counts_balanced(
+    topology: GrowthTopology,
+    selection_counts: dict[int, int],
+) -> list[int]:
+    remaining = dict(selection_counts)
+    selected: list[int] = []
+    for node_id in topology.ring_node_ids:
+        size = topology.interval_size(node_id)
+        if remaining.get(size, 0) <= 0:
+            continue
+        selected.append(node_id)
+        remaining[size] -= 1
+    return selected
+
+
+def _select_nodes_from_counts_random(
+    topology: GrowthTopology,
+    eligible_by_size: dict[int, list[int]],
+    selection_counts: dict[int, int],
+    *,
+    seed: int,
+) -> list[int]:
+    generator = torch.Generator(device="cpu")
+    generator.manual_seed(seed)
+    selected: list[int] = []
+    for size in sorted(selection_counts, reverse=True):
+        nodes = list(eligible_by_size[size])
+        if selection_counts[size] >= len(nodes):
+            selected.extend(nodes)
+            continue
+        permutation = torch.randperm(len(nodes), generator=generator).tolist()
+        selected.extend(nodes[index] for index in permutation[: selection_counts[size]])
+    selected_set = set(selected)
+    return [node_id for node_id in topology.ring_node_ids if node_id in selected_set]
+
+
+def _select_nodes_from_counts_utility(
+    topology: GrowthTopology,
+    eligible_by_size: dict[int, list[int]],
+    selection_counts: dict[int, int],
+    *,
+    utility_scores: dict[int, float],
+) -> list[int]:
+    selected: list[int] = []
+    for size in sorted(selection_counts, reverse=True):
+        ranked = sorted(
+            eligible_by_size[size],
+            key=lambda node_id: (-utility_scores.get(node_id, 0.0), topology.ring_index(node_id)),
+        )
+        selected.extend(ranked[: selection_counts[size]])
+    selected_set = set(selected)
+    return [node_id for node_id in topology.ring_node_ids if node_id in selected_set]
+
+
+def _select_parents_via_size_allocations(
+    topology: GrowthTopology,
+    *,
+    count: int,
+    remaining_active_counts: tuple[int, ...],
+    split_parent_policy: str,
+    utility_scores: dict[int, float],
+    seed: int,
+) -> tuple[list[int], int]:
+    eligible_by_size = _eligible_nodes_by_size(topology)
+    feasible_allocations = _feasible_size_count_allocations(
+        topology,
+        count,
+        remaining_active_counts=remaining_active_counts,
+    )
+    if not feasible_allocations:
+        raise ValueError("No schedule-feasible selective split allocation exists for the requested transition.")
+
+    feasible_subset_count = sum(
+        _allocation_subset_count(eligible_by_size, selection_counts) for selection_counts in feasible_allocations
+    )
+
+    if split_parent_policy == "balanced":
+        selected = min(
+            (
+                _select_nodes_from_counts_balanced(topology, selection_counts)
+                for selection_counts in feasible_allocations
+            ),
+            key=lambda subset: _balanced_subset_key(topology, tuple(subset)),
+        )
+        return selected, feasible_subset_count
+
+    if split_parent_policy == "utility":
+        selected = max(
+            (
+                _select_nodes_from_counts_utility(
+                    topology,
+                    eligible_by_size,
+                    selection_counts,
+                    utility_scores=utility_scores,
+                )
+                for selection_counts in feasible_allocations
+            ),
+            key=lambda subset: (
+                sum(utility_scores.get(node_id, 0.0) for node_id in subset),
+                tuple(-topology.ring_index(node_id) for node_id in subset),
+            ),
+        )
+        return selected, feasible_subset_count
+
+    if split_parent_policy == "random":
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(seed)
+        allocation_index = int(torch.randint(len(feasible_allocations), (1,), generator=generator).item())
+        selected = _select_nodes_from_counts_random(
+            topology,
+            eligible_by_size,
+            feasible_allocations[allocation_index],
+            seed=seed,
+        )
+        return selected, feasible_subset_count
+
+    raise ValueError(f"Unsupported growth.split_parent_policy: {split_parent_policy}")
+
+
 def _balanced_subset_key(topology: GrowthTopology, subset: tuple[int, ...]) -> tuple[tuple[int, int], ...]:
     ordered = sorted(
         subset,
@@ -416,28 +602,39 @@ def transition_topology_for_growth(
     if delta > len(eligible):
         raise ValueError("Selective growth requested more splits than eligible parents.")
     future_active_counts_tuple = tuple(int(count) for count in future_active_counts)
-    feasible_subsets = _feasible_parent_subsets(
-        topology,
-        delta,
-        remaining_active_counts=future_active_counts_tuple,
-    )
-    if not feasible_subsets:
-        raise ValueError("No schedule-feasible selective split set exists for the requested transition.")
-
     utility_components = utility_components or {}
     utility_scores = {
         node_id: utility_components.get(node_id, {}).get("score", 0.0)
         for node_id in eligible
     }
 
-    if split_parent_policy == "balanced":
-        selected = balanced_split_parents(topology, feasible_subsets)
-    elif split_parent_policy == "random":
-        selected = random_split_parents(topology, feasible_subsets, seed=seed)
-    elif split_parent_policy == "utility":
-        selected = utility_split_parents(topology, feasible_subsets, utility_scores=utility_scores)
+    exhaustive_subset_count = math.comb(len(eligible), delta)
+    if exhaustive_subset_count <= 20_000:
+        feasible_subsets = _feasible_parent_subsets(
+            topology,
+            delta,
+            remaining_active_counts=future_active_counts_tuple,
+        )
+        if not feasible_subsets:
+            raise ValueError("No schedule-feasible selective split set exists for the requested transition.")
+        feasible_subset_count = len(feasible_subsets)
+        if split_parent_policy == "balanced":
+            selected = balanced_split_parents(topology, feasible_subsets)
+        elif split_parent_policy == "random":
+            selected = random_split_parents(topology, feasible_subsets, seed=seed)
+        elif split_parent_policy == "utility":
+            selected = utility_split_parents(topology, feasible_subsets, utility_scores=utility_scores)
+        else:
+            raise ValueError(f"Unsupported growth.split_parent_policy: {split_parent_policy}")
     else:
-        raise ValueError(f"Unsupported growth.split_parent_policy: {split_parent_policy}")
+        selected, feasible_subset_count = _select_parents_via_size_allocations(
+            topology,
+            count=delta,
+            remaining_active_counts=future_active_counts_tuple,
+            split_parent_policy=split_parent_policy,
+            utility_scores=utility_scores,
+            seed=seed,
+        )
 
     selected_set = set(selected)
     new_topology, parent_to_child, parent_to_children, child_intervals = topology.split_selected(selected)
@@ -456,7 +653,7 @@ def transition_topology_for_growth(
         "selected_parents": selected,
         "unselected_parents": unselected,
         "remaining_future_active_counts": list(future_active_counts_tuple),
-        "feasible_parent_subset_count": len(feasible_subsets),
+        "feasible_parent_subset_count": feasible_subset_count,
         "selected_parent_scores": selected_scores,
         "unselected_parent_scores": unselected_scores,
         "parent_components": {

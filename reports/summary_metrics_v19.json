@@ -1,0 +1,82 @@
+{
+  "status": "stopped_for_feasibility",
+  "visible_gpu_count": 2,
+  "date_utc": "2026-03-18",
+  "attempted_final_compute_leaves": 64,
+  "fallback_final_compute_leaves": 48,
+  "core_schedule_64": {
+    "total_steps": 9000,
+    "stage_steps": [250, 250, 300, 300, 400, 500, 700, 900, 5400]
+  },
+  "transfer_schedule_64": {
+    "total_steps": 10000,
+    "stage_steps": [250, 250, 300, 300, 400, 500, 700, 900, 6400]
+  },
+  "core_schedule_48": {
+    "total_steps": 9000,
+    "stage_steps": [250, 250, 300, 300, 400, 500, 700, 6300]
+  },
+  "transfer_schedule_48": {
+    "total_steps": 10000,
+    "stage_steps": [250, 250, 300, 300, 400, 500, 700, 7300]
+  },
+  "completed_profile_runs": [
+    {
+      "run_dir": "runs/20260318-213521-v19-core-visitonly-scale-profile64-s1234",
+      "selector": "visitonly",
+      "regime": "Core-L",
+      "final_compute_leaves": 64,
+      "train_steps_run": 50,
+      "observed_runtime_seconds_approx": 61,
+      "config": "configs/v19_core_visitonly_scale.yaml",
+      "stage_at_step_50": 8,
+      "active_compute_nodes_at_step_50": 64,
+      "stage_local_step_at_step_50": 30,
+      "stage_bootstrap_active_at_step_50": true,
+      "train_packets_per_second_at_step_50": 1129.4907762929943,
+      "train_max_memory_gb_at_step_50": 0.6182389259338379,
+      "task_visit_coverage_at_step_50": 0.828125,
+      "task_visit_gini_at_step_50": 0.8163967917675545,
+      "val_query_accuracy_at_step_50": 0.020833333333333332,
+      "estimated_core_runtime_hours_lower_bound": 3.05,
+      "estimated_t1_runtime_hours_lower_bound": 3.39
+    },
+    {
+      "run_dir": "runs/20260318-213627-v19-core-visitonly-scale48-profile-s1234",
+      "selector": "visitonly",
+      "regime": "Core-L",
+      "final_compute_leaves": 48,
+      "train_steps_run": 50,
+      "observed_runtime_seconds_approx": 49,
+      "config": "configs/v19_core_visitonly_scale48.yaml",
+      "stage_at_step_50": 7,
+      "active_compute_nodes_at_step_50": 48,
+      "stage_local_step_at_step_50": 35,
+      "stage_bootstrap_active_at_step_50": true,
+      "train_packets_per_second_at_step_50": 1143.4452290075405,
+      "train_max_memory_gb_at_step_50": 0.48444557189941406,
+      "task_visit_coverage_at_step_50": 0.9166666865348816,
+      "task_visit_gini_at_step_50": 0.797018754423213,
+      "val_query_accuracy_at_step_50": 0.0625,
+      "estimated_core_runtime_hours_lower_bound": 2.45,
+      "estimated_t1_runtime_hours_lower_bound": 2.72
+    }
+  ],
+  "partial_runs_not_counted": [
+    "runs/20260318-212958-v19-core-visitonly-scale-s1234",
+    "runs/20260318-213139-v19-core-visit-taskgrad-scale-s1234",
+    "runs/20260318-213146-v19-core-visit-querygrad-scale-s1234"
+  ],
+  "lower_bound_wallclock_estimates_hours": {
+    "initial_matrix_64": 128.8,
+    "minimum_full_campaign_64": 161.0,
+    "initial_matrix_48": 103.4,
+    "minimum_full_campaign_48": 129.2
+  },
+  "feasibility_conclusion": {
+    "used_fallback": true,
+    "full_v19_matrix_completed": false,
+    "reason": "The mandated 40-run initial matrix plus 10+ run follow-up campaign was not tractable on 2 visible GPUs at the required long schedules, even after a narrow grouped-allocation optimization to make 64-leaf selective splitting computationally feasible.",
+    "recommended_next_step": "Use the v18 visitonly selector as the current default and revisit selector-family scale only with either materially more compute or substantially reduced step budgets."
+  }
+}
