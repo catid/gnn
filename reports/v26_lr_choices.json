@@ -1,0 +1,10 @@
+{
+  "querygradonly": 1.0,
+  "stageadaptive_vt": 1.0,
+  "visit_taskgrad_025": 1.0,
+  "visit_taskgrad_0375": 1.0,
+  "visit_taskgrad_0625": 1.0,
+  "visit_taskgrad_half": 1.0,
+  "visit_taskgrad_half_querygrad_0125": 1.0,
+  "visitonly": 1.0
+}

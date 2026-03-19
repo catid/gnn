@@ -10,7 +10,7 @@ from torch import nn
 from torch.nn.parallel import DistributedDataParallel as DDP
 from tqdm import tqdm
 
-from apsgnn.config import ExperimentConfig, dump_config, load_config
+from apsgnn.config import ExperimentConfig, dump_config, load_config, selector_weights_for_stage
 from apsgnn.ddp_utils import cleanup_distributed, is_distributed, is_main_process, setup_distributed
 from apsgnn.eval import accumulate_metric_sums, finalize_metrics, reduce_metric_sums, run_evaluation
 from apsgnn.growth import (
@@ -271,16 +271,17 @@ def main() -> None:
                     window=config.growth.mutation_stagnation_window,
                     delta=config.growth.mutation_stagnation_delta,
                 )
+                selector_weights = selector_weights_for_stage(config.growth, stage.index)
                 if selective_topology:
                     assert topology is not None
                     utility_components = (
                         coverage_tracker.selection_components(
                             topology,
                             utility_alpha=config.growth.utility_success_alpha,
-                            utility_visit_weight=config.growth.utility_visit_weight,
-                            utility_grad_weight=config.growth.utility_grad_weight,
-                            utility_query_visit_weight=config.growth.utility_query_visit_weight,
-                            utility_query_grad_weight=config.growth.utility_query_grad_weight,
+                            utility_visit_weight=selector_weights["utility_visit_weight"],
+                            utility_grad_weight=selector_weights["utility_grad_weight"],
+                            utility_query_visit_weight=selector_weights["utility_query_visit_weight"],
+                            utility_query_grad_weight=selector_weights["utility_query_grad_weight"],
                         )
                         if coverage_tracker is not None
                         else {}
@@ -291,10 +292,10 @@ def main() -> None:
                         split_parent_policy=config.growth.split_parent_policy,
                         utility_components=utility_components,
                         utility_alpha=config.growth.utility_success_alpha,
-                        utility_visit_weight=config.growth.utility_visit_weight,
-                        utility_grad_weight=config.growth.utility_grad_weight,
-                        utility_query_visit_weight=config.growth.utility_query_visit_weight,
-                        utility_query_grad_weight=config.growth.utility_query_grad_weight,
+                        utility_visit_weight=selector_weights["utility_visit_weight"],
+                        utility_grad_weight=selector_weights["utility_grad_weight"],
+                        utility_query_visit_weight=selector_weights["utility_query_visit_weight"],
+                        utility_query_grad_weight=selector_weights["utility_query_grad_weight"],
                         seed=config.train.seed + stage.index,
                         future_active_counts=[
                             future_stage.active_compute_nodes
@@ -303,6 +304,8 @@ def main() -> None:
                     )
                     topology_stats.update(
                         {
+                            "selector_stage_index": int(stage.index),
+                            "selector_weights": selector_weights,
                             "stage_stagnated": stage_transition_stats["stagnated"],
                             "stage_stagnation_window": stage_transition_stats["window"],
                             "stage_stagnation_delta": stage_transition_stats["delta"],

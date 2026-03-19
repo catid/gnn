@@ -135,6 +135,11 @@ class GrowthConfig:
     utility_success_alpha: float = 0.75
     utility_query_visit_weight: float = 0.0
     utility_query_grad_weight: float = 0.0
+    adaptive_selector_stage_index_min: int = -1
+    adaptive_utility_visit_weight: float = 1.0
+    adaptive_utility_grad_weight: float = 1.0
+    adaptive_utility_query_visit_weight: float = 0.0
+    adaptive_utility_query_grad_weight: float = 0.0
     utility_tail_fraction: float = 1.0
     best_metric_final_stage_only: bool = False
 
@@ -152,6 +157,26 @@ class ExperimentConfig:
 
 
 ConfigT = TypeVar("ConfigT")
+
+
+def selector_weights_for_stage(growth: GrowthConfig, next_stage_index: int) -> dict[str, float]:
+    use_adaptive = (
+        int(growth.adaptive_selector_stage_index_min) >= 0
+        and int(next_stage_index) >= int(growth.adaptive_selector_stage_index_min)
+    )
+    if use_adaptive:
+        return {
+            "utility_visit_weight": float(growth.adaptive_utility_visit_weight),
+            "utility_grad_weight": float(growth.adaptive_utility_grad_weight),
+            "utility_query_visit_weight": float(growth.adaptive_utility_query_visit_weight),
+            "utility_query_grad_weight": float(growth.adaptive_utility_query_grad_weight),
+        }
+    return {
+        "utility_visit_weight": float(growth.utility_visit_weight),
+        "utility_grad_weight": float(growth.utility_grad_weight),
+        "utility_query_visit_weight": float(growth.utility_query_visit_weight),
+        "utility_query_grad_weight": float(growth.utility_query_grad_weight),
+    }
 
 
 def _merge_dataclass(instance: ConfigT, updates: dict[str, Any]) -> ConfigT:

@@ -1,0 +1,928 @@
+{
+  "core_screen_rank": [
+    "visit_taskgrad_025",
+    "visit_taskgrad_0375",
+    "visit_taskgrad_0625",
+    "visit_taskgrad_half_querygrad_0125",
+    "stageadaptive_vt",
+    "querygradonly"
+  ],
+  "exploitation_winner": "visit_taskgrad_half",
+  "final_rank": [
+    "visit_taskgrad_half",
+    "visit_taskgrad_025",
+    "visit_taskgrad_0375"
+  ],
+  "overall_exploration_rank": [
+    "visit_taskgrad_025",
+    "visit_taskgrad_0375",
+    "visit_taskgrad_0625"
+  ],
+  "phase_summaries": {
+    "core_m": {
+      "visit_taskgrad_half": {
+        "best_to_last_drop": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "best_val": {
+          "mean": 0.16666666666666666,
+          "std": 0.0
+        },
+        "count": 1,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k6": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.06666666666666667,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.3333333333333333,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.042499999999999996,
+          "std": 0.0
+        }
+      },
+      "visitonly": {
+        "best_to_last_drop": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "best_val": {
+          "mean": 0.16666666666666666,
+          "std": 0.0
+        },
+        "count": 1,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k6": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.05833333333333333,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.25,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.026249999999999996,
+          "std": 0.0
+        }
+      }
+    },
+    "core_p": {
+      "querygradonly": {
+        "best_to_last_drop": {
+          "mean": 0.02083333333333333,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.1875,
+          "std": 0.029462782549439494
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.046875,
+          "std": 0.007365695637359868
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.041666666666666664,
+          "std": 0.02946278254943948
+        },
+        "k6": {
+          "mean": 0.05208333333333333,
+          "std": 0.044194173824159216
+        },
+        "last5_val_mean": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.16666666666666669,
+          "std": 0.05892556509887897
+        },
+        "lr_multiplier": {
+          "mean": 0.9,
+          "std": 0.14142135623730948
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.10442708333333334,
+          "std": 0.01730938474779569
+        }
+      },
+      "stageadaptive_vt": {
+        "best_to_last_drop": {
+          "mean": 0.02083333333333333,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.1875,
+          "std": 0.029462782549439494
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.046875,
+          "std": 0.007365695637359868
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.041666666666666664,
+          "std": 0.02946278254943948
+        },
+        "k6": {
+          "mean": 0.05208333333333333,
+          "std": 0.044194173824159216
+        },
+        "last5_val_mean": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.16666666666666669,
+          "std": 0.05892556509887897
+        },
+        "lr_multiplier": {
+          "mean": 0.9,
+          "std": 0.14142135623730948
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.10442708333333334,
+          "std": 0.01730938474779569
+        }
+      },
+      "visit_taskgrad_025": {
+        "best_to_last_drop": {
+          "mean": 0.02083333333333333,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.1875,
+          "std": 0.029462782549439494
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.046875,
+          "std": 0.007365695637359868
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.041666666666666664,
+          "std": 0.02946278254943948
+        },
+        "k6": {
+          "mean": 0.05208333333333333,
+          "std": 0.044194173824159216
+        },
+        "last5_val_mean": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.16666666666666669,
+          "std": 0.05892556509887897
+        },
+        "lr_multiplier": {
+          "mean": 0.9,
+          "std": 0.14142135623730948
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.10442708333333334,
+          "std": 0.01730938474779569
+        }
+      },
+      "visit_taskgrad_0375": {
+        "best_to_last_drop": {
+          "mean": 0.02083333333333333,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.1875,
+          "std": 0.029462782549439494
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.046875,
+          "std": 0.007365695637359868
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.041666666666666664,
+          "std": 0.02946278254943948
+        },
+        "k6": {
+          "mean": 0.05208333333333333,
+          "std": 0.044194173824159216
+        },
+        "last5_val_mean": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.16666666666666669,
+          "std": 0.05892556509887897
+        },
+        "lr_multiplier": {
+          "mean": 0.9,
+          "std": 0.14142135623730948
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.10442708333333334,
+          "std": 0.01730938474779569
+        }
+      },
+      "visit_taskgrad_0625": {
+        "best_to_last_drop": {
+          "mean": 0.02083333333333333,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.1875,
+          "std": 0.029462782549439494
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.046875,
+          "std": 0.007365695637359868
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.041666666666666664,
+          "std": 0.02946278254943948
+        },
+        "k6": {
+          "mean": 0.05208333333333333,
+          "std": 0.044194173824159216
+        },
+        "last5_val_mean": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.16666666666666669,
+          "std": 0.05892556509887897
+        },
+        "lr_multiplier": {
+          "mean": 0.9,
+          "std": 0.14142135623730948
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.10442708333333334,
+          "std": 0.01730938474779569
+        }
+      },
+      "visit_taskgrad_half": {
+        "best_to_last_drop": {
+          "mean": 0.02083333333333333,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.1875,
+          "std": 0.029462782549439494
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.046875,
+          "std": 0.007365695637359868
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.041666666666666664,
+          "std": 0.02946278254943948
+        },
+        "k6": {
+          "mean": 0.05208333333333333,
+          "std": 0.044194173824159216
+        },
+        "last5_val_mean": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.16666666666666669,
+          "std": 0.05892556509887897
+        },
+        "lr_multiplier": {
+          "mean": 0.9,
+          "std": 0.14142135623730948
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.10442708333333334,
+          "std": 0.01730938474779569
+        }
+      },
+      "visit_taskgrad_half_querygrad_0125": {
+        "best_to_last_drop": {
+          "mean": 0.02083333333333333,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.1875,
+          "std": 0.029462782549439494
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.046875,
+          "std": 0.007365695637359868
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.041666666666666664,
+          "std": 0.02946278254943948
+        },
+        "k6": {
+          "mean": 0.05208333333333333,
+          "std": 0.044194173824159216
+        },
+        "last5_val_mean": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.16666666666666669,
+          "std": 0.05892556509887897
+        },
+        "lr_multiplier": {
+          "mean": 0.9,
+          "std": 0.14142135623730948
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.10442708333333334,
+          "std": 0.01730938474779569
+        }
+      },
+      "visitonly": {
+        "best_to_last_drop": {
+          "mean": 0.02083333333333333,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.1875,
+          "std": 0.029462782549439494
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.046875,
+          "std": 0.007365695637359868
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.041666666666666664,
+          "std": 0.02946278254943948
+        },
+        "k6": {
+          "mean": 0.05208333333333333,
+          "std": 0.044194173824159216
+        },
+        "last5_val_mean": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.16666666666666669,
+          "std": 0.05892556509887897
+        },
+        "lr_multiplier": {
+          "mean": 0.9,
+          "std": 0.14142135623730948
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.10442708333333334,
+          "std": 0.01730938474779569
+        }
+      }
+    },
+    "core_s": {
+      "querygradonly": {
+        "best_to_last_drop": {
+          "mean": 0.125,
+          "std": 0.058925565098878946
+        },
+        "best_val": {
+          "mean": 0.14583333333333331,
+          "std": 0.029462782549439473
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.03515625,
+          "std": 0.005524271728019903
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.03125,
+          "std": 0.02209708691207961
+        },
+        "k6": {
+          "mean": 0.0390625,
+          "std": 0.011048543456039806
+        },
+        "last5_val_mean": {
+          "mean": 0.05416666666666667,
+          "std": 0.0058925565098878994
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "lr_multiplier": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.10416666666666666,
+          "std": 0.029462782549439483
+        },
+        "screen_composite": {
+          "mean": 0.0339453125,
+          "std": 0.01397640747189035
+        }
+      },
+      "stageadaptive_vt": {
+        "best_to_last_drop": {
+          "mean": 0.0625,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.14583333333333331,
+          "std": 0.029462782549439473
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.03125,
+          "std": 0.011048543456039806
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.03125,
+          "std": 0.02209708691207961
+        },
+        "k6": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.07083333333333333,
+          "std": 0.005892556509887895
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.057395833333333326,
+          "std": 0.006150355857195486
+        }
+      },
+      "visit_taskgrad_025": {
+        "best_to_last_drop": {
+          "mean": 0.0625,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.14583333333333331,
+          "std": 0.029462782549439473
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.03125,
+          "std": 0.011048543456039806
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.03125,
+          "std": 0.02209708691207961
+        },
+        "k6": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.07083333333333333,
+          "std": 0.005892556509887895
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.057395833333333326,
+          "std": 0.006150355857195486
+        }
+      },
+      "visit_taskgrad_0375": {
+        "best_to_last_drop": {
+          "mean": 0.0625,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.14583333333333331,
+          "std": 0.029462782549439473
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.03125,
+          "std": 0.011048543456039806
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.03125,
+          "std": 0.02209708691207961
+        },
+        "k6": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.07083333333333333,
+          "std": 0.005892556509887895
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.057395833333333326,
+          "std": 0.006150355857195486
+        }
+      },
+      "visit_taskgrad_0625": {
+        "best_to_last_drop": {
+          "mean": 0.0625,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.14583333333333331,
+          "std": 0.029462782549439473
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.03125,
+          "std": 0.011048543456039806
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.03125,
+          "std": 0.02209708691207961
+        },
+        "k6": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.07083333333333333,
+          "std": 0.005892556509887895
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.057395833333333326,
+          "std": 0.006150355857195486
+        }
+      },
+      "visit_taskgrad_half_querygrad_0125": {
+        "best_to_last_drop": {
+          "mean": 0.0625,
+          "std": 0.029462782549439473
+        },
+        "best_val": {
+          "mean": 0.14583333333333331,
+          "std": 0.029462782549439473
+        },
+        "count": 2,
+        "delivery_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.03125,
+          "std": 0.011048543456039806
+        },
+        "home_to_out_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.03125,
+          "std": 0.02209708691207961
+        },
+        "k6": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.07083333333333333,
+          "std": 0.005892556509887895
+        },
+        "last_dense_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "screen_composite": {
+          "mean": 0.057395833333333326,
+          "std": 0.006150355857195486
+        }
+      }
+    }
+  },
+  "pilot_lr_choices": {
+    "querygradonly": 1.0,
+    "stageadaptive_vt": 1.0,
+    "visit_taskgrad_025": 1.0,
+    "visit_taskgrad_0375": 1.0,
+    "visit_taskgrad_0625": 1.0,
+    "visit_taskgrad_half": 1.0,
+    "visit_taskgrad_half_querygrad_0125": 1.0,
+    "visitonly": 1.0
+  },
+  "promoted_m": [
+    "visit_taskgrad_025",
+    "visit_taskgrad_0375"
+  ],
+  "promoted_t1": [
+    "visit_taskgrad_025",
+    "visit_taskgrad_0375",
+    "visit_taskgrad_0625"
+  ]
+}
