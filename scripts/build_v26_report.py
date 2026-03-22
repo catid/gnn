@@ -40,6 +40,26 @@ EXPLORATION_SELECTORS = [
     "querygradonly",
 ]
 
+# Core-S produced a five-way tie among the non-Q exploration arms.
+# These manual promotions reflect the actual executed v26 funnel:
+# - T1-S ran the more informative trio: lower-weight neighbor, tiny query residual,
+#   and stage-adaptive rule.
+# - M then confirmed the two actual T1-S survivors.
+MANUAL_PROMOTED_T1 = [
+    "visit_taskgrad_0375",
+    "visit_taskgrad_half_querygrad_0125",
+    "stageadaptive_vt",
+]
+
+MANUAL_PROMOTED_M = [
+    "stageadaptive_vt",
+    "visit_taskgrad_0375",
+]
+
+SHOWDOWN_SEEDS = [10234, 11234]
+FINAL_RERUN_SEEDS = [8234, 9234]
+DISAMBIGUATION_SEEDS = [12234]
+
 DISPLAY = {
     "visitonly": "V",
     "visit_taskgrad_half": "VT-0.5",
@@ -218,6 +238,25 @@ def rank_summary(summary: dict[str, dict[str, Any]], selectors: list[str] | None
     return sorted(candidates, key=lambda selector: summary[selector]["screen_composite"]["mean"], reverse=True)
 
 
+def summarize_subset(records: list[dict[str, Any]], selectors: list[str]) -> dict[str, dict[str, Any]]:
+    out: dict[str, dict[str, Any]] = {}
+    for selector in selectors:
+        selector_records = [record for record in records if record["selector"] == selector]
+        if not selector_records:
+            continue
+        out[selector] = {
+            "count": len(selector_records),
+            "best_val": mean_std([record["best_val"] for record in selector_records]),
+            "last_val": mean_std([record["last_val"] for record in selector_records]),
+            "last5_val_mean": mean_std([record["last5_val_mean"] for record in selector_records]),
+            "best_to_last_drop": mean_std([record["best_to_last_drop"] for record in selector_records]),
+            "dense_mean": mean_std([record["dense_mean"] for record in selector_records]),
+            "last_dense_mean": mean_std([record["last_dense_mean"] for record in selector_records]),
+            "screen_composite": mean_std([record["screen_composite"] for record in selector_records]),
+        }
+    return out
+
+
 def choose_lr_multipliers(pilot_records: list[dict[str, Any]]) -> dict[str, float]:
     by_selector: dict[str, list[dict[str, Any]]] = {}
     for record in pilot_records:
@@ -324,13 +363,13 @@ def main() -> None:
             phase_summaries[phase] = summarize_phase(records, regime)
 
     core_screen_rank = rank_summary(phase_summaries.get("core_s", {}), EXPLORATION_SELECTORS)
-    promoted_t1 = core_screen_rank[:3]
+    promoted_t1 = [selector for selector in MANUAL_PROMOTED_T1 if selector in phase_summaries.get("core_s", {})]
     overall_exploration_rank = combined_rank(
         phase_summaries.get("core_s", {}),
         phase_summaries.get("t1_s", {}),
         promoted_t1,
     )
-    promoted_m = overall_exploration_rank[:2]
+    promoted_m = [selector for selector in MANUAL_PROMOTED_M if selector in overall_exploration_rank]
 
     exploit_candidates = ["visitonly", "visit_taskgrad_half"]
     exploit_score = {}
@@ -349,7 +388,7 @@ def main() -> None:
         )
     exploitation_winner = max(exploit_score, key=exploit_score.get) if any(exploit_score.values()) else "visit_taskgrad_half"
 
-    final_candidates = list(dict.fromkeys([exploitation_winner, *promoted_m]))
+    final_candidates = list(dict.fromkeys([*exploit_candidates, *promoted_m]))
     final_scores = {}
     for selector in final_candidates:
         final_scores[selector] = (
@@ -369,6 +408,20 @@ def main() -> None:
             + phase_summaries.get("t2c_l", {}).get(selector, {}).get("last_val", {}).get("mean", 0.0)
         )
     final_rank = sorted(final_scores, key=final_scores.get, reverse=True)
+
+    t1_l_records = [record for record in all_records if record["phase"] == "t1_l"]
+    showdown_summary = summarize_subset(
+        [record for record in t1_l_records if record["seed"] in SHOWDOWN_SEEDS],
+        ["visit_taskgrad_half", "stageadaptive_vt"],
+    )
+    rerun_summary = summarize_subset(
+        [record for record in t1_l_records if record["seed"] in FINAL_RERUN_SEEDS],
+        ["visitonly", "visit_taskgrad_half"],
+    )
+    disambiguation_summary = summarize_subset(
+        [record for record in t1_l_records if record["seed"] in DISAMBIGUATION_SEEDS],
+        ["visitonly", "visit_taskgrad_half"],
+    )
 
     plot_summary(
         phase_summaries.get("core_s", {}),
@@ -403,6 +456,9 @@ def main() -> None:
         "promoted_m": promoted_m,
         "exploitation_winner": exploitation_winner,
         "final_rank": final_rank,
+        "showdown_summary": showdown_summary,
+        "final_rerun_summary": rerun_summary,
+        "disambiguation_summary": disambiguation_summary,
         "phase_summaries": phase_summaries,
     }
     SUMMARY_PATH.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -425,6 +481,36 @@ def main() -> None:
         ]
         for selector in core_screen_rank
         if "core_s" in phase_summaries and selector in phase_summaries["core_s"]
+    ]
+    showdown_rows = [
+        [
+            DISPLAY[selector],
+            fmt_stat(payload["best_val"]),
+            fmt_stat(payload["last_val"]),
+            fmt_stat(payload["dense_mean"]),
+            fmt_stat(payload["last_dense_mean"]),
+        ]
+        for selector, payload in showdown_summary.items()
+    ]
+    rerun_rows = [
+        [
+            DISPLAY[selector],
+            fmt_stat(payload["best_val"]),
+            fmt_stat(payload["last_val"]),
+            fmt_stat(payload["dense_mean"]),
+            fmt_stat(payload["last_dense_mean"]),
+        ]
+        for selector, payload in rerun_summary.items()
+    ]
+    disambiguation_rows = [
+        [
+            DISPLAY[selector],
+            fmt_stat(payload["best_val"]),
+            fmt_stat(payload["last_val"]),
+            fmt_stat(payload["dense_mean"]),
+            fmt_stat(payload["last_dense_mean"]),
+        ]
+        for selector, payload in disambiguation_summary.items()
     ]
     report = f"""# APSGNN v26 50/50 Selector Campaign
 
@@ -450,6 +536,25 @@ Promoted to `T1-S`: `{", ".join(DISPLAY[s] for s in promoted_t1) if promoted_t1 
 Promoted to `M`: `{", ".join(DISPLAY[s] for s in promoted_m) if promoted_m else "-"}`  
 Current exploitation winner: `{DISPLAY.get(exploitation_winner, exploitation_winner)}`  
 Current final rank: `{", ".join(DISPLAY[s] for s in final_rank) if final_rank else "-"}`
+
+Manual tie-break note:
+- `Core-S` produced a five-way tie among the non-`Q` exploration arms.
+- The executed `T1-S` trio was `VT-0.375`, `VT-0.5+Q0.125`, and `StageAdaptive-VT`.
+- The executed `M` exploration confirmation arms were `StageAdaptive-VT` and `VT-0.375`.
+
+## Showdown And Rerun Subsets
+
+`T1-L` showdown (`StageAdaptive-VT` vs `VT-0.5`, seeds `10234, 11234`):
+
+{markdown_table(["Selector", "Best", "Last", "Dense", "Last Dense"], showdown_rows) if showdown_rows else "No showdown runs recorded yet."}
+
+Fresh rerun (`V` vs `VT-0.5`, seeds `8234, 9234`):
+
+{markdown_table(["Selector", "Best", "Last", "Dense", "Last Dense"], rerun_rows) if rerun_rows else "No fresh rerun runs recorded yet."}
+
+Disambiguation (`V` vs `VT-0.5`, seed `12234`):
+
+{markdown_table(["Selector", "Best", "Last", "Dense", "Last Dense"], disambiguation_rows) if disambiguation_rows else "Not run yet."}
 
 ## Completed runs
 
