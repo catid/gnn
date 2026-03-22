@@ -10,7 +10,7 @@ from torch import nn
 from torch.nn.parallel import DistributedDataParallel as DDP
 from tqdm import tqdm
 
-from apsgnn.config import ExperimentConfig, dump_config, load_config, selector_weights_for_stage
+from apsgnn.config import ExperimentConfig, dump_config, load_config, selector_decision_for_stage
 from apsgnn.ddp_utils import cleanup_distributed, is_distributed, is_main_process, setup_distributed
 from apsgnn.eval import accumulate_metric_sums, finalize_metrics, reduce_metric_sums, run_evaluation
 from apsgnn.growth import (
@@ -115,6 +115,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--run-name", default=None, help="Override runtime.run_name.")
     parser.add_argument("--train-steps", type=int, default=None, help="Override train steps.")
     parser.add_argument("--seed", type=int, default=None, help="Override train seed.")
+    parser.add_argument("--lr-scale", type=float, default=None, help="Optional learning-rate multiplier.")
     parser.add_argument("--benchmark-only", action="store_true", help="Run warmup + throughput benchmark only.")
     parser.add_argument("--checkpoint", default=None, help="Optional checkpoint to resume from.")
     parser.add_argument("--init-checkpoint", default=None, help="Optional model-only warm-start checkpoint.")
@@ -187,6 +188,8 @@ def main() -> None:
         config.train.train_steps = args.train_steps
     if args.seed is not None:
         config.train.seed = args.seed
+    if args.lr_scale is not None:
+        config.train.lr = float(config.train.lr) * float(args.lr_scale)
     if args.init_checkpoint is not None:
         config.train.init_checkpoint = args.init_checkpoint
 
@@ -271,7 +274,14 @@ def main() -> None:
                     window=config.growth.mutation_stagnation_window,
                     delta=config.growth.mutation_stagnation_delta,
                 )
-                selector_weights = selector_weights_for_stage(config.growth, stage.index)
+                selector_snapshot = coverage_tracker.current_snapshot() if coverage_tracker is not None else {}
+                selector_decision = selector_decision_for_stage(
+                    config.growth,
+                    stage.index,
+                    task=config.task,
+                    current_snapshot=selector_snapshot,
+                )
+                selector_weights = selector_decision["weights"]
                 if selective_topology:
                     assert topology is not None
                     utility_components = (
@@ -306,6 +316,8 @@ def main() -> None:
                         {
                             "selector_stage_index": int(stage.index),
                             "selector_weights": selector_weights,
+                            "selector_decision": selector_decision,
+                            "selector_snapshot": selector_snapshot,
                             "stage_stagnated": stage_transition_stats["stagnated"],
                             "stage_stagnation_window": stage_transition_stats["window"],
                             "stage_stagnation_delta": stage_transition_stats["delta"],
@@ -348,6 +360,10 @@ def main() -> None:
                         mutation_min_query_grad_z=config.growth.mutation_min_query_grad_z,
                         mutation_require_stagnation=config.growth.mutation_require_stagnation,
                         transition_stats={
+                            "selector_stage_index": int(stage.index),
+                            "selector_weights": selector_weights,
+                            "selector_decision": selector_decision,
+                            "selector_snapshot": selector_snapshot,
                             "stage_stagnated": stage_transition_stats["stagnated"],
                             "stage_stagnation_window": stage_transition_stats["window"],
                             "stage_stagnation_delta": stage_transition_stats["delta"],

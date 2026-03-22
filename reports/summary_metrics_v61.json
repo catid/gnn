@@ -1,0 +1,6055 @@
+{
+  "rollup_window": 5,
+  "visible_gpu_count": 2,
+  "records": [
+    {
+      "run": "20260322-082543-v61-hmid-gate_ingress_pool1-32-l-s3234",
+      "regime": "hmid",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "l",
+      "seed": 3234,
+      "tag": "",
+      "config_name": "configs/v61_hmid_gate_ingress_pool1_32_l.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 3360,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.008333333333333333,
+      "best_to_last_drop": 0.0,
+      "k3": 0.0546875,
+      "last_k3": 0.0546875,
+      "k7": 0.015625,
+      "last_k7": 0.015625,
+      "k11": 0.0703125,
+      "last_k11": 0.0703125,
+      "dense_mean": 0.04296875,
+      "last_dense_mean": 0.04296875,
+      "composite": 0.0355859375,
+      "score": 0.08463541666666666
+    },
+    {
+      "run": "20260322-083414-v61-hmid-gate_ingress_pool1-32-l-s4234",
+      "regime": "hmid",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "l",
+      "seed": 4234,
+      "tag": "",
+      "config_name": "configs/v61_hmid_gate_ingress_pool1_32_l.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 3360,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.0,
+      "last5_val_mean": 0.024999999999999998,
+      "best_to_last_drop": 0.08333333333333333,
+      "k3": 0.0234375,
+      "last_k3": 0.0234375,
+      "k7": 0.0390625,
+      "last_k7": 0.0390625,
+      "k11": 0.0625,
+      "last_k11": 0.0625,
+      "dense_mean": 0.05078125,
+      "last_dense_mean": 0.05078125,
+      "composite": 0.027851562500000003,
+      "score": 0.05078125
+    },
+    {
+      "run": "20260322-082142-v61-hmid-visit_taskgrad_half-32-l-s3234",
+      "regime": "hmid",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "l",
+      "seed": 3234,
+      "tag": "",
+      "config_name": "configs/v61_hmid_visit_taskgrad_half_32_l.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 3360,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.0,
+      "last5_val_mean": 0.0,
+      "best_to_last_drop": 0.041666666666666664,
+      "k3": 0.046875,
+      "last_k3": 0.046875,
+      "k7": 0.0234375,
+      "last_k7": 0.0234375,
+      "k11": 0.046875,
+      "last_k11": 0.046875,
+      "dense_mean": 0.03515625,
+      "last_dense_mean": 0.03515625,
+      "composite": 0.0158203125,
+      "score": 0.03515625
+    },
+    {
+      "run": "20260322-083015-v61-hmid-visit_taskgrad_half-32-l-s4234",
+      "regime": "hmid",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "l",
+      "seed": 4234,
+      "tag": "",
+      "config_name": "configs/v61_hmid_visit_taskgrad_half_32_l.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 3360,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.0,
+      "last5_val_mean": 0.008333333333333333,
+      "best_to_last_drop": 0.041666666666666664,
+      "k3": 0.0078125,
+      "last_k3": 0.0078125,
+      "k7": 0.0390625,
+      "last_k7": 0.0390625,
+      "k11": 0.046875,
+      "last_k11": 0.046875,
+      "dense_mean": 0.04296875,
+      "last_dense_mean": 0.04296875,
+      "composite": 0.021002604166666668,
+      "score": 0.04296875
+    },
+    {
+      "run": "20260322-081744-v61-hmid-visitonly-32-l-s3234",
+      "regime": "hmid",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "l",
+      "seed": 3234,
+      "tag": "",
+      "config_name": "configs/v61_hmid_visitonly_32_l.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 3360,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.008333333333333333,
+      "best_to_last_drop": 0.0,
+      "k3": 0.0546875,
+      "last_k3": 0.0546875,
+      "k7": 0.015625,
+      "last_k7": 0.015625,
+      "k11": 0.0703125,
+      "last_k11": 0.0703125,
+      "dense_mean": 0.04296875,
+      "last_dense_mean": 0.04296875,
+      "composite": 0.0355859375,
+      "score": 0.08463541666666666
+    },
+    {
+      "run": "20260322-084133-v61-hmid-visitonly-32-l-s4234",
+      "regime": "hmid",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "l",
+      "seed": 4234,
+      "tag": "",
+      "config_name": "configs/v61_hmid_visitonly_32_l.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 3360,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.0,
+      "last5_val_mean": 0.024999999999999998,
+      "best_to_last_drop": 0.08333333333333333,
+      "k3": 0.0234375,
+      "last_k3": 0.0234375,
+      "k7": 0.0390625,
+      "last_k7": 0.0390625,
+      "k11": 0.0625,
+      "last_k11": 0.0625,
+      "dense_mean": 0.05078125,
+      "last_dense_mean": 0.05078125,
+      "composite": 0.027851562500000003,
+      "score": 0.05078125
+    },
+    {
+      "run": "20260322-083735-v61-hmix-gate_ingress_pool1-32-l-s3234",
+      "regime": "hmix",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "l",
+      "seed": 3234,
+      "tag": "",
+      "config_name": "configs/v61_hmix_gate_ingress_pool1_32_l.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 3360,
+      "best_val": 0.043478260869565216,
+      "last_val": 0.0,
+      "last5_val_mean": 0.0,
+      "best_to_last_drop": 0.043478260869565216,
+      "k3": 0.046875,
+      "last_k3": 0.046875,
+      "k7": 0.0703125,
+      "last_k7": 0.0703125,
+      "k11": 0.0390625,
+      "last_k11": 0.0390625,
+      "dense_mean": 0.0546875,
+      "last_dense_mean": 0.0546875,
+      "composite": 0.024609375,
+      "score": 0.0546875
+    },
+    {
+      "run": "20260322-084607-v61-hmix-gate_ingress_pool1-32-l-s4234",
+      "regime": "hmix",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "l",
+      "seed": 4234,
+      "tag": "",
+      "config_name": "configs/v61_hmix_gate_ingress_pool1_32_l.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 3360,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.0,
+      "last5_val_mean": 0.0,
+      "best_to_last_drop": 0.041666666666666664,
+      "k3": 0.015625,
+      "last_k3": 0.015625,
+      "k7": 0.03125,
+      "last_k7": 0.03125,
+      "k11": 0.0625,
+      "last_k11": 0.0625,
+      "dense_mean": 0.046875,
+      "last_dense_mean": 0.046875,
+      "composite": 0.02109375,
+      "score": 0.046875
+    },
+    {
+      "run": "20260322-083338-v61-hmix-visit_taskgrad_half-32-l-s3234",
+      "regime": "hmix",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "l",
+      "seed": 3234,
+      "tag": "",
+      "config_name": "configs/v61_hmix_visit_taskgrad_half_32_l.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 3360,
+      "best_val": 0.043478260869565216,
+      "last_val": 0.0,
+      "last5_val_mean": 0.0,
+      "best_to_last_drop": 0.043478260869565216,
+      "k3": 0.046875,
+      "last_k3": 0.046875,
+      "k7": 0.0703125,
+      "last_k7": 0.0703125,
+      "k11": 0.0390625,
+      "last_k11": 0.0390625,
+      "dense_mean": 0.0546875,
+      "last_dense_mean": 0.0546875,
+      "composite": 0.024609375,
+      "score": 0.0546875
+    },
+    {
+      "run": "20260322-084212-v61-hmix-visit_taskgrad_half-32-l-s4234",
+      "regime": "hmix",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "l",
+      "seed": 4234,
+      "tag": "",
+      "config_name": "configs/v61_hmix_visit_taskgrad_half_32_l.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 3360,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.0,
+      "last5_val_mean": 0.0,
+      "best_to_last_drop": 0.041666666666666664,
+      "k3": 0.015625,
+      "last_k3": 0.015625,
+      "k7": 0.03125,
+      "last_k7": 0.03125,
+      "k11": 0.0625,
+      "last_k11": 0.0625,
+      "dense_mean": 0.046875,
+      "last_dense_mean": 0.046875,
+      "composite": 0.02109375,
+      "score": 0.046875
+    },
+    {
+      "run": "20260322-082943-v61-hmix-visitonly-32-l-s3234",
+      "regime": "hmix",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "l",
+      "seed": 3234,
+      "tag": "",
+      "config_name": "configs/v61_hmix_visitonly_32_l.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 3360,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.0,
+      "last5_val_mean": 0.0,
+      "best_to_last_drop": 0.041666666666666664,
+      "k3": 0.046875,
+      "last_k3": 0.046875,
+      "k7": 0.046875,
+      "last_k7": 0.046875,
+      "k11": 0.046875,
+      "last_k11": 0.046875,
+      "dense_mean": 0.046875,
+      "last_dense_mean": 0.046875,
+      "composite": 0.02109375,
+      "score": 0.046875
+    },
+    {
+      "run": "20260322-083814-v61-hmix-visitonly-32-l-s4234",
+      "regime": "hmix",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "l",
+      "seed": 4234,
+      "tag": "",
+      "config_name": "configs/v61_hmix_visitonly_32_l.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 3360,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.016666666666666666,
+      "best_to_last_drop": 0.0,
+      "k3": 0.0390625,
+      "last_k3": 0.0390625,
+      "k7": 0.03125,
+      "last_k7": 0.03125,
+      "k11": 0.0546875,
+      "last_k11": 0.0546875,
+      "dense_mean": 0.04296875,
+      "last_dense_mean": 0.04296875,
+      "composite": 0.03725260416666667,
+      "score": 0.08463541666666666
+    },
+    {
+      "run": "20260322-070821-v61-core-visit_taskgrad_half-32-m-s1234",
+      "regime": "core",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "m",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_core_visit_taskgrad_half_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.06666666666666667,
+      "best_to_last_drop": 0.08333333333333333,
+      "k2": 0.052083333333333336,
+      "last_k2": 0.052083333333333336,
+      "k6": 0.03125,
+      "last_k6": 0.03125,
+      "k10": 0.0,
+      "last_k10": 0.0,
+      "dense_mean": 0.015625,
+      "last_dense_mean": 0.015625,
+      "composite": 0.04953125,
+      "score": 0.09895833333333333
+    },
+    {
+      "run": "20260322-071154-v61-core-visit_taskgrad_half-32-m-s2234",
+      "regime": "core",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "m",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_core_visit_taskgrad_half_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.041666666666666664,
+      "k2": 0.0,
+      "last_k2": 0.0,
+      "k6": 0.041666666666666664,
+      "last_k6": 0.041666666666666664,
+      "k10": 0.0625,
+      "last_k10": 0.0625,
+      "dense_mean": 0.05208333333333333,
+      "last_dense_mean": 0.05208333333333333,
+      "composite": 0.049687499999999996,
+      "score": 0.09375
+    },
+    {
+      "run": "20260322-070118-v61-core-visitonly-32-m-s1234",
+      "regime": "core",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "m",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_core_visitonly_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.20833333333333334,
+      "last_val": 0.16666666666666666,
+      "last5_val_mean": 0.09166666666666666,
+      "best_to_last_drop": 0.041666666666666685,
+      "k2": 0.07291666666666667,
+      "last_k2": 0.07291666666666667,
+      "k6": 0.041666666666666664,
+      "last_k6": 0.041666666666666664,
+      "k10": 0.010416666666666666,
+      "last_k10": 0.010416666666666666,
+      "dense_mean": 0.026041666666666664,
+      "last_dense_mean": 0.026041666666666664,
+      "composite": 0.08838541666666666,
+      "score": 0.19270833333333331
+    },
+    {
+      "run": "20260322-070450-v61-core-visitonly-32-m-s2234",
+      "regime": "core",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "m",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_core_visitonly_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.016666666666666666,
+      "best_to_last_drop": 0.08333333333333334,
+      "k2": 0.03125,
+      "last_k2": 0.03125,
+      "k6": 0.03125,
+      "last_k6": 0.03125,
+      "k10": 0.0625,
+      "last_k10": 0.0625,
+      "dense_mean": 0.046875,
+      "last_dense_mean": 0.046875,
+      "composite": 0.039010416666666665,
+      "score": 0.08854166666666666
+    },
+    {
+      "run": "20260322-072249-v61-t1-visit_taskgrad_half-32-m-s1234",
+      "regime": "t1",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "m",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t1_visit_taskgrad_half_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.0,
+      "last5_val_mean": 0.08333333333333333,
+      "best_to_last_drop": 0.16666666666666666,
+      "k4": 0.020833333333333332,
+      "last_k4": 0.020833333333333332,
+      "k8": 0.020833333333333332,
+      "last_k8": 0.020833333333333332,
+      "k12": 0.010416666666666666,
+      "last_k12": 0.010416666666666666,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.041666666666666664,
+      "dense_mean": 0.024305555555555552,
+      "last_dense_mean": 0.024305555555555552,
+      "composite": 0.027604166666666666,
+      "score": 0.024305555555555552
+    },
+    {
+      "run": "20260322-072630-v61-t1-visit_taskgrad_half-32-m-s2234",
+      "regime": "t1",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "m",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t1_visit_taskgrad_half_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.0,
+      "last5_val_mean": 0.008333333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.010416666666666666,
+      "last_k4": 0.010416666666666666,
+      "k8": 0.03125,
+      "last_k8": 0.03125,
+      "k12": 0.03125,
+      "last_k12": 0.03125,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.041666666666666664,
+      "dense_mean": 0.034722222222222224,
+      "last_dense_mean": 0.034722222222222224,
+      "composite": 0.017291666666666667,
+      "score": 0.034722222222222224
+    },
+    {
+      "run": "20260322-071526-v61-t1-visitonly-32-m-s1234",
+      "regime": "t1",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "m",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t1_visitonly_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.0,
+      "last5_val_mean": 0.075,
+      "best_to_last_drop": 0.16666666666666666,
+      "k4": 0.020833333333333332,
+      "last_k4": 0.020833333333333332,
+      "k8": 0.03125,
+      "last_k8": 0.03125,
+      "k12": 0.020833333333333332,
+      "last_k12": 0.020833333333333332,
+      "k14": 0.052083333333333336,
+      "last_k14": 0.052083333333333336,
+      "dense_mean": 0.034722222222222224,
+      "last_dense_mean": 0.034722222222222224,
+      "composite": 0.030625,
+      "score": 0.034722222222222224
+    },
+    {
+      "run": "20260322-071909-v61-t1-visitonly-32-m-s2234",
+      "regime": "t1",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "m",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t1_visitonly_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.0,
+      "last5_val_mean": 0.008333333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.010416666666666666,
+      "last_k4": 0.010416666666666666,
+      "k8": 0.03125,
+      "last_k8": 0.03125,
+      "k12": 0.03125,
+      "last_k12": 0.03125,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.041666666666666664,
+      "dense_mean": 0.034722222222222224,
+      "last_dense_mean": 0.034722222222222224,
+      "composite": 0.017291666666666667,
+      "score": 0.034722222222222224
+    },
+    {
+      "run": "20260322-073734-v61-t1r-visit_taskgrad_half-32-m-s1234",
+      "regime": "t1r",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "m",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t1r_visit_taskgrad_half_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.0,
+      "last5_val_mean": 0.08333333333333333,
+      "best_to_last_drop": 0.16666666666666666,
+      "k4": 0.020833333333333332,
+      "last_k4": 0.020833333333333332,
+      "k8": 0.020833333333333332,
+      "last_k8": 0.020833333333333332,
+      "k12": 0.010416666666666666,
+      "last_k12": 0.010416666666666666,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.041666666666666664,
+      "dense_mean": 0.024305555555555552,
+      "last_dense_mean": 0.024305555555555552,
+      "composite": 0.027604166666666666,
+      "score": 0.024305555555555552
+    },
+    {
+      "run": "20260322-074113-v61-t1r-visit_taskgrad_half-32-m-s2234",
+      "regime": "t1r",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "m",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t1r_visit_taskgrad_half_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.0,
+      "last5_val_mean": 0.008333333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.010416666666666666,
+      "last_k4": 0.010416666666666666,
+      "k8": 0.03125,
+      "last_k8": 0.03125,
+      "k12": 0.03125,
+      "last_k12": 0.03125,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.041666666666666664,
+      "dense_mean": 0.034722222222222224,
+      "last_dense_mean": 0.034722222222222224,
+      "composite": 0.017291666666666667,
+      "score": 0.034722222222222224
+    },
+    {
+      "run": "20260322-073012-v61-t1r-visitonly-32-m-s1234",
+      "regime": "t1r",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "m",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t1r_visitonly_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.0,
+      "last5_val_mean": 0.075,
+      "best_to_last_drop": 0.16666666666666666,
+      "k4": 0.020833333333333332,
+      "last_k4": 0.020833333333333332,
+      "k8": 0.03125,
+      "last_k8": 0.03125,
+      "k12": 0.020833333333333332,
+      "last_k12": 0.020833333333333332,
+      "k14": 0.052083333333333336,
+      "last_k14": 0.052083333333333336,
+      "dense_mean": 0.034722222222222224,
+      "last_dense_mean": 0.034722222222222224,
+      "composite": 0.030625,
+      "score": 0.034722222222222224
+    },
+    {
+      "run": "20260322-073352-v61-t1r-visitonly-32-m-s2234",
+      "regime": "t1r",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "m",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t1r_visitonly_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.0,
+      "last5_val_mean": 0.008333333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.010416666666666666,
+      "last_k4": 0.010416666666666666,
+      "k8": 0.03125,
+      "last_k8": 0.03125,
+      "k12": 0.03125,
+      "last_k12": 0.03125,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.041666666666666664,
+      "dense_mean": 0.034722222222222224,
+      "last_dense_mean": 0.034722222222222224,
+      "composite": 0.017291666666666667,
+      "score": 0.034722222222222224
+    },
+    {
+      "run": "20260322-075212-v61-t2a-visit_taskgrad_half-32-m-s1234",
+      "regime": "t2a",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "m",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t2a_visit_taskgrad_half_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.03333333333333333,
+      "best_to_last_drop": 0.041666666666666664,
+      "k4": 0.0625,
+      "last_k4": 0.0625,
+      "k8": 0.03125,
+      "last_k8": 0.03125,
+      "k12": 0.041666666666666664,
+      "last_k12": 0.041666666666666664,
+      "k14": 0.03125,
+      "last_k14": 0.03125,
+      "dense_mean": 0.034722222222222224,
+      "last_dense_mean": 0.034722222222222224,
+      "composite": 0.036875,
+      "score": 0.0763888888888889
+    },
+    {
+      "run": "20260322-075551-v61-t2a-visit_taskgrad_half-32-m-s2234",
+      "regime": "t2a",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "m",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t2a_visit_taskgrad_half_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.0,
+      "last5_val_mean": 0.024999999999999998,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.03125,
+      "last_k4": 0.03125,
+      "k8": 0.020833333333333332,
+      "last_k8": 0.020833333333333332,
+      "k12": 0.03125,
+      "last_k12": 0.03125,
+      "k14": 0.0625,
+      "last_k14": 0.0625,
+      "dense_mean": 0.03819444444444445,
+      "last_dense_mean": 0.03819444444444445,
+      "composite": 0.022187500000000002,
+      "score": 0.03819444444444445
+    },
+    {
+      "run": "20260322-074454-v61-t2a-visitonly-32-m-s1234",
+      "regime": "t2a",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "m",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t2a_visitonly_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.0,
+      "last5_val_mean": 0.0,
+      "best_to_last_drop": 0.041666666666666664,
+      "k4": 0.010416666666666666,
+      "last_k4": 0.010416666666666666,
+      "k8": 0.03125,
+      "last_k8": 0.03125,
+      "k12": 0.041666666666666664,
+      "last_k12": 0.041666666666666664,
+      "k14": 0.010416666666666666,
+      "last_k14": 0.010416666666666666,
+      "dense_mean": 0.027777777777777776,
+      "last_dense_mean": 0.027777777777777776,
+      "composite": 0.012499999999999999,
+      "score": 0.027777777777777776
+    },
+    {
+      "run": "20260322-074833-v61-t2a-visitonly-32-m-s2234",
+      "regime": "t2a",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "m",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t2a_visitonly_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.0,
+      "last5_val_mean": 0.008333333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.041666666666666664,
+      "last_k4": 0.041666666666666664,
+      "k8": 0.03125,
+      "last_k8": 0.03125,
+      "k12": 0.041666666666666664,
+      "last_k12": 0.041666666666666664,
+      "k14": 0.0625,
+      "last_k14": 0.0625,
+      "dense_mean": 0.04513888888888889,
+      "last_dense_mean": 0.04513888888888889,
+      "composite": 0.021979166666666668,
+      "score": 0.04513888888888889
+    },
+    {
+      "run": "20260322-080656-v61-t2b-visit_taskgrad_half-32-m-s1234",
+      "regime": "t2b",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "m",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t2b_visit_taskgrad_half_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.125,
+      "last_val": 0.0,
+      "last5_val_mean": 0.024999999999999998,
+      "best_to_last_drop": 0.125,
+      "k4": 0.0625,
+      "last_k4": 0.0625,
+      "k8": 0.0625,
+      "last_k8": 0.0625,
+      "k12": 0.041666666666666664,
+      "last_k12": 0.041666666666666664,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.041666666666666664,
+      "dense_mean": 0.04861111111111111,
+      "last_dense_mean": 0.04861111111111111,
+      "composite": 0.026875000000000003,
+      "score": 0.04861111111111111
+    },
+    {
+      "run": "20260322-081049-v61-t2b-visit_taskgrad_half-32-m-s2234",
+      "regime": "t2b",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "m",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t2b_visit_taskgrad_half_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.09999999999999999,
+      "best_to_last_drop": 0.125,
+      "k4": 0.03125,
+      "last_k4": 0.03125,
+      "k8": 0.020833333333333332,
+      "last_k8": 0.020833333333333332,
+      "k12": 0.020833333333333332,
+      "last_k12": 0.020833333333333332,
+      "k14": 0.0,
+      "last_k14": 0.0,
+      "dense_mean": 0.013888888888888888,
+      "last_dense_mean": 0.013888888888888888,
+      "composite": 0.04083333333333333,
+      "score": 0.05555555555555555
+    },
+    {
+      "run": "20260322-075929-v61-t2b-visitonly-32-m-s1234",
+      "regime": "t2b",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "m",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t2b_visitonly_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.125,
+      "last_val": 0.0,
+      "last5_val_mean": 0.016666666666666666,
+      "best_to_last_drop": 0.125,
+      "k4": 0.0625,
+      "last_k4": 0.0625,
+      "k8": 0.052083333333333336,
+      "last_k8": 0.052083333333333336,
+      "k12": 0.03125,
+      "last_k12": 0.03125,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.041666666666666664,
+      "dense_mean": 0.041666666666666664,
+      "last_dense_mean": 0.041666666666666664,
+      "composite": 0.022083333333333333,
+      "score": 0.041666666666666664
+    },
+    {
+      "run": "20260322-080307-v61-t2b-visitonly-32-m-s2234",
+      "regime": "t2b",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "m",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t2b_visitonly_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.09999999999999999,
+      "best_to_last_drop": 0.125,
+      "k4": 0.03125,
+      "last_k4": 0.03125,
+      "k8": 0.020833333333333332,
+      "last_k8": 0.020833333333333332,
+      "k12": 0.020833333333333332,
+      "last_k12": 0.020833333333333332,
+      "k14": 0.0,
+      "last_k14": 0.0,
+      "dense_mean": 0.013888888888888888,
+      "last_dense_mean": 0.013888888888888888,
+      "composite": 0.04083333333333333,
+      "score": 0.05555555555555555
+    },
+    {
+      "run": "20260322-082218-v61-t2c-visit_taskgrad_half-32-m-s1234",
+      "regime": "t2c",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "m",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t2c_visit_taskgrad_half_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.125,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.08333333333333333,
+      "best_to_last_drop": 0.04166666666666667,
+      "k6": 0.052083333333333336,
+      "last_k6": 0.052083333333333336,
+      "k10": 0.020833333333333332,
+      "last_k10": 0.020833333333333332,
+      "k14": 0.010416666666666666,
+      "last_k14": 0.010416666666666666,
+      "k16": 0.020833333333333332,
+      "last_k16": 0.020833333333333332,
+      "dense_mean": 0.017361111111111112,
+      "last_dense_mean": 0.017361111111111112,
+      "composite": 0.05364583333333332,
+      "score": 0.10069444444444445
+    },
+    {
+      "run": "20260322-082610-v61-t2c-visit_taskgrad_half-32-m-s2234",
+      "regime": "t2c",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "m",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t2c_visit_taskgrad_half_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.008333333333333333,
+      "best_to_last_drop": 0.0,
+      "k6": 0.010416666666666666,
+      "last_k6": 0.010416666666666666,
+      "k10": 0.052083333333333336,
+      "last_k10": 0.052083333333333336,
+      "k14": 0.03125,
+      "last_k14": 0.03125,
+      "k16": 0.010416666666666666,
+      "last_k16": 0.010416666666666666,
+      "dense_mean": 0.03125,
+      "last_dense_mean": 0.03125,
+      "composite": 0.0303125,
+      "score": 0.07291666666666666
+    },
+    {
+      "run": "20260322-081440-v61-t2c-visitonly-32-m-s1234",
+      "regime": "t2c",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "m",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t2c_visitonly_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.08333333333333333,
+      "best_to_last_drop": 0.08333333333333334,
+      "k6": 0.020833333333333332,
+      "last_k6": 0.020833333333333332,
+      "k10": 0.03125,
+      "last_k10": 0.03125,
+      "k14": 0.03125,
+      "last_k14": 0.03125,
+      "k16": 0.0,
+      "last_k16": 0.0,
+      "dense_mean": 0.020833333333333332,
+      "last_dense_mean": 0.020833333333333332,
+      "composite": 0.040624999999999994,
+      "score": 0.0625
+    },
+    {
+      "run": "20260322-081825-v61-t2c-visitonly-32-m-s2234",
+      "regime": "t2c",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "m",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t2c_visitonly_32_m.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 2520,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.008333333333333333,
+      "best_to_last_drop": 0.0,
+      "k6": 0.010416666666666666,
+      "last_k6": 0.010416666666666666,
+      "k10": 0.041666666666666664,
+      "last_k10": 0.041666666666666664,
+      "k14": 0.03125,
+      "last_k14": 0.03125,
+      "k16": 0.0,
+      "last_k16": 0.0,
+      "dense_mean": 0.024305555555555556,
+      "last_dense_mean": 0.024305555555555556,
+      "composite": 0.0271875,
+      "score": 0.06597222222222222
+    },
+    {
+      "run": "20260322-063040-v61-core-gate_ingress_pool1-32-p-lr08-s1234",
+      "regime": "core",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_core_gate_ingress_pool1_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.20833333333333334,
+      "last_val": 0.16666666666666666,
+      "last5_val_mean": 0.15833333333333333,
+      "best_to_last_drop": 0.041666666666666685,
+      "k2": 0.0,
+      "last_k2": 0.0,
+      "k6": 0.0,
+      "last_k6": 0.0,
+      "k10": 0.0,
+      "last_k10": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.09,
+      "score": 0.16666666666666666
+    },
+    {
+      "run": "20260322-063208-v61-core-gate_ingress_pool1-32-p-lr10-s1234",
+      "regime": "core",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_core_gate_ingress_pool1_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.11666666666666667,
+      "best_to_last_drop": 0.125,
+      "k2": 0.03125,
+      "last_k2": 0.0,
+      "k6": 0.046875,
+      "last_k6": 0.0,
+      "k10": 0.03125,
+      "last_k10": 0.0,
+      "dense_mean": 0.0390625,
+      "last_dense_mean": 0.0,
+      "composite": 0.05549479166666667,
+      "score": 0.08072916666666666
+    },
+    {
+      "run": "20260322-063336-v61-core-gate_ingress_pool1_or_tightttl-32-p-lr08-s1234",
+      "regime": "core",
+      "arm": "gate_ingress_pool1_or_tightttl",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1|tightttl)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_core_gate_ingress_pool1_or_tightttl_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.20833333333333334,
+      "last_val": 0.16666666666666666,
+      "last5_val_mean": 0.15833333333333333,
+      "best_to_last_drop": 0.041666666666666685,
+      "k2": 0.0,
+      "last_k2": 0.0,
+      "k6": 0.0,
+      "last_k6": 0.0,
+      "k10": 0.0,
+      "last_k10": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.09,
+      "score": 0.16666666666666666
+    },
+    {
+      "run": "20260322-063504-v61-core-gate_ingress_pool1_or_tightttl-32-p-lr10-s1234",
+      "regime": "core",
+      "arm": "gate_ingress_pool1_or_tightttl",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1|tightttl)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_core_gate_ingress_pool1_or_tightttl_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.11666666666666667,
+      "best_to_last_drop": 0.125,
+      "k2": 0.03125,
+      "last_k2": 0.0,
+      "k6": 0.046875,
+      "last_k6": 0.0,
+      "k10": 0.03125,
+      "last_k10": 0.0,
+      "dense_mean": 0.0390625,
+      "last_dense_mean": 0.0,
+      "composite": 0.05549479166666667,
+      "score": 0.08072916666666666
+    },
+    {
+      "run": "20260322-063632-v61-core-gate_meta_a-32-p-lr08-s1234",
+      "regime": "core",
+      "arm": "gate_meta_a",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(A)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_core_gate_meta_a_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.20833333333333334,
+      "last_val": 0.16666666666666666,
+      "last5_val_mean": 0.15833333333333333,
+      "best_to_last_drop": 0.041666666666666685,
+      "k2": 0.0,
+      "last_k2": 0.0,
+      "k6": 0.0,
+      "last_k6": 0.0,
+      "k10": 0.0,
+      "last_k10": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.09,
+      "score": 0.16666666666666666
+    },
+    {
+      "run": "20260322-063800-v61-core-gate_meta_a-32-p-lr10-s1234",
+      "regime": "core",
+      "arm": "gate_meta_a",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(A)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_core_gate_meta_a_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.11666666666666667,
+      "best_to_last_drop": 0.125,
+      "k2": 0.03125,
+      "last_k2": 0.0,
+      "k6": 0.046875,
+      "last_k6": 0.0,
+      "k10": 0.03125,
+      "last_k10": 0.0,
+      "dense_mean": 0.0390625,
+      "last_dense_mean": 0.0,
+      "composite": 0.05549479166666667,
+      "score": 0.08072916666666666
+    },
+    {
+      "run": "20260322-063929-v61-core-gate_meta_b-32-p-lr08-s1234",
+      "regime": "core",
+      "arm": "gate_meta_b",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(B)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_core_gate_meta_b_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.20833333333333334,
+      "last_val": 0.16666666666666666,
+      "last5_val_mean": 0.15833333333333333,
+      "best_to_last_drop": 0.041666666666666685,
+      "k2": 0.0,
+      "last_k2": 0.0,
+      "k6": 0.0,
+      "last_k6": 0.0,
+      "k10": 0.0,
+      "last_k10": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.09,
+      "score": 0.16666666666666666
+    },
+    {
+      "run": "20260322-064057-v61-core-gate_meta_b-32-p-lr10-s1234",
+      "regime": "core",
+      "arm": "gate_meta_b",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(B)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_core_gate_meta_b_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.11666666666666667,
+      "best_to_last_drop": 0.125,
+      "k2": 0.03125,
+      "last_k2": 0.0,
+      "k6": 0.046875,
+      "last_k6": 0.0,
+      "k10": 0.03125,
+      "last_k10": 0.0,
+      "dense_mean": 0.0390625,
+      "last_dense_mean": 0.0,
+      "composite": 0.05549479166666667,
+      "score": 0.08072916666666666
+    },
+    {
+      "run": "20260322-064225-v61-core-gate_online_a-32-p-lr08-s1234",
+      "regime": "core",
+      "arm": "gate_online_a",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(A)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_core_gate_online_a_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.20833333333333334,
+      "last_val": 0.16666666666666666,
+      "last5_val_mean": 0.15833333333333333,
+      "best_to_last_drop": 0.041666666666666685,
+      "k2": 0.0,
+      "last_k2": 0.0,
+      "k6": 0.0,
+      "last_k6": 0.0,
+      "k10": 0.0,
+      "last_k10": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.09,
+      "score": 0.16666666666666666
+    },
+    {
+      "run": "20260322-064353-v61-core-gate_online_a-32-p-lr10-s1234",
+      "regime": "core",
+      "arm": "gate_online_a",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(A)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_core_gate_online_a_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.11666666666666667,
+      "best_to_last_drop": 0.125,
+      "k2": 0.03125,
+      "last_k2": 0.0,
+      "k6": 0.046875,
+      "last_k6": 0.0,
+      "k10": 0.03125,
+      "last_k10": 0.0,
+      "dense_mean": 0.0390625,
+      "last_dense_mean": 0.0,
+      "composite": 0.05549479166666667,
+      "score": 0.08072916666666666
+    },
+    {
+      "run": "20260322-064521-v61-core-gate_online_b-32-p-lr08-s1234",
+      "regime": "core",
+      "arm": "gate_online_b",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(B)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_core_gate_online_b_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.20833333333333334,
+      "last_val": 0.16666666666666666,
+      "last5_val_mean": 0.15833333333333333,
+      "best_to_last_drop": 0.041666666666666685,
+      "k2": 0.0,
+      "last_k2": 0.0,
+      "k6": 0.0,
+      "last_k6": 0.0,
+      "k10": 0.0,
+      "last_k10": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.09,
+      "score": 0.16666666666666666
+    },
+    {
+      "run": "20260322-064648-v61-core-gate_online_b-32-p-lr10-s1234",
+      "regime": "core",
+      "arm": "gate_online_b",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(B)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_core_gate_online_b_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.11666666666666667,
+      "best_to_last_drop": 0.125,
+      "k2": 0.03125,
+      "last_k2": 0.0,
+      "k6": 0.046875,
+      "last_k6": 0.0,
+      "k10": 0.03125,
+      "last_k10": 0.0,
+      "dense_mean": 0.0390625,
+      "last_dense_mean": 0.0,
+      "composite": 0.05549479166666667,
+      "score": 0.08072916666666666
+    },
+    {
+      "run": "20260322-062454-v61-core-gate_writers_le2-32-p-lr08-s1234",
+      "regime": "core",
+      "arm": "gate_writers_le2",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=2",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_core_gate_writers_le2_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.20833333333333334,
+      "last_val": 0.16666666666666666,
+      "last5_val_mean": 0.15833333333333333,
+      "best_to_last_drop": 0.041666666666666685,
+      "k2": 0.0,
+      "last_k2": 0.0,
+      "k6": 0.0,
+      "last_k6": 0.0,
+      "k10": 0.0,
+      "last_k10": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.09,
+      "score": 0.16666666666666666
+    },
+    {
+      "run": "20260322-062618-v61-core-gate_writers_le2-32-p-lr10-s1234",
+      "regime": "core",
+      "arm": "gate_writers_le2",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=2",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_core_gate_writers_le2_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.11666666666666667,
+      "best_to_last_drop": 0.125,
+      "k2": 0.03125,
+      "last_k2": 0.0,
+      "k6": 0.046875,
+      "last_k6": 0.0,
+      "k10": 0.03125,
+      "last_k10": 0.0,
+      "dense_mean": 0.0390625,
+      "last_dense_mean": 0.0,
+      "composite": 0.05549479166666667,
+      "score": 0.08072916666666666
+    },
+    {
+      "run": "20260322-062744-v61-core-gate_writers_le3-32-p-lr08-s1234",
+      "regime": "core",
+      "arm": "gate_writers_le3",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=3",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_core_gate_writers_le3_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.20833333333333334,
+      "last_val": 0.16666666666666666,
+      "last5_val_mean": 0.15833333333333333,
+      "best_to_last_drop": 0.041666666666666685,
+      "k2": 0.0,
+      "last_k2": 0.0,
+      "k6": 0.0,
+      "last_k6": 0.0,
+      "k10": 0.0,
+      "last_k10": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.09,
+      "score": 0.16666666666666666
+    },
+    {
+      "run": "20260322-062912-v61-core-gate_writers_le3-32-p-lr10-s1234",
+      "regime": "core",
+      "arm": "gate_writers_le3",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=3",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_core_gate_writers_le3_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.11666666666666667,
+      "best_to_last_drop": 0.125,
+      "k2": 0.03125,
+      "last_k2": 0.0,
+      "k6": 0.046875,
+      "last_k6": 0.0,
+      "k10": 0.03125,
+      "last_k10": 0.0,
+      "dense_mean": 0.0390625,
+      "last_dense_mean": 0.0,
+      "composite": 0.05549479166666667,
+      "score": 0.08072916666666666
+    },
+    {
+      "run": "20260322-062206-v61-core-visit_taskgrad_half-32-p-lr08-s1234",
+      "regime": "core",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_core_visit_taskgrad_half_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.20833333333333334,
+      "last_val": 0.16666666666666666,
+      "last5_val_mean": 0.15833333333333333,
+      "best_to_last_drop": 0.041666666666666685,
+      "k2": 0.0,
+      "last_k2": 0.0,
+      "k6": 0.0,
+      "last_k6": 0.0,
+      "k10": 0.0,
+      "last_k10": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.09,
+      "score": 0.16666666666666666
+    },
+    {
+      "run": "20260322-062329-v61-core-visit_taskgrad_half-32-p-lr10-s1234",
+      "regime": "core",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_core_visit_taskgrad_half_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.11666666666666667,
+      "best_to_last_drop": 0.125,
+      "k2": 0.03125,
+      "last_k2": 0.0,
+      "k6": 0.046875,
+      "last_k6": 0.0,
+      "k10": 0.03125,
+      "last_k10": 0.0,
+      "dense_mean": 0.0390625,
+      "last_dense_mean": 0.0,
+      "composite": 0.05549479166666667,
+      "score": 0.08072916666666666
+    },
+    {
+      "run": "20260322-061918-v61-core-visitonly-32-p-lr08-s1234",
+      "regime": "core",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_core_visitonly_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.20833333333333334,
+      "last_val": 0.16666666666666666,
+      "last5_val_mean": 0.15833333333333333,
+      "best_to_last_drop": 0.041666666666666685,
+      "k2": 0.0,
+      "last_k2": 0.0,
+      "k6": 0.0,
+      "last_k6": 0.0,
+      "k10": 0.0,
+      "last_k10": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.09,
+      "score": 0.16666666666666666
+    },
+    {
+      "run": "20260322-062042-v61-core-visitonly-32-p-lr10-s1234",
+      "regime": "core",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_core_visitonly_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.11666666666666667,
+      "best_to_last_drop": 0.125,
+      "k2": 0.03125,
+      "last_k2": 0.0,
+      "k6": 0.046875,
+      "last_k6": 0.0,
+      "k10": 0.03125,
+      "last_k10": 0.0,
+      "dense_mean": 0.0390625,
+      "last_dense_mean": 0.0,
+      "composite": 0.05549479166666667,
+      "score": 0.08072916666666666
+    },
+    {
+      "run": "20260322-063910-v61-t1-gate_ingress_pool1-32-p-lr08-s1234",
+      "regime": "t1",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_t1_gate_ingress_pool1_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.0,
+      "k14": 0.0,
+      "last_k14": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.026249999999999996,
+      "score": 0.041666666666666664
+    },
+    {
+      "run": "20260322-064042-v61-t1-gate_ingress_pool1-32-p-lr10-s1234",
+      "regime": "t1",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_t1_gate_ingress_pool1_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.046875,
+      "last_k4": 0.0,
+      "k8": 0.03125,
+      "last_k8": 0.0,
+      "k12": 0.015625,
+      "last_k12": 0.0,
+      "k14": 0.015625,
+      "last_k14": 0.0,
+      "dense_mean": 0.020833333333333332,
+      "last_dense_mean": 0.0,
+      "composite": 0.05020833333333333,
+      "score": 0.10416666666666666
+    },
+    {
+      "run": "20260322-064213-v61-t1-gate_ingress_pool1_or_tightttl-32-p-lr08-s1234",
+      "regime": "t1",
+      "arm": "gate_ingress_pool1_or_tightttl",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1|tightttl)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_t1_gate_ingress_pool1_or_tightttl_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.0,
+      "k14": 0.0,
+      "last_k14": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.026249999999999996,
+      "score": 0.041666666666666664
+    },
+    {
+      "run": "20260322-064344-v61-t1-gate_ingress_pool1_or_tightttl-32-p-lr10-s1234",
+      "regime": "t1",
+      "arm": "gate_ingress_pool1_or_tightttl",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1|tightttl)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_t1_gate_ingress_pool1_or_tightttl_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.046875,
+      "last_k4": 0.0,
+      "k8": 0.03125,
+      "last_k8": 0.0,
+      "k12": 0.015625,
+      "last_k12": 0.0,
+      "k14": 0.015625,
+      "last_k14": 0.0,
+      "dense_mean": 0.020833333333333332,
+      "last_dense_mean": 0.0,
+      "composite": 0.05020833333333333,
+      "score": 0.10416666666666666
+    },
+    {
+      "run": "20260322-064516-v61-t1-gate_meta_a-32-p-lr08-s1234",
+      "regime": "t1",
+      "arm": "gate_meta_a",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(A)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_t1_gate_meta_a_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.0,
+      "k14": 0.0,
+      "last_k14": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.026249999999999996,
+      "score": 0.041666666666666664
+    },
+    {
+      "run": "20260322-064647-v61-t1-gate_meta_a-32-p-lr10-s1234",
+      "regime": "t1",
+      "arm": "gate_meta_a",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(A)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_t1_gate_meta_a_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.046875,
+      "last_k4": 0.0,
+      "k8": 0.03125,
+      "last_k8": 0.0,
+      "k12": 0.015625,
+      "last_k12": 0.0,
+      "k14": 0.015625,
+      "last_k14": 0.0,
+      "dense_mean": 0.020833333333333332,
+      "last_dense_mean": 0.0,
+      "composite": 0.05020833333333333,
+      "score": 0.10416666666666666
+    },
+    {
+      "run": "20260322-064818-v61-t1-gate_meta_b-32-p-lr08-s1234",
+      "regime": "t1",
+      "arm": "gate_meta_b",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(B)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_t1_gate_meta_b_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.0,
+      "k14": 0.0,
+      "last_k14": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.026249999999999996,
+      "score": 0.041666666666666664
+    },
+    {
+      "run": "20260322-064945-v61-t1-gate_meta_b-32-p-lr10-s1234",
+      "regime": "t1",
+      "arm": "gate_meta_b",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(B)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_t1_gate_meta_b_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.046875,
+      "last_k4": 0.0,
+      "k8": 0.03125,
+      "last_k8": 0.0,
+      "k12": 0.015625,
+      "last_k12": 0.0,
+      "k14": 0.015625,
+      "last_k14": 0.0,
+      "dense_mean": 0.020833333333333332,
+      "last_dense_mean": 0.0,
+      "composite": 0.05020833333333333,
+      "score": 0.10416666666666666
+    },
+    {
+      "run": "20260322-065112-v61-t1-gate_online_a-32-p-lr08-s1234",
+      "regime": "t1",
+      "arm": "gate_online_a",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(A)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_t1_gate_online_a_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.0,
+      "k14": 0.0,
+      "last_k14": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.026249999999999996,
+      "score": 0.041666666666666664
+    },
+    {
+      "run": "20260322-065240-v61-t1-gate_online_a-32-p-lr10-s1234",
+      "regime": "t1",
+      "arm": "gate_online_a",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(A)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_t1_gate_online_a_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.046875,
+      "last_k4": 0.0,
+      "k8": 0.03125,
+      "last_k8": 0.0,
+      "k12": 0.015625,
+      "last_k12": 0.0,
+      "k14": 0.015625,
+      "last_k14": 0.0,
+      "dense_mean": 0.020833333333333332,
+      "last_dense_mean": 0.0,
+      "composite": 0.05020833333333333,
+      "score": 0.10416666666666666
+    },
+    {
+      "run": "20260322-065407-v61-t1-gate_online_b-32-p-lr08-s1234",
+      "regime": "t1",
+      "arm": "gate_online_b",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(B)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_t1_gate_online_b_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.0,
+      "k14": 0.0,
+      "last_k14": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.026249999999999996,
+      "score": 0.041666666666666664
+    },
+    {
+      "run": "20260322-065534-v61-t1-gate_online_b-32-p-lr10-s1234",
+      "regime": "t1",
+      "arm": "gate_online_b",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(B)",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_t1_gate_online_b_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.046875,
+      "last_k4": 0.0,
+      "k8": 0.03125,
+      "last_k8": 0.0,
+      "k12": 0.015625,
+      "last_k12": 0.0,
+      "k14": 0.015625,
+      "last_k14": 0.0,
+      "dense_mean": 0.020833333333333332,
+      "last_dense_mean": 0.0,
+      "composite": 0.05020833333333333,
+      "score": 0.10416666666666666
+    },
+    {
+      "run": "20260322-063306-v61-t1-gate_writers_le2-32-p-lr08-s1234",
+      "regime": "t1",
+      "arm": "gate_writers_le2",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=2",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_t1_gate_writers_le2_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.0,
+      "k14": 0.0,
+      "last_k14": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.026249999999999996,
+      "score": 0.041666666666666664
+    },
+    {
+      "run": "20260322-063437-v61-t1-gate_writers_le2-32-p-lr10-s1234",
+      "regime": "t1",
+      "arm": "gate_writers_le2",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=2",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_t1_gate_writers_le2_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.046875,
+      "last_k4": 0.0,
+      "k8": 0.03125,
+      "last_k8": 0.0,
+      "k12": 0.015625,
+      "last_k12": 0.0,
+      "k14": 0.015625,
+      "last_k14": 0.0,
+      "dense_mean": 0.020833333333333332,
+      "last_dense_mean": 0.0,
+      "composite": 0.05020833333333333,
+      "score": 0.10416666666666666
+    },
+    {
+      "run": "20260322-063608-v61-t1-gate_writers_le3-32-p-lr08-s1234",
+      "regime": "t1",
+      "arm": "gate_writers_le3",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=3",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_t1_gate_writers_le3_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.0,
+      "k14": 0.0,
+      "last_k14": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.026249999999999996,
+      "score": 0.041666666666666664
+    },
+    {
+      "run": "20260322-063740-v61-t1-gate_writers_le3-32-p-lr10-s1234",
+      "regime": "t1",
+      "arm": "gate_writers_le3",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=3",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_t1_gate_writers_le3_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.046875,
+      "last_k4": 0.0,
+      "k8": 0.03125,
+      "last_k8": 0.0,
+      "k12": 0.015625,
+      "last_k12": 0.0,
+      "k14": 0.015625,
+      "last_k14": 0.0,
+      "dense_mean": 0.020833333333333332,
+      "last_dense_mean": 0.0,
+      "composite": 0.05020833333333333,
+      "score": 0.10416666666666666
+    },
+    {
+      "run": "20260322-063004-v61-t1-visit_taskgrad_half-32-p-lr08-s1234",
+      "regime": "t1",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_t1_visit_taskgrad_half_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.0,
+      "k14": 0.0,
+      "last_k14": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.026249999999999996,
+      "score": 0.041666666666666664
+    },
+    {
+      "run": "20260322-063135-v61-t1-visit_taskgrad_half-32-p-lr10-s1234",
+      "regime": "t1",
+      "arm": "visit_taskgrad_half",
+      "family": "visit_taskgrad_half",
+      "family_label": "VT-0.5",
+      "category": "static",
+      "arm_label": "VT-0.5",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_t1_visit_taskgrad_half_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.046875,
+      "last_k4": 0.0,
+      "k8": 0.03125,
+      "last_k8": 0.0,
+      "k12": 0.015625,
+      "last_k12": 0.0,
+      "k14": 0.015625,
+      "last_k14": 0.0,
+      "dense_mean": 0.020833333333333332,
+      "last_dense_mean": 0.0,
+      "composite": 0.05020833333333333,
+      "score": 0.10416666666666666
+    },
+    {
+      "run": "20260322-062701-v61-t1-visitonly-32-p-lr08-s1234",
+      "regime": "t1",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr08",
+      "config_name": "configs/v61_t1_visitonly_32_p.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 420,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.0,
+      "k14": 0.0,
+      "last_k14": 0.0,
+      "dense_mean": 0.0,
+      "last_dense_mean": 0.0,
+      "composite": 0.026249999999999996,
+      "score": 0.041666666666666664
+    },
+    {
+      "run": "20260322-062832-v61-t1-visitonly-32-p-lr10-s1234",
+      "regime": "t1",
+      "arm": "visitonly",
+      "family": "visitonly",
+      "family_label": "V",
+      "category": "static",
+      "arm_label": "V",
+      "schedule": "p",
+      "seed": 1234,
+      "tag": "lr10",
+      "config_name": "configs/v61_t1_visitonly_32_p.yaml",
+      "lr": 0.0002,
+      "lr_multiplier": 1.0,
+      "train_steps": 420,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.05833333333333333,
+      "best_to_last_drop": 0.08333333333333333,
+      "k4": 0.046875,
+      "last_k4": 0.0,
+      "k8": 0.03125,
+      "last_k8": 0.0,
+      "k12": 0.015625,
+      "last_k12": 0.0,
+      "k14": 0.015625,
+      "last_k14": 0.0,
+      "dense_mean": 0.020833333333333332,
+      "last_dense_mean": 0.0,
+      "composite": 0.05020833333333333,
+      "score": 0.10416666666666666
+    },
+    {
+      "run": "20260322-070619-v61-core-gate_ingress_pool1-32-s-s1234",
+      "regime": "core",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "s",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_core_gate_ingress_pool1_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.25,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.049999999999999996,
+      "best_to_last_drop": 0.16666666666666669,
+      "k2": 0.03125,
+      "last_k2": 0.03125,
+      "k6": 0.041666666666666664,
+      "last_k6": 0.041666666666666664,
+      "k10": 0.0625,
+      "last_k10": 0.0625,
+      "dense_mean": 0.05208333333333333,
+      "last_dense_mean": 0.05208333333333333,
+      "composite": 0.06260416666666666,
+      "score": 0.13541666666666666
+    },
+    {
+      "run": "20260322-070852-v61-core-gate_ingress_pool1-32-s-s2234",
+      "regime": "core",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "s",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_core_gate_ingress_pool1_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.06702898550724637,
+      "best_to_last_drop": 0.0,
+      "k2": 0.03125,
+      "last_k2": 0.03125,
+      "k6": 0.052083333333333336,
+      "last_k6": 0.052083333333333336,
+      "k10": 0.0625,
+      "last_k10": 0.0625,
+      "dense_mean": 0.05729166666666667,
+      "last_dense_mean": 0.05729166666666667,
+      "composite": 0.06835371376811594,
+      "score": 0.140625
+    },
+    {
+      "run": "20260322-071122-v61-core-gate_meta_a-32-s-s1234",
+      "regime": "core",
+      "arm": "gate_meta_a",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(A)",
+      "schedule": "s",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_core_gate_meta_a_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.25,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.049999999999999996,
+      "best_to_last_drop": 0.16666666666666669,
+      "k2": 0.03125,
+      "last_k2": 0.03125,
+      "k6": 0.041666666666666664,
+      "last_k6": 0.041666666666666664,
+      "k10": 0.0625,
+      "last_k10": 0.0625,
+      "dense_mean": 0.05208333333333333,
+      "last_dense_mean": 0.05208333333333333,
+      "composite": 0.06260416666666666,
+      "score": 0.13541666666666666
+    },
+    {
+      "run": "20260322-071354-v61-core-gate_meta_a-32-s-s2234",
+      "regime": "core",
+      "arm": "gate_meta_a",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(A)",
+      "schedule": "s",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_core_gate_meta_a_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.06702898550724637,
+      "best_to_last_drop": 0.0,
+      "k2": 0.03125,
+      "last_k2": 0.03125,
+      "k6": 0.052083333333333336,
+      "last_k6": 0.052083333333333336,
+      "k10": 0.0625,
+      "last_k10": 0.0625,
+      "dense_mean": 0.05729166666666667,
+      "last_dense_mean": 0.05729166666666667,
+      "composite": 0.06835371376811594,
+      "score": 0.140625
+    },
+    {
+      "run": "20260322-071627-v61-core-gate_online_a-32-s-s1234",
+      "regime": "core",
+      "arm": "gate_online_a",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(A)",
+      "schedule": "s",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_core_gate_online_a_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.25,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.049999999999999996,
+      "best_to_last_drop": 0.16666666666666669,
+      "k2": 0.03125,
+      "last_k2": 0.03125,
+      "k6": 0.041666666666666664,
+      "last_k6": 0.041666666666666664,
+      "k10": 0.0625,
+      "last_k10": 0.0625,
+      "dense_mean": 0.05208333333333333,
+      "last_dense_mean": 0.05208333333333333,
+      "composite": 0.06260416666666666,
+      "score": 0.13541666666666666
+    },
+    {
+      "run": "20260322-071900-v61-core-gate_online_a-32-s-s2234",
+      "regime": "core",
+      "arm": "gate_online_a",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(A)",
+      "schedule": "s",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_core_gate_online_a_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.06702898550724637,
+      "best_to_last_drop": 0.0,
+      "k2": 0.03125,
+      "last_k2": 0.03125,
+      "k6": 0.052083333333333336,
+      "last_k6": 0.052083333333333336,
+      "k10": 0.0625,
+      "last_k10": 0.0625,
+      "dense_mean": 0.05729166666666667,
+      "last_dense_mean": 0.05729166666666667,
+      "composite": 0.06835371376811594,
+      "score": 0.140625
+    },
+    {
+      "run": "20260322-070118-v61-core-gate_writers_le2-32-s-s1234",
+      "regime": "core",
+      "arm": "gate_writers_le2",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=2",
+      "schedule": "s",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_core_gate_writers_le2_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.25,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.049999999999999996,
+      "best_to_last_drop": 0.16666666666666669,
+      "k2": 0.03125,
+      "last_k2": 0.03125,
+      "k6": 0.041666666666666664,
+      "last_k6": 0.041666666666666664,
+      "k10": 0.0625,
+      "last_k10": 0.0625,
+      "dense_mean": 0.05208333333333333,
+      "last_dense_mean": 0.05208333333333333,
+      "composite": 0.06260416666666666,
+      "score": 0.13541666666666666
+    },
+    {
+      "run": "20260322-070347-v61-core-gate_writers_le2-32-s-s2234",
+      "regime": "core",
+      "arm": "gate_writers_le2",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=2",
+      "schedule": "s",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_core_gate_writers_le2_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.08333333333333333,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.06702898550724637,
+      "best_to_last_drop": 0.0,
+      "k2": 0.03125,
+      "last_k2": 0.03125,
+      "k6": 0.052083333333333336,
+      "last_k6": 0.052083333333333336,
+      "k10": 0.0625,
+      "last_k10": 0.0625,
+      "dense_mean": 0.05729166666666667,
+      "last_dense_mean": 0.05729166666666667,
+      "composite": 0.06835371376811594,
+      "score": 0.140625
+    },
+    {
+      "run": "20260322-072647-v61-t1-gate_ingress_pool1-32-s-s1234",
+      "regime": "t1",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "s",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t1_gate_ingress_pool1_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.016666666666666666,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.041666666666666664,
+      "last_k4": 0.041666666666666664,
+      "k8": 0.020833333333333332,
+      "last_k8": 0.020833333333333332,
+      "k12": 0.020833333333333332,
+      "last_k12": 0.020833333333333332,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.041666666666666664,
+      "dense_mean": 0.027777777777777776,
+      "last_dense_mean": 0.027777777777777776,
+      "composite": 0.030416666666666665,
+      "score": 0.06944444444444445
+    },
+    {
+      "run": "20260322-072925-v61-t1-gate_ingress_pool1-32-s-s2234",
+      "regime": "t1",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "s",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t1_gate_ingress_pool1_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.125,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.07572463768115942,
+      "best_to_last_drop": 0.04166666666666667,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.03125,
+      "last_k12": 0.03125,
+      "k14": 0.010416666666666666,
+      "last_k14": 0.010416666666666666,
+      "dense_mean": 0.013888888888888888,
+      "last_dense_mean": 0.013888888888888888,
+      "composite": 0.05056159420289855,
+      "score": 0.09722222222222221
+    },
+    {
+      "run": "20260322-073201-v61-t1-gate_meta_a-32-s-s1234",
+      "regime": "t1",
+      "arm": "gate_meta_a",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(A)",
+      "schedule": "s",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t1_gate_meta_a_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.016666666666666666,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.041666666666666664,
+      "last_k4": 0.041666666666666664,
+      "k8": 0.020833333333333332,
+      "last_k8": 0.020833333333333332,
+      "k12": 0.020833333333333332,
+      "last_k12": 0.020833333333333332,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.041666666666666664,
+      "dense_mean": 0.027777777777777776,
+      "last_dense_mean": 0.027777777777777776,
+      "composite": 0.030416666666666665,
+      "score": 0.06944444444444445
+    },
+    {
+      "run": "20260322-073441-v61-t1-gate_meta_a-32-s-s2234",
+      "regime": "t1",
+      "arm": "gate_meta_a",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(A)",
+      "schedule": "s",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t1_gate_meta_a_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.125,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.07572463768115942,
+      "best_to_last_drop": 0.04166666666666667,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.03125,
+      "last_k12": 0.03125,
+      "k14": 0.010416666666666666,
+      "last_k14": 0.010416666666666666,
+      "dense_mean": 0.013888888888888888,
+      "last_dense_mean": 0.013888888888888888,
+      "composite": 0.05056159420289855,
+      "score": 0.09722222222222221
+    },
+    {
+      "run": "20260322-073719-v61-t1-gate_online_a-32-s-s1234",
+      "regime": "t1",
+      "arm": "gate_online_a",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(A)",
+      "schedule": "s",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t1_gate_online_a_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.016666666666666666,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.041666666666666664,
+      "last_k4": 0.041666666666666664,
+      "k8": 0.020833333333333332,
+      "last_k8": 0.020833333333333332,
+      "k12": 0.020833333333333332,
+      "last_k12": 0.020833333333333332,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.041666666666666664,
+      "dense_mean": 0.027777777777777776,
+      "last_dense_mean": 0.027777777777777776,
+      "composite": 0.030416666666666665,
+      "score": 0.06944444444444445
+    },
+    {
+      "run": "20260322-073954-v61-t1-gate_online_a-32-s-s2234",
+      "regime": "t1",
+      "arm": "gate_online_a",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(A)",
+      "schedule": "s",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t1_gate_online_a_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.125,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.07572463768115942,
+      "best_to_last_drop": 0.04166666666666667,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.03125,
+      "last_k12": 0.03125,
+      "k14": 0.010416666666666666,
+      "last_k14": 0.010416666666666666,
+      "dense_mean": 0.013888888888888888,
+      "last_dense_mean": 0.013888888888888888,
+      "composite": 0.05056159420289855,
+      "score": 0.09722222222222221
+    },
+    {
+      "run": "20260322-072130-v61-t1-gate_writers_le2-32-s-s1234",
+      "regime": "t1",
+      "arm": "gate_writers_le2",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=2",
+      "schedule": "s",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t1_gate_writers_le2_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.125,
+      "last_val": 0.041666666666666664,
+      "last5_val_mean": 0.016666666666666666,
+      "best_to_last_drop": 0.08333333333333334,
+      "k4": 0.041666666666666664,
+      "last_k4": 0.041666666666666664,
+      "k8": 0.020833333333333332,
+      "last_k8": 0.020833333333333332,
+      "k12": 0.020833333333333332,
+      "last_k12": 0.020833333333333332,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.041666666666666664,
+      "dense_mean": 0.027777777777777776,
+      "last_dense_mean": 0.027777777777777776,
+      "composite": 0.030416666666666665,
+      "score": 0.06944444444444445
+    },
+    {
+      "run": "20260322-072409-v61-t1-gate_writers_le2-32-s-s2234",
+      "regime": "t1",
+      "arm": "gate_writers_le2",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=2",
+      "schedule": "s",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t1_gate_writers_le2_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.125,
+      "last_val": 0.08333333333333333,
+      "last5_val_mean": 0.07572463768115942,
+      "best_to_last_drop": 0.04166666666666667,
+      "k4": 0.0,
+      "last_k4": 0.0,
+      "k8": 0.0,
+      "last_k8": 0.0,
+      "k12": 0.03125,
+      "last_k12": 0.03125,
+      "k14": 0.010416666666666666,
+      "last_k14": 0.010416666666666666,
+      "dense_mean": 0.013888888888888888,
+      "last_dense_mean": 0.013888888888888888,
+      "composite": 0.05056159420289855,
+      "score": 0.09722222222222221
+    },
+    {
+      "run": "20260322-074744-v61-t2a-gate_ingress_pool1-32-s-s1234",
+      "regime": "t2a",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "s",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t2a_gate_ingress_pool1_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.0,
+      "last5_val_mean": 0.0,
+      "best_to_last_drop": 0.041666666666666664,
+      "k4": 0.020833333333333332,
+      "last_k4": 0.020833333333333332,
+      "k8": 0.041666666666666664,
+      "last_k8": 0.041666666666666664,
+      "k12": 0.0625,
+      "last_k12": 0.0625,
+      "k14": 0.03125,
+      "last_k14": 0.03125,
+      "dense_mean": 0.04513888888888889,
+      "last_dense_mean": 0.04513888888888889,
+      "composite": 0.0203125,
+      "score": 0.04513888888888889
+    },
+    {
+      "run": "20260322-075022-v61-t2a-gate_ingress_pool1-32-s-s2234",
+      "regime": "t2a",
+      "arm": "gate_ingress_pool1",
+      "family": "g_ingress",
+      "family_label": "G_ingress",
+      "category": "gate",
+      "arm_label": "G_ingress(pool1)",
+      "schedule": "s",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t2a_gate_ingress_pool1_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.043478260869565216,
+      "last5_val_mean": 0.06739130434782609,
+      "best_to_last_drop": 0.12318840579710144,
+      "k4": 0.010526315789473684,
+      "last_k4": 0.0,
+      "k8": 0.021052631578947368,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.021739130434782608,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.010526315789473684,
+      "dense_mean": 0.020906432748538012,
+      "last_dense_mean": 0.010755148741418764,
+      "composite": 0.03810354691075515,
+      "score": 0.06438469361810323
+    },
+    {
+      "run": "20260322-075259-v61-t2a-gate_meta_a-32-s-s1234",
+      "regime": "t2a",
+      "arm": "gate_meta_a",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(A)",
+      "schedule": "s",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t2a_gate_meta_a_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.0,
+      "last5_val_mean": 0.0,
+      "best_to_last_drop": 0.041666666666666664,
+      "k4": 0.020833333333333332,
+      "last_k4": 0.020833333333333332,
+      "k8": 0.041666666666666664,
+      "last_k8": 0.041666666666666664,
+      "k12": 0.0625,
+      "last_k12": 0.0625,
+      "k14": 0.03125,
+      "last_k14": 0.03125,
+      "dense_mean": 0.04513888888888889,
+      "last_dense_mean": 0.04513888888888889,
+      "composite": 0.0203125,
+      "score": 0.04513888888888889
+    },
+    {
+      "run": "20260322-075536-v61-t2a-gate_meta_a-32-s-s2234",
+      "regime": "t2a",
+      "arm": "gate_meta_a",
+      "family": "g_meta",
+      "family_label": "G_meta",
+      "category": "gate",
+      "arm_label": "G_meta(A)",
+      "schedule": "s",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t2a_gate_meta_a_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.043478260869565216,
+      "last5_val_mean": 0.06739130434782609,
+      "best_to_last_drop": 0.12318840579710144,
+      "k4": 0.010526315789473684,
+      "last_k4": 0.0,
+      "k8": 0.021052631578947368,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.021739130434782608,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.010526315789473684,
+      "dense_mean": 0.020906432748538012,
+      "last_dense_mean": 0.010755148741418764,
+      "composite": 0.03810354691075515,
+      "score": 0.06438469361810323
+    },
+    {
+      "run": "20260322-075811-v61-t2a-gate_online_a-32-s-s1234",
+      "regime": "t2a",
+      "arm": "gate_online_a",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(A)",
+      "schedule": "s",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t2a_gate_online_a_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.0,
+      "last5_val_mean": 0.0,
+      "best_to_last_drop": 0.041666666666666664,
+      "k4": 0.020833333333333332,
+      "last_k4": 0.020833333333333332,
+      "k8": 0.041666666666666664,
+      "last_k8": 0.041666666666666664,
+      "k12": 0.0625,
+      "last_k12": 0.0625,
+      "k14": 0.03125,
+      "last_k14": 0.03125,
+      "dense_mean": 0.04513888888888889,
+      "last_dense_mean": 0.04513888888888889,
+      "composite": 0.0203125,
+      "score": 0.04513888888888889
+    },
+    {
+      "run": "20260322-080049-v61-t2a-gate_online_a-32-s-s2234",
+      "regime": "t2a",
+      "arm": "gate_online_a",
+      "family": "g_online",
+      "family_label": "G_online",
+      "category": "gate",
+      "arm_label": "G_online(A)",
+      "schedule": "s",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t2a_gate_online_a_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.043478260869565216,
+      "last5_val_mean": 0.06739130434782609,
+      "best_to_last_drop": 0.12318840579710144,
+      "k4": 0.010526315789473684,
+      "last_k4": 0.0,
+      "k8": 0.021052631578947368,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.021739130434782608,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.010526315789473684,
+      "dense_mean": 0.020906432748538012,
+      "last_dense_mean": 0.010755148741418764,
+      "composite": 0.03810354691075515,
+      "score": 0.06438469361810323
+    },
+    {
+      "run": "20260322-074233-v61-t2a-gate_writers_le2-32-s-s1234",
+      "regime": "t2a",
+      "arm": "gate_writers_le2",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=2",
+      "schedule": "s",
+      "seed": 1234,
+      "tag": "",
+      "config_name": "configs/v61_t2a_gate_writers_le2_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.041666666666666664,
+      "last_val": 0.0,
+      "last5_val_mean": 0.0,
+      "best_to_last_drop": 0.041666666666666664,
+      "k4": 0.020833333333333332,
+      "last_k4": 0.020833333333333332,
+      "k8": 0.041666666666666664,
+      "last_k8": 0.041666666666666664,
+      "k12": 0.0625,
+      "last_k12": 0.0625,
+      "k14": 0.03125,
+      "last_k14": 0.03125,
+      "dense_mean": 0.04513888888888889,
+      "last_dense_mean": 0.04513888888888889,
+      "composite": 0.0203125,
+      "score": 0.04513888888888889
+    },
+    {
+      "run": "20260322-074510-v61-t2a-gate_writers_le2-32-s-s2234",
+      "regime": "t2a",
+      "arm": "gate_writers_le2",
+      "family": "g_writers",
+      "family_label": "G_writers",
+      "category": "gate",
+      "arm_label": "G_writers<=2",
+      "schedule": "s",
+      "seed": 2234,
+      "tag": "",
+      "config_name": "configs/v61_t2a_gate_writers_le2_32_s.yaml",
+      "lr": 0.00016,
+      "lr_multiplier": 0.8,
+      "train_steps": 1260,
+      "best_val": 0.16666666666666666,
+      "last_val": 0.043478260869565216,
+      "last5_val_mean": 0.06739130434782609,
+      "best_to_last_drop": 0.12318840579710144,
+      "k4": 0.010526315789473684,
+      "last_k4": 0.0,
+      "k8": 0.021052631578947368,
+      "last_k8": 0.0,
+      "k12": 0.0,
+      "last_k12": 0.021739130434782608,
+      "k14": 0.041666666666666664,
+      "last_k14": 0.010526315789473684,
+      "dense_mean": 0.020906432748538012,
+      "last_dense_mean": 0.010755148741418764,
+      "composite": 0.03810354691075515,
+      "score": 0.06438469361810323
+    }
+  ],
+  "pilot_rankings": {
+    "g_ingress": {
+      "label": "G_ingress",
+      "candidates": [
+        {
+          "candidate": "gate_ingress_pool1@lr0.8",
+          "arm": "gate_ingress_pool1",
+          "label": "G_ingress(pool1)",
+          "lr_multiplier": 0.8,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666669,
+              "std": 0.05892556509887897
+            },
+            "last_val": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "last5_val_mean": {
+              "mean": 0.10833333333333332,
+              "std": 0.07071067811865475
+            },
+            "best_to_last_drop": {
+              "mean": 0.06250000000000001,
+              "std": 0.029462782549439473
+            },
+            "dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.058124999999999996,
+              "std": 0.045078057300642405
+            },
+            "score": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "lr_multiplier": {
+              "mean": 0.8,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-063040-v61-core-gate_ingress_pool1-32-p-lr08-s1234",
+              "20260322-063910-v61-t1-gate_ingress_pool1-32-p-lr08-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "gate_ingress_pool1_or_tightttl@lr0.8",
+          "arm": "gate_ingress_pool1_or_tightttl",
+          "label": "G_ingress(pool1|tightttl)",
+          "lr_multiplier": 0.8,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666669,
+              "std": 0.05892556509887897
+            },
+            "last_val": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "last5_val_mean": {
+              "mean": 0.10833333333333332,
+              "std": 0.07071067811865475
+            },
+            "best_to_last_drop": {
+              "mean": 0.06250000000000001,
+              "std": 0.029462782549439473
+            },
+            "dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.058124999999999996,
+              "std": 0.045078057300642405
+            },
+            "score": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "lr_multiplier": {
+              "mean": 0.8,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-063336-v61-core-gate_ingress_pool1_or_tightttl-32-p-lr08-s1234",
+              "20260322-064213-v61-t1-gate_ingress_pool1_or_tightttl-32-p-lr08-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "gate_ingress_pool1@lr1.0",
+          "arm": "gate_ingress_pool1",
+          "label": "G_ingress(pool1)",
+          "lr_multiplier": 1.0,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666666,
+              "std": 0.0
+            },
+            "last_val": {
+              "mean": 0.0625,
+              "std": 0.02946278254943948
+            },
+            "last5_val_mean": {
+              "mean": 0.0875,
+              "std": 0.04124789556921528
+            },
+            "best_to_last_drop": {
+              "mean": 0.10416666666666666,
+              "std": 0.029462782549439483
+            },
+            "dense_mean": {
+              "mean": 0.029947916666666664,
+              "std": 0.012889967365379774
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.0528515625,
+              "std": 0.0037380905359601395
+            },
+            "score": {
+              "mean": 0.09244791666666666,
+              "std": 0.016572815184059706
+            },
+            "lr_multiplier": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-063208-v61-core-gate_ingress_pool1-32-p-lr10-s1234",
+              "20260322-064042-v61-t1-gate_ingress_pool1-32-p-lr10-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "gate_ingress_pool1_or_tightttl@lr1.0",
+          "arm": "gate_ingress_pool1_or_tightttl",
+          "label": "G_ingress(pool1|tightttl)",
+          "lr_multiplier": 1.0,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666666,
+              "std": 0.0
+            },
+            "last_val": {
+              "mean": 0.0625,
+              "std": 0.02946278254943948
+            },
+            "last5_val_mean": {
+              "mean": 0.0875,
+              "std": 0.04124789556921528
+            },
+            "best_to_last_drop": {
+              "mean": 0.10416666666666666,
+              "std": 0.029462782549439483
+            },
+            "dense_mean": {
+              "mean": 0.029947916666666664,
+              "std": 0.012889967365379774
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.0528515625,
+              "std": 0.0037380905359601395
+            },
+            "score": {
+              "mean": 0.09244791666666666,
+              "std": 0.016572815184059706
+            },
+            "lr_multiplier": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-063504-v61-core-gate_ingress_pool1_or_tightttl-32-p-lr10-s1234",
+              "20260322-064344-v61-t1-gate_ingress_pool1_or_tightttl-32-p-lr10-s1234"
+            ]
+          }
+        }
+      ],
+      "best": {
+        "candidate": "gate_ingress_pool1@lr0.8",
+        "arm": "gate_ingress_pool1",
+        "label": "G_ingress(pool1)",
+        "lr_multiplier": 0.8,
+        "summary": {
+          "count": 2,
+          "best_val": {
+            "mean": 0.16666666666666669,
+            "std": 0.05892556509887897
+          },
+          "last_val": {
+            "mean": 0.10416666666666666,
+            "std": 0.08838834764831843
+          },
+          "last5_val_mean": {
+            "mean": 0.10833333333333332,
+            "std": 0.07071067811865475
+          },
+          "best_to_last_drop": {
+            "mean": 0.06250000000000001,
+            "std": 0.029462782549439473
+          },
+          "dense_mean": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "last_dense_mean": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "composite": {
+            "mean": 0.058124999999999996,
+            "std": 0.045078057300642405
+          },
+          "score": {
+            "mean": 0.10416666666666666,
+            "std": 0.08838834764831843
+          },
+          "lr_multiplier": {
+            "mean": 0.8,
+            "std": 0.0
+          },
+          "runs": [
+            "20260322-063040-v61-core-gate_ingress_pool1-32-p-lr08-s1234",
+            "20260322-063910-v61-t1-gate_ingress_pool1-32-p-lr08-s1234"
+          ]
+        }
+      }
+    },
+    "g_meta": {
+      "label": "G_meta",
+      "candidates": [
+        {
+          "candidate": "gate_meta_a@lr0.8",
+          "arm": "gate_meta_a",
+          "label": "G_meta(A)",
+          "lr_multiplier": 0.8,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666669,
+              "std": 0.05892556509887897
+            },
+            "last_val": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "last5_val_mean": {
+              "mean": 0.10833333333333332,
+              "std": 0.07071067811865475
+            },
+            "best_to_last_drop": {
+              "mean": 0.06250000000000001,
+              "std": 0.029462782549439473
+            },
+            "dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.058124999999999996,
+              "std": 0.045078057300642405
+            },
+            "score": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "lr_multiplier": {
+              "mean": 0.8,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-063632-v61-core-gate_meta_a-32-p-lr08-s1234",
+              "20260322-064516-v61-t1-gate_meta_a-32-p-lr08-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "gate_meta_b@lr0.8",
+          "arm": "gate_meta_b",
+          "label": "G_meta(B)",
+          "lr_multiplier": 0.8,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666669,
+              "std": 0.05892556509887897
+            },
+            "last_val": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "last5_val_mean": {
+              "mean": 0.10833333333333332,
+              "std": 0.07071067811865475
+            },
+            "best_to_last_drop": {
+              "mean": 0.06250000000000001,
+              "std": 0.029462782549439473
+            },
+            "dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.058124999999999996,
+              "std": 0.045078057300642405
+            },
+            "score": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "lr_multiplier": {
+              "mean": 0.8,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-063929-v61-core-gate_meta_b-32-p-lr08-s1234",
+              "20260322-064818-v61-t1-gate_meta_b-32-p-lr08-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "gate_meta_a@lr1.0",
+          "arm": "gate_meta_a",
+          "label": "G_meta(A)",
+          "lr_multiplier": 1.0,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666666,
+              "std": 0.0
+            },
+            "last_val": {
+              "mean": 0.0625,
+              "std": 0.02946278254943948
+            },
+            "last5_val_mean": {
+              "mean": 0.0875,
+              "std": 0.04124789556921528
+            },
+            "best_to_last_drop": {
+              "mean": 0.10416666666666666,
+              "std": 0.029462782549439483
+            },
+            "dense_mean": {
+              "mean": 0.029947916666666664,
+              "std": 0.012889967365379774
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.0528515625,
+              "std": 0.0037380905359601395
+            },
+            "score": {
+              "mean": 0.09244791666666666,
+              "std": 0.016572815184059706
+            },
+            "lr_multiplier": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-063800-v61-core-gate_meta_a-32-p-lr10-s1234",
+              "20260322-064647-v61-t1-gate_meta_a-32-p-lr10-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "gate_meta_b@lr1.0",
+          "arm": "gate_meta_b",
+          "label": "G_meta(B)",
+          "lr_multiplier": 1.0,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666666,
+              "std": 0.0
+            },
+            "last_val": {
+              "mean": 0.0625,
+              "std": 0.02946278254943948
+            },
+            "last5_val_mean": {
+              "mean": 0.0875,
+              "std": 0.04124789556921528
+            },
+            "best_to_last_drop": {
+              "mean": 0.10416666666666666,
+              "std": 0.029462782549439483
+            },
+            "dense_mean": {
+              "mean": 0.029947916666666664,
+              "std": 0.012889967365379774
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.0528515625,
+              "std": 0.0037380905359601395
+            },
+            "score": {
+              "mean": 0.09244791666666666,
+              "std": 0.016572815184059706
+            },
+            "lr_multiplier": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-064057-v61-core-gate_meta_b-32-p-lr10-s1234",
+              "20260322-064945-v61-t1-gate_meta_b-32-p-lr10-s1234"
+            ]
+          }
+        }
+      ],
+      "best": {
+        "candidate": "gate_meta_a@lr0.8",
+        "arm": "gate_meta_a",
+        "label": "G_meta(A)",
+        "lr_multiplier": 0.8,
+        "summary": {
+          "count": 2,
+          "best_val": {
+            "mean": 0.16666666666666669,
+            "std": 0.05892556509887897
+          },
+          "last_val": {
+            "mean": 0.10416666666666666,
+            "std": 0.08838834764831843
+          },
+          "last5_val_mean": {
+            "mean": 0.10833333333333332,
+            "std": 0.07071067811865475
+          },
+          "best_to_last_drop": {
+            "mean": 0.06250000000000001,
+            "std": 0.029462782549439473
+          },
+          "dense_mean": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "last_dense_mean": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "composite": {
+            "mean": 0.058124999999999996,
+            "std": 0.045078057300642405
+          },
+          "score": {
+            "mean": 0.10416666666666666,
+            "std": 0.08838834764831843
+          },
+          "lr_multiplier": {
+            "mean": 0.8,
+            "std": 0.0
+          },
+          "runs": [
+            "20260322-063632-v61-core-gate_meta_a-32-p-lr08-s1234",
+            "20260322-064516-v61-t1-gate_meta_a-32-p-lr08-s1234"
+          ]
+        }
+      }
+    },
+    "g_online": {
+      "label": "G_online",
+      "candidates": [
+        {
+          "candidate": "gate_online_a@lr0.8",
+          "arm": "gate_online_a",
+          "label": "G_online(A)",
+          "lr_multiplier": 0.8,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666669,
+              "std": 0.05892556509887897
+            },
+            "last_val": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "last5_val_mean": {
+              "mean": 0.10833333333333332,
+              "std": 0.07071067811865475
+            },
+            "best_to_last_drop": {
+              "mean": 0.06250000000000001,
+              "std": 0.029462782549439473
+            },
+            "dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.058124999999999996,
+              "std": 0.045078057300642405
+            },
+            "score": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "lr_multiplier": {
+              "mean": 0.8,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-064225-v61-core-gate_online_a-32-p-lr08-s1234",
+              "20260322-065112-v61-t1-gate_online_a-32-p-lr08-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "gate_online_b@lr0.8",
+          "arm": "gate_online_b",
+          "label": "G_online(B)",
+          "lr_multiplier": 0.8,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666669,
+              "std": 0.05892556509887897
+            },
+            "last_val": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "last5_val_mean": {
+              "mean": 0.10833333333333332,
+              "std": 0.07071067811865475
+            },
+            "best_to_last_drop": {
+              "mean": 0.06250000000000001,
+              "std": 0.029462782549439473
+            },
+            "dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.058124999999999996,
+              "std": 0.045078057300642405
+            },
+            "score": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "lr_multiplier": {
+              "mean": 0.8,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-064521-v61-core-gate_online_b-32-p-lr08-s1234",
+              "20260322-065407-v61-t1-gate_online_b-32-p-lr08-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "gate_online_a@lr1.0",
+          "arm": "gate_online_a",
+          "label": "G_online(A)",
+          "lr_multiplier": 1.0,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666666,
+              "std": 0.0
+            },
+            "last_val": {
+              "mean": 0.0625,
+              "std": 0.02946278254943948
+            },
+            "last5_val_mean": {
+              "mean": 0.0875,
+              "std": 0.04124789556921528
+            },
+            "best_to_last_drop": {
+              "mean": 0.10416666666666666,
+              "std": 0.029462782549439483
+            },
+            "dense_mean": {
+              "mean": 0.029947916666666664,
+              "std": 0.012889967365379774
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.0528515625,
+              "std": 0.0037380905359601395
+            },
+            "score": {
+              "mean": 0.09244791666666666,
+              "std": 0.016572815184059706
+            },
+            "lr_multiplier": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-064353-v61-core-gate_online_a-32-p-lr10-s1234",
+              "20260322-065240-v61-t1-gate_online_a-32-p-lr10-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "gate_online_b@lr1.0",
+          "arm": "gate_online_b",
+          "label": "G_online(B)",
+          "lr_multiplier": 1.0,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666666,
+              "std": 0.0
+            },
+            "last_val": {
+              "mean": 0.0625,
+              "std": 0.02946278254943948
+            },
+            "last5_val_mean": {
+              "mean": 0.0875,
+              "std": 0.04124789556921528
+            },
+            "best_to_last_drop": {
+              "mean": 0.10416666666666666,
+              "std": 0.029462782549439483
+            },
+            "dense_mean": {
+              "mean": 0.029947916666666664,
+              "std": 0.012889967365379774
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.0528515625,
+              "std": 0.0037380905359601395
+            },
+            "score": {
+              "mean": 0.09244791666666666,
+              "std": 0.016572815184059706
+            },
+            "lr_multiplier": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-064648-v61-core-gate_online_b-32-p-lr10-s1234",
+              "20260322-065534-v61-t1-gate_online_b-32-p-lr10-s1234"
+            ]
+          }
+        }
+      ],
+      "best": {
+        "candidate": "gate_online_a@lr0.8",
+        "arm": "gate_online_a",
+        "label": "G_online(A)",
+        "lr_multiplier": 0.8,
+        "summary": {
+          "count": 2,
+          "best_val": {
+            "mean": 0.16666666666666669,
+            "std": 0.05892556509887897
+          },
+          "last_val": {
+            "mean": 0.10416666666666666,
+            "std": 0.08838834764831843
+          },
+          "last5_val_mean": {
+            "mean": 0.10833333333333332,
+            "std": 0.07071067811865475
+          },
+          "best_to_last_drop": {
+            "mean": 0.06250000000000001,
+            "std": 0.029462782549439473
+          },
+          "dense_mean": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "last_dense_mean": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "composite": {
+            "mean": 0.058124999999999996,
+            "std": 0.045078057300642405
+          },
+          "score": {
+            "mean": 0.10416666666666666,
+            "std": 0.08838834764831843
+          },
+          "lr_multiplier": {
+            "mean": 0.8,
+            "std": 0.0
+          },
+          "runs": [
+            "20260322-064225-v61-core-gate_online_a-32-p-lr08-s1234",
+            "20260322-065112-v61-t1-gate_online_a-32-p-lr08-s1234"
+          ]
+        }
+      }
+    },
+    "g_writers": {
+      "label": "G_writers",
+      "candidates": [
+        {
+          "candidate": "gate_writers_le2@lr0.8",
+          "arm": "gate_writers_le2",
+          "label": "G_writers<=2",
+          "lr_multiplier": 0.8,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666669,
+              "std": 0.05892556509887897
+            },
+            "last_val": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "last5_val_mean": {
+              "mean": 0.10833333333333332,
+              "std": 0.07071067811865475
+            },
+            "best_to_last_drop": {
+              "mean": 0.06250000000000001,
+              "std": 0.029462782549439473
+            },
+            "dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.058124999999999996,
+              "std": 0.045078057300642405
+            },
+            "score": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "lr_multiplier": {
+              "mean": 0.8,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-062454-v61-core-gate_writers_le2-32-p-lr08-s1234",
+              "20260322-063306-v61-t1-gate_writers_le2-32-p-lr08-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "gate_writers_le3@lr0.8",
+          "arm": "gate_writers_le3",
+          "label": "G_writers<=3",
+          "lr_multiplier": 0.8,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666669,
+              "std": 0.05892556509887897
+            },
+            "last_val": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "last5_val_mean": {
+              "mean": 0.10833333333333332,
+              "std": 0.07071067811865475
+            },
+            "best_to_last_drop": {
+              "mean": 0.06250000000000001,
+              "std": 0.029462782549439473
+            },
+            "dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.058124999999999996,
+              "std": 0.045078057300642405
+            },
+            "score": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "lr_multiplier": {
+              "mean": 0.8,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-062744-v61-core-gate_writers_le3-32-p-lr08-s1234",
+              "20260322-063608-v61-t1-gate_writers_le3-32-p-lr08-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "gate_writers_le2@lr1.0",
+          "arm": "gate_writers_le2",
+          "label": "G_writers<=2",
+          "lr_multiplier": 1.0,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666666,
+              "std": 0.0
+            },
+            "last_val": {
+              "mean": 0.0625,
+              "std": 0.02946278254943948
+            },
+            "last5_val_mean": {
+              "mean": 0.0875,
+              "std": 0.04124789556921528
+            },
+            "best_to_last_drop": {
+              "mean": 0.10416666666666666,
+              "std": 0.029462782549439483
+            },
+            "dense_mean": {
+              "mean": 0.029947916666666664,
+              "std": 0.012889967365379774
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.0528515625,
+              "std": 0.0037380905359601395
+            },
+            "score": {
+              "mean": 0.09244791666666666,
+              "std": 0.016572815184059706
+            },
+            "lr_multiplier": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-062618-v61-core-gate_writers_le2-32-p-lr10-s1234",
+              "20260322-063437-v61-t1-gate_writers_le2-32-p-lr10-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "gate_writers_le3@lr1.0",
+          "arm": "gate_writers_le3",
+          "label": "G_writers<=3",
+          "lr_multiplier": 1.0,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666666,
+              "std": 0.0
+            },
+            "last_val": {
+              "mean": 0.0625,
+              "std": 0.02946278254943948
+            },
+            "last5_val_mean": {
+              "mean": 0.0875,
+              "std": 0.04124789556921528
+            },
+            "best_to_last_drop": {
+              "mean": 0.10416666666666666,
+              "std": 0.029462782549439483
+            },
+            "dense_mean": {
+              "mean": 0.029947916666666664,
+              "std": 0.012889967365379774
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.0528515625,
+              "std": 0.0037380905359601395
+            },
+            "score": {
+              "mean": 0.09244791666666666,
+              "std": 0.016572815184059706
+            },
+            "lr_multiplier": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-062912-v61-core-gate_writers_le3-32-p-lr10-s1234",
+              "20260322-063740-v61-t1-gate_writers_le3-32-p-lr10-s1234"
+            ]
+          }
+        }
+      ],
+      "best": {
+        "candidate": "gate_writers_le2@lr0.8",
+        "arm": "gate_writers_le2",
+        "label": "G_writers<=2",
+        "lr_multiplier": 0.8,
+        "summary": {
+          "count": 2,
+          "best_val": {
+            "mean": 0.16666666666666669,
+            "std": 0.05892556509887897
+          },
+          "last_val": {
+            "mean": 0.10416666666666666,
+            "std": 0.08838834764831843
+          },
+          "last5_val_mean": {
+            "mean": 0.10833333333333332,
+            "std": 0.07071067811865475
+          },
+          "best_to_last_drop": {
+            "mean": 0.06250000000000001,
+            "std": 0.029462782549439473
+          },
+          "dense_mean": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "last_dense_mean": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "composite": {
+            "mean": 0.058124999999999996,
+            "std": 0.045078057300642405
+          },
+          "score": {
+            "mean": 0.10416666666666666,
+            "std": 0.08838834764831843
+          },
+          "lr_multiplier": {
+            "mean": 0.8,
+            "std": 0.0
+          },
+          "runs": [
+            "20260322-062454-v61-core-gate_writers_le2-32-p-lr08-s1234",
+            "20260322-063306-v61-t1-gate_writers_le2-32-p-lr08-s1234"
+          ]
+        }
+      }
+    },
+    "visit_taskgrad_half": {
+      "label": "VT-0.5",
+      "candidates": [
+        {
+          "candidate": "visit_taskgrad_half@lr0.8",
+          "arm": "visit_taskgrad_half",
+          "label": "VT-0.5",
+          "lr_multiplier": 0.8,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666669,
+              "std": 0.05892556509887897
+            },
+            "last_val": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "last5_val_mean": {
+              "mean": 0.10833333333333332,
+              "std": 0.07071067811865475
+            },
+            "best_to_last_drop": {
+              "mean": 0.06250000000000001,
+              "std": 0.029462782549439473
+            },
+            "dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.058124999999999996,
+              "std": 0.045078057300642405
+            },
+            "score": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "lr_multiplier": {
+              "mean": 0.8,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-062206-v61-core-visit_taskgrad_half-32-p-lr08-s1234",
+              "20260322-063004-v61-t1-visit_taskgrad_half-32-p-lr08-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "visit_taskgrad_half@lr1.0",
+          "arm": "visit_taskgrad_half",
+          "label": "VT-0.5",
+          "lr_multiplier": 1.0,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666666,
+              "std": 0.0
+            },
+            "last_val": {
+              "mean": 0.0625,
+              "std": 0.02946278254943948
+            },
+            "last5_val_mean": {
+              "mean": 0.0875,
+              "std": 0.04124789556921528
+            },
+            "best_to_last_drop": {
+              "mean": 0.10416666666666666,
+              "std": 0.029462782549439483
+            },
+            "dense_mean": {
+              "mean": 0.029947916666666664,
+              "std": 0.012889967365379774
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.0528515625,
+              "std": 0.0037380905359601395
+            },
+            "score": {
+              "mean": 0.09244791666666666,
+              "std": 0.016572815184059706
+            },
+            "lr_multiplier": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-062329-v61-core-visit_taskgrad_half-32-p-lr10-s1234",
+              "20260322-063135-v61-t1-visit_taskgrad_half-32-p-lr10-s1234"
+            ]
+          }
+        }
+      ],
+      "best": {
+        "candidate": "visit_taskgrad_half@lr0.8",
+        "arm": "visit_taskgrad_half",
+        "label": "VT-0.5",
+        "lr_multiplier": 0.8,
+        "summary": {
+          "count": 2,
+          "best_val": {
+            "mean": 0.16666666666666669,
+            "std": 0.05892556509887897
+          },
+          "last_val": {
+            "mean": 0.10416666666666666,
+            "std": 0.08838834764831843
+          },
+          "last5_val_mean": {
+            "mean": 0.10833333333333332,
+            "std": 0.07071067811865475
+          },
+          "best_to_last_drop": {
+            "mean": 0.06250000000000001,
+            "std": 0.029462782549439473
+          },
+          "dense_mean": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "last_dense_mean": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "composite": {
+            "mean": 0.058124999999999996,
+            "std": 0.045078057300642405
+          },
+          "score": {
+            "mean": 0.10416666666666666,
+            "std": 0.08838834764831843
+          },
+          "lr_multiplier": {
+            "mean": 0.8,
+            "std": 0.0
+          },
+          "runs": [
+            "20260322-062206-v61-core-visit_taskgrad_half-32-p-lr08-s1234",
+            "20260322-063004-v61-t1-visit_taskgrad_half-32-p-lr08-s1234"
+          ]
+        }
+      }
+    },
+    "visitonly": {
+      "label": "V",
+      "candidates": [
+        {
+          "candidate": "visitonly@lr0.8",
+          "arm": "visitonly",
+          "label": "V",
+          "lr_multiplier": 0.8,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666669,
+              "std": 0.05892556509887897
+            },
+            "last_val": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "last5_val_mean": {
+              "mean": 0.10833333333333332,
+              "std": 0.07071067811865475
+            },
+            "best_to_last_drop": {
+              "mean": 0.06250000000000001,
+              "std": 0.029462782549439473
+            },
+            "dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.058124999999999996,
+              "std": 0.045078057300642405
+            },
+            "score": {
+              "mean": 0.10416666666666666,
+              "std": 0.08838834764831843
+            },
+            "lr_multiplier": {
+              "mean": 0.8,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-061918-v61-core-visitonly-32-p-lr08-s1234",
+              "20260322-062701-v61-t1-visitonly-32-p-lr08-s1234"
+            ]
+          }
+        },
+        {
+          "candidate": "visitonly@lr1.0",
+          "arm": "visitonly",
+          "label": "V",
+          "lr_multiplier": 1.0,
+          "summary": {
+            "count": 2,
+            "best_val": {
+              "mean": 0.16666666666666666,
+              "std": 0.0
+            },
+            "last_val": {
+              "mean": 0.0625,
+              "std": 0.02946278254943948
+            },
+            "last5_val_mean": {
+              "mean": 0.0875,
+              "std": 0.04124789556921528
+            },
+            "best_to_last_drop": {
+              "mean": 0.10416666666666666,
+              "std": 0.029462782549439483
+            },
+            "dense_mean": {
+              "mean": 0.029947916666666664,
+              "std": 0.012889967365379774
+            },
+            "last_dense_mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "composite": {
+              "mean": 0.0528515625,
+              "std": 0.0037380905359601395
+            },
+            "score": {
+              "mean": 0.09244791666666666,
+              "std": 0.016572815184059706
+            },
+            "lr_multiplier": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "runs": [
+              "20260322-062042-v61-core-visitonly-32-p-lr10-s1234",
+              "20260322-062832-v61-t1-visitonly-32-p-lr10-s1234"
+            ]
+          }
+        }
+      ],
+      "best": {
+        "candidate": "visitonly@lr0.8",
+        "arm": "visitonly",
+        "label": "V",
+        "lr_multiplier": 0.8,
+        "summary": {
+          "count": 2,
+          "best_val": {
+            "mean": 0.16666666666666669,
+            "std": 0.05892556509887897
+          },
+          "last_val": {
+            "mean": 0.10416666666666666,
+            "std": 0.08838834764831843
+          },
+          "last5_val_mean": {
+            "mean": 0.10833333333333332,
+            "std": 0.07071067811865475
+          },
+          "best_to_last_drop": {
+            "mean": 0.06250000000000001,
+            "std": 0.029462782549439473
+          },
+          "dense_mean": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "last_dense_mean": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "composite": {
+            "mean": 0.058124999999999996,
+            "std": 0.045078057300642405
+          },
+          "score": {
+            "mean": 0.10416666666666666,
+            "std": 0.08838834764831843
+          },
+          "lr_multiplier": {
+            "mean": 0.8,
+            "std": 0.0
+          },
+          "runs": [
+            "20260322-061918-v61-core-visitonly-32-p-lr08-s1234",
+            "20260322-062701-v61-t1-visitonly-32-p-lr08-s1234"
+          ]
+        }
+      }
+    }
+  },
+  "exploitation_summary": {
+    "core": {
+      "visit_taskgrad_half": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.125,
+          "std": 0.05892556509887896
+        },
+        "last_val": {
+          "mean": 0.0625,
+          "std": 0.02946278254943948
+        },
+        "last5_val_mean": {
+          "mean": 0.0625,
+          "std": 0.0058925565098878994
+        },
+        "best_to_last_drop": {
+          "mean": 0.0625,
+          "std": 0.02946278254943948
+        },
+        "dense_mean": {
+          "mean": 0.033854166666666664,
+          "std": 0.02577993473075954
+        },
+        "last_dense_mean": {
+          "mean": 0.033854166666666664,
+          "std": 0.02577993473075954
+        },
+        "composite": {
+          "mean": 0.049609375,
+          "std": 0.0001104854345603957
+        },
+        "score": {
+          "mean": 0.09635416666666666,
+          "std": 0.003682847818679932
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-070821-v61-core-visit_taskgrad_half-32-m-s1234",
+          "20260322-071154-v61-core-visit_taskgrad_half-32-m-s2234"
+        ],
+        "k2": {
+          "mean": 0.026041666666666668,
+          "std": 0.03682847818679935
+        },
+        "last_k2": {
+          "mean": 0.026041666666666668,
+          "std": 0.03682847818679935
+        },
+        "k6": {
+          "mean": 0.03645833333333333,
+          "std": 0.007365695637359868
+        },
+        "last_k6": {
+          "mean": 0.03645833333333333,
+          "std": 0.007365695637359868
+        },
+        "k10": {
+          "mean": 0.03125,
+          "std": 0.04419417382415922
+        },
+        "last_k10": {
+          "mean": 0.03125,
+          "std": 0.04419417382415922
+        }
+      },
+      "visitonly": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.16666666666666669,
+          "std": 0.05892556509887897
+        },
+        "last_val": {
+          "mean": 0.10416666666666666,
+          "std": 0.08838834764831843
+        },
+        "last5_val_mean": {
+          "mean": 0.05416666666666666,
+          "std": 0.05303300858899106
+        },
+        "best_to_last_drop": {
+          "mean": 0.06250000000000001,
+          "std": 0.029462782549439473
+        },
+        "dense_mean": {
+          "mean": 0.03645833333333333,
+          "std": 0.014731391274719742
+        },
+        "last_dense_mean": {
+          "mean": 0.03645833333333333,
+          "std": 0.014731391274719742
+        },
+        "composite": {
+          "mean": 0.06369791666666666,
+          "std": 0.03491339732108578
+        },
+        "score": {
+          "mean": 0.140625,
+          "std": 0.07365695637359869
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-070118-v61-core-visitonly-32-m-s1234",
+          "20260322-070450-v61-core-visitonly-32-m-s2234"
+        ],
+        "k2": {
+          "mean": 0.052083333333333336,
+          "std": 0.029462782549439483
+        },
+        "last_k2": {
+          "mean": 0.052083333333333336,
+          "std": 0.029462782549439483
+        },
+        "k6": {
+          "mean": 0.03645833333333333,
+          "std": 0.007365695637359868
+        },
+        "last_k6": {
+          "mean": 0.03645833333333333,
+          "std": 0.007365695637359868
+        },
+        "k10": {
+          "mean": 0.036458333333333336,
+          "std": 0.03682847818679935
+        },
+        "last_k10": {
+          "mean": 0.036458333333333336,
+          "std": 0.03682847818679935
+        }
+      }
+    },
+    "t1": {
+      "visit_taskgrad_half": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.125,
+          "std": 0.05892556509887896
+        },
+        "last_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.04583333333333333,
+          "std": 0.053033008588991064
+        },
+        "best_to_last_drop": {
+          "mean": 0.125,
+          "std": 0.05892556509887896
+        },
+        "dense_mean": {
+          "mean": 0.029513888888888888,
+          "std": 0.0073656956373598734
+        },
+        "last_dense_mean": {
+          "mean": 0.029513888888888888,
+          "std": 0.0073656956373598734
+        },
+        "composite": {
+          "mean": 0.022447916666666665,
+          "std": 0.007292038680986271
+        },
+        "score": {
+          "mean": 0.029513888888888888,
+          "std": 0.0073656956373598734
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-072249-v61-t1-visit_taskgrad_half-32-m-s1234",
+          "20260322-072630-v61-t1-visit_taskgrad_half-32-m-s2234"
+        ],
+        "k4": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "last_k4": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "k8": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "last_k8": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "k12": {
+          "mean": 0.020833333333333332,
+          "std": 0.01473139127471974
+        },
+        "last_k12": {
+          "mean": 0.020833333333333332,
+          "std": 0.01473139127471974
+        },
+        "k14": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_k14": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        }
+      },
+      "visitonly": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.125,
+          "std": 0.05892556509887896
+        },
+        "last_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.04714045207910317
+        },
+        "best_to_last_drop": {
+          "mean": 0.125,
+          "std": 0.05892556509887896
+        },
+        "dense_mean": {
+          "mean": 0.034722222222222224,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.034722222222222224,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.02395833333333333,
+          "std": 0.009428090415820633
+        },
+        "score": {
+          "mean": 0.034722222222222224,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-071526-v61-t1-visitonly-32-m-s1234",
+          "20260322-071909-v61-t1-visitonly-32-m-s2234"
+        ],
+        "k4": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "last_k4": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "k8": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k8": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k12": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "last_k12": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "k14": {
+          "mean": 0.046875,
+          "std": 0.0073656956373598734
+        },
+        "last_k14": {
+          "mean": 0.046875,
+          "std": 0.0073656956373598734
+        }
+      }
+    },
+    "t1r": {
+      "visit_taskgrad_half": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.125,
+          "std": 0.05892556509887896
+        },
+        "last_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.04583333333333333,
+          "std": 0.053033008588991064
+        },
+        "best_to_last_drop": {
+          "mean": 0.125,
+          "std": 0.05892556509887896
+        },
+        "dense_mean": {
+          "mean": 0.029513888888888888,
+          "std": 0.0073656956373598734
+        },
+        "last_dense_mean": {
+          "mean": 0.029513888888888888,
+          "std": 0.0073656956373598734
+        },
+        "composite": {
+          "mean": 0.022447916666666665,
+          "std": 0.007292038680986271
+        },
+        "score": {
+          "mean": 0.029513888888888888,
+          "std": 0.0073656956373598734
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-073734-v61-t1r-visit_taskgrad_half-32-m-s1234",
+          "20260322-074113-v61-t1r-visit_taskgrad_half-32-m-s2234"
+        ],
+        "k4": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "last_k4": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "k8": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "last_k8": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "k12": {
+          "mean": 0.020833333333333332,
+          "std": 0.01473139127471974
+        },
+        "last_k12": {
+          "mean": 0.020833333333333332,
+          "std": 0.01473139127471974
+        },
+        "k14": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_k14": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        }
+      },
+      "visitonly": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.125,
+          "std": 0.05892556509887896
+        },
+        "last_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.04714045207910317
+        },
+        "best_to_last_drop": {
+          "mean": 0.125,
+          "std": 0.05892556509887896
+        },
+        "dense_mean": {
+          "mean": 0.034722222222222224,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.034722222222222224,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.02395833333333333,
+          "std": 0.009428090415820633
+        },
+        "score": {
+          "mean": 0.034722222222222224,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-073012-v61-t1r-visitonly-32-m-s1234",
+          "20260322-073352-v61-t1r-visitonly-32-m-s2234"
+        ],
+        "k4": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "last_k4": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "k8": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k8": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k12": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "last_k12": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "k14": {
+          "mean": 0.046875,
+          "std": 0.0073656956373598734
+        },
+        "last_k14": {
+          "mean": 0.046875,
+          "std": 0.0073656956373598734
+        }
+      }
+    },
+    "t2a": {
+      "visit_taskgrad_half": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "last5_val_mean": {
+          "mean": 0.029166666666666667,
+          "std": 0.005892556509887897
+        },
+        "best_to_last_drop": {
+          "mean": 0.0625,
+          "std": 0.02946278254943948
+        },
+        "dense_mean": {
+          "mean": 0.036458333333333336,
+          "std": 0.002455231879119958
+        },
+        "last_dense_mean": {
+          "mean": 0.036458333333333336,
+          "std": 0.002455231879119958
+        },
+        "composite": {
+          "mean": 0.029531250000000002,
+          "std": 0.010385630848677413
+        },
+        "score": {
+          "mean": 0.05729166666666667,
+          "std": 0.027007550670319527
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-075212-v61-t2a-visit_taskgrad_half-32-m-s1234",
+          "20260322-075551-v61-t2a-visit_taskgrad_half-32-m-s2234"
+        ],
+        "k4": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "last_k4": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "k8": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "last_k8": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "k12": {
+          "mean": 0.03645833333333333,
+          "std": 0.007365695637359868
+        },
+        "last_k12": {
+          "mean": 0.03645833333333333,
+          "std": 0.007365695637359868
+        },
+        "k14": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "last_k14": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        }
+      },
+      "visitonly": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.0625,
+          "std": 0.02946278254943948
+        },
+        "last_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.004166666666666667,
+          "std": 0.005892556509887896
+        },
+        "best_to_last_drop": {
+          "mean": 0.0625,
+          "std": 0.02946278254943948
+        },
+        "dense_mean": {
+          "mean": 0.03645833333333333,
+          "std": 0.012276159395599784
+        },
+        "last_dense_mean": {
+          "mean": 0.03645833333333333,
+          "std": 0.012276159395599784
+        },
+        "composite": {
+          "mean": 0.017239583333333332,
+          "std": 0.006702783029997483
+        },
+        "score": {
+          "mean": 0.03645833333333333,
+          "std": 0.012276159395599784
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-074454-v61-t2a-visitonly-32-m-s1234",
+          "20260322-074833-v61-t2a-visitonly-32-m-s2234"
+        ],
+        "k4": {
+          "mean": 0.026041666666666664,
+          "std": 0.022097086912079608
+        },
+        "last_k4": {
+          "mean": 0.026041666666666664,
+          "std": 0.022097086912079608
+        },
+        "k8": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k8": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k12": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_k12": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "k14": {
+          "mean": 0.036458333333333336,
+          "std": 0.03682847818679935
+        },
+        "last_k14": {
+          "mean": 0.036458333333333336,
+          "std": 0.03682847818679935
+        }
+      }
+    },
+    "t2b": {
+      "visit_taskgrad_half": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.14583333333333331,
+          "std": 0.029462782549439473
+        },
+        "last_val": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "last5_val_mean": {
+          "mean": 0.06249999999999999,
+          "std": 0.05303300858899106
+        },
+        "best_to_last_drop": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.03125,
+          "std": 0.024552318791199568
+        },
+        "last_dense_mean": {
+          "mean": 0.03125,
+          "std": 0.024552318791199568
+        },
+        "composite": {
+          "mean": 0.03385416666666667,
+          "std": 0.009870032154062224
+        },
+        "score": {
+          "mean": 0.05208333333333333,
+          "std": 0.00491046375823991
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-080656-v61-t2b-visit_taskgrad_half-32-m-s1234",
+          "20260322-081049-v61-t2b-visit_taskgrad_half-32-m-s2234"
+        ],
+        "k4": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "last_k4": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "k8": {
+          "mean": 0.041666666666666664,
+          "std": 0.02946278254943948
+        },
+        "last_k8": {
+          "mean": 0.041666666666666664,
+          "std": 0.02946278254943948
+        },
+        "k12": {
+          "mean": 0.03125,
+          "std": 0.01473139127471974
+        },
+        "last_k12": {
+          "mean": 0.03125,
+          "std": 0.01473139127471974
+        },
+        "k14": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "last_k14": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        }
+      },
+      "visitonly": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.14583333333333331,
+          "std": 0.029462782549439473
+        },
+        "last_val": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "last5_val_mean": {
+          "mean": 0.05833333333333333,
+          "std": 0.05892556509887895
+        },
+        "best_to_last_drop": {
+          "mean": 0.125,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.027777777777777776,
+          "std": 0.019641855032959652
+        },
+        "last_dense_mean": {
+          "mean": 0.027777777777777776,
+          "std": 0.019641855032959652
+        },
+        "composite": {
+          "mean": 0.03145833333333333,
+          "std": 0.013258252147247766
+        },
+        "score": {
+          "mean": 0.048611111111111105,
+          "std": 0.009820927516479826
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-075929-v61-t2b-visitonly-32-m-s1234",
+          "20260322-080307-v61-t2b-visitonly-32-m-s2234"
+        ],
+        "k4": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "last_k4": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "k8": {
+          "mean": 0.036458333333333336,
+          "std": 0.02209708691207961
+        },
+        "last_k8": {
+          "mean": 0.036458333333333336,
+          "std": 0.02209708691207961
+        },
+        "k12": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "last_k12": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "k14": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "last_k14": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        }
+      }
+    },
+    "t2c": {
+      "visit_taskgrad_half": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.05892556509887896
+        },
+        "last_val": {
+          "mean": 0.0625,
+          "std": 0.02946278254943948
+        },
+        "last5_val_mean": {
+          "mean": 0.04583333333333333,
+          "std": 0.053033008588991064
+        },
+        "best_to_last_drop": {
+          "mean": 0.020833333333333336,
+          "std": 0.029462782549439483
+        },
+        "dense_mean": {
+          "mean": 0.024305555555555556,
+          "std": 0.009820927516479826
+        },
+        "last_dense_mean": {
+          "mean": 0.024305555555555556,
+          "std": 0.009820927516479826
+        },
+        "composite": {
+          "mean": 0.041979166666666665,
+          "std": 0.016499158227686102
+        },
+        "score": {
+          "mean": 0.08680555555555555,
+          "std": 0.019641855032959663
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-082218-v61-t2c-visit_taskgrad_half-32-m-s1234",
+          "20260322-082610-v61-t2c-visit_taskgrad_half-32-m-s2234"
+        ],
+        "k6": {
+          "mean": 0.03125,
+          "std": 0.029462782549439483
+        },
+        "last_k6": {
+          "mean": 0.03125,
+          "std": 0.029462782549439483
+        },
+        "k10": {
+          "mean": 0.036458333333333336,
+          "std": 0.02209708691207961
+        },
+        "last_k10": {
+          "mean": 0.036458333333333336,
+          "std": 0.02209708691207961
+        },
+        "k14": {
+          "mean": 0.020833333333333332,
+          "std": 0.01473139127471974
+        },
+        "last_k14": {
+          "mean": 0.020833333333333332,
+          "std": 0.01473139127471974
+        },
+        "k16": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "last_k16": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        }
+      },
+      "visitonly": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.05892556509887896
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.04583333333333333,
+          "std": 0.053033008588991064
+        },
+        "best_to_last_drop": {
+          "mean": 0.04166666666666667,
+          "std": 0.05892556509887897
+        },
+        "dense_mean": {
+          "mean": 0.022569444444444444,
+          "std": 0.002455231879119958
+        },
+        "last_dense_mean": {
+          "mean": 0.022569444444444444,
+          "std": 0.002455231879119958
+        },
+        "composite": {
+          "mean": 0.03390625,
+          "std": 0.009501747372194228
+        },
+        "score": {
+          "mean": 0.0642361111111111,
+          "std": 0.002455231879119958
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-081440-v61-t2c-visitonly-32-m-s1234",
+          "20260322-081825-v61-t2c-visitonly-32-m-s2234"
+        ],
+        "k6": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "last_k6": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "k10": {
+          "mean": 0.03645833333333333,
+          "std": 0.007365695637359868
+        },
+        "last_k10": {
+          "mean": 0.03645833333333333,
+          "std": 0.007365695637359868
+        },
+        "k14": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k14": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k16": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_k16": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      }
+    }
+  },
+  "exploration_summary": {
+    "g_ingress": {
+      "label": "G_ingress",
+      "arms": [
+        "gate_ingress_pool1"
+      ],
+      "summary": {
+        "count": 6,
+        "best_val": {
+          "mean": 0.13194444444444445,
+          "std": 0.07176672601535451
+        },
+        "last_val": {
+          "mean": 0.05585748792270531,
+          "std": 0.033880524997335536
+        },
+        "last5_val_mean": {
+          "mean": 0.04613526570048309,
+          "std": 0.030905322784360575
+        },
+        "best_to_last_drop": {
+          "mean": 0.07608695652173914,
+          "std": 0.06104830554704964
+        },
+        "dense_mean": {
+          "mean": 0.036181164717348925,
+          "std": 0.0177744366547244
+        },
+        "last_dense_mean": {
+          "mean": 0.03448928404949572,
+          "std": 0.019877842350153403
+        },
+        "composite": {
+          "mean": 0.04505869803585049,
+          "std": 0.018739907260631627
+        },
+        "score": {
+          "mean": 0.09203865264005424,
+          "std": 0.03935475111794483
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-070619-v61-core-gate_ingress_pool1-32-s-s1234",
+          "20260322-070852-v61-core-gate_ingress_pool1-32-s-s2234",
+          "20260322-072647-v61-t1-gate_ingress_pool1-32-s-s1234",
+          "20260322-072925-v61-t1-gate_ingress_pool1-32-s-s2234",
+          "20260322-074744-v61-t2a-gate_ingress_pool1-32-s-s1234",
+          "20260322-075022-v61-t2a-gate_ingress_pool1-32-s-s2234"
+        ]
+      }
+    },
+    "g_meta": {
+      "label": "G_meta",
+      "arms": [
+        "gate_meta_a"
+      ],
+      "summary": {
+        "count": 6,
+        "best_val": {
+          "mean": 0.13194444444444445,
+          "std": 0.07176672601535451
+        },
+        "last_val": {
+          "mean": 0.05585748792270531,
+          "std": 0.033880524997335536
+        },
+        "last5_val_mean": {
+          "mean": 0.04613526570048309,
+          "std": 0.030905322784360575
+        },
+        "best_to_last_drop": {
+          "mean": 0.07608695652173914,
+          "std": 0.06104830554704964
+        },
+        "dense_mean": {
+          "mean": 0.036181164717348925,
+          "std": 0.0177744366547244
+        },
+        "last_dense_mean": {
+          "mean": 0.03448928404949572,
+          "std": 0.019877842350153403
+        },
+        "composite": {
+          "mean": 0.04505869803585049,
+          "std": 0.018739907260631627
+        },
+        "score": {
+          "mean": 0.09203865264005424,
+          "std": 0.03935475111794483
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-071122-v61-core-gate_meta_a-32-s-s1234",
+          "20260322-071354-v61-core-gate_meta_a-32-s-s2234",
+          "20260322-073201-v61-t1-gate_meta_a-32-s-s1234",
+          "20260322-073441-v61-t1-gate_meta_a-32-s-s2234",
+          "20260322-075259-v61-t2a-gate_meta_a-32-s-s1234",
+          "20260322-075536-v61-t2a-gate_meta_a-32-s-s2234"
+        ]
+      }
+    },
+    "g_online": {
+      "label": "G_online",
+      "arms": [
+        "gate_online_a"
+      ],
+      "summary": {
+        "count": 6,
+        "best_val": {
+          "mean": 0.13194444444444445,
+          "std": 0.07176672601535451
+        },
+        "last_val": {
+          "mean": 0.05585748792270531,
+          "std": 0.033880524997335536
+        },
+        "last5_val_mean": {
+          "mean": 0.04613526570048309,
+          "std": 0.030905322784360575
+        },
+        "best_to_last_drop": {
+          "mean": 0.07608695652173914,
+          "std": 0.06104830554704964
+        },
+        "dense_mean": {
+          "mean": 0.036181164717348925,
+          "std": 0.0177744366547244
+        },
+        "last_dense_mean": {
+          "mean": 0.03448928404949572,
+          "std": 0.019877842350153403
+        },
+        "composite": {
+          "mean": 0.04505869803585049,
+          "std": 0.018739907260631627
+        },
+        "score": {
+          "mean": 0.09203865264005424,
+          "std": 0.03935475111794483
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-071627-v61-core-gate_online_a-32-s-s1234",
+          "20260322-071900-v61-core-gate_online_a-32-s-s2234",
+          "20260322-073719-v61-t1-gate_online_a-32-s-s1234",
+          "20260322-073954-v61-t1-gate_online_a-32-s-s2234",
+          "20260322-075811-v61-t2a-gate_online_a-32-s-s1234",
+          "20260322-080049-v61-t2a-gate_online_a-32-s-s2234"
+        ]
+      }
+    },
+    "g_writers": {
+      "label": "G_writers",
+      "arms": [
+        "gate_writers_le2"
+      ],
+      "summary": {
+        "count": 6,
+        "best_val": {
+          "mean": 0.13194444444444445,
+          "std": 0.07176672601535451
+        },
+        "last_val": {
+          "mean": 0.05585748792270531,
+          "std": 0.033880524997335536
+        },
+        "last5_val_mean": {
+          "mean": 0.04613526570048309,
+          "std": 0.030905322784360575
+        },
+        "best_to_last_drop": {
+          "mean": 0.07608695652173914,
+          "std": 0.06104830554704964
+        },
+        "dense_mean": {
+          "mean": 0.036181164717348925,
+          "std": 0.0177744366547244
+        },
+        "last_dense_mean": {
+          "mean": 0.03448928404949572,
+          "std": 0.019877842350153403
+        },
+        "composite": {
+          "mean": 0.04505869803585049,
+          "std": 0.018739907260631627
+        },
+        "score": {
+          "mean": 0.09203865264005424,
+          "std": 0.03935475111794483
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-070118-v61-core-gate_writers_le2-32-s-s1234",
+          "20260322-070347-v61-core-gate_writers_le2-32-s-s2234",
+          "20260322-072130-v61-t1-gate_writers_le2-32-s-s1234",
+          "20260322-072409-v61-t1-gate_writers_le2-32-s-s2234",
+          "20260322-074233-v61-t2a-gate_writers_le2-32-s-s1234",
+          "20260322-074510-v61-t2a-gate_writers_le2-32-s-s2234"
+        ]
+      }
+    }
+  },
+  "best_gate": {
+    "family": "g_ingress",
+    "label": "G_ingress",
+    "arms": [
+      "gate_ingress_pool1"
+    ],
+    "summary": {
+      "count": 6,
+      "best_val": {
+        "mean": 0.13194444444444445,
+        "std": 0.07176672601535451
+      },
+      "last_val": {
+        "mean": 0.05585748792270531,
+        "std": 0.033880524997335536
+      },
+      "last5_val_mean": {
+        "mean": 0.04613526570048309,
+        "std": 0.030905322784360575
+      },
+      "best_to_last_drop": {
+        "mean": 0.07608695652173914,
+        "std": 0.06104830554704964
+      },
+      "dense_mean": {
+        "mean": 0.036181164717348925,
+        "std": 0.0177744366547244
+      },
+      "last_dense_mean": {
+        "mean": 0.03448928404949572,
+        "std": 0.019877842350153403
+      },
+      "composite": {
+        "mean": 0.04505869803585049,
+        "std": 0.018739907260631627
+      },
+      "score": {
+        "mean": 0.09203865264005424,
+        "std": 0.03935475111794483
+      },
+      "lr_multiplier": {
+        "mean": 0.8,
+        "std": 0.0
+      },
+      "runs": [
+        "20260322-070619-v61-core-gate_ingress_pool1-32-s-s1234",
+        "20260322-070852-v61-core-gate_ingress_pool1-32-s-s2234",
+        "20260322-072647-v61-t1-gate_ingress_pool1-32-s-s1234",
+        "20260322-072925-v61-t1-gate_ingress_pool1-32-s-s2234",
+        "20260322-074744-v61-t2a-gate_ingress_pool1-32-s-s1234",
+        "20260322-075022-v61-t2a-gate_ingress_pool1-32-s-s2234"
+      ]
+    }
+  },
+  "holdout_summary": {
+    "hmid": {
+      "gate_ingress_pool1": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.0625,
+          "std": 0.02946278254943948
+        },
+        "last_val": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "last5_val_mean": {
+          "mean": 0.016666666666666666,
+          "std": 0.01178511301977579
+        },
+        "best_to_last_drop": {
+          "mean": 0.041666666666666664,
+          "std": 0.05892556509887896
+        },
+        "dense_mean": {
+          "mean": 0.046875,
+          "std": 0.005524271728019903
+        },
+        "last_dense_mean": {
+          "mean": 0.046875,
+          "std": 0.005524271728019903
+        },
+        "composite": {
+          "mean": 0.031718750000000004,
+          "std": 0.0054690290107397
+        },
+        "score": {
+          "mean": 0.06770833333333333,
+          "std": 0.02393851082141957
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-082543-v61-hmid-gate_ingress_pool1-32-l-s3234",
+          "20260322-083414-v61-hmid-gate_ingress_pool1-32-l-s4234"
+        ],
+        "k3": {
+          "mean": 0.0390625,
+          "std": 0.02209708691207961
+        },
+        "last_k3": {
+          "mean": 0.0390625,
+          "std": 0.02209708691207961
+        },
+        "k7": {
+          "mean": 0.02734375,
+          "std": 0.016572815184059706
+        },
+        "last_k7": {
+          "mean": 0.02734375,
+          "std": 0.016572815184059706
+        },
+        "k11": {
+          "mean": 0.06640625,
+          "std": 0.005524271728019903
+        },
+        "last_k11": {
+          "mean": 0.06640625,
+          "std": 0.005524271728019903
+        }
+      },
+      "visit_taskgrad_half": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.004166666666666667,
+          "std": 0.005892556509887896
+        },
+        "best_to_last_drop": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.0390625,
+          "std": 0.005524271728019903
+        },
+        "last_dense_mean": {
+          "mean": 0.0390625,
+          "std": 0.005524271728019903
+        },
+        "composite": {
+          "mean": 0.018411458333333332,
+          "std": 0.0036644335795865367
+        },
+        "score": {
+          "mean": 0.0390625,
+          "std": 0.005524271728019903
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-082142-v61-hmid-visit_taskgrad_half-32-l-s3234",
+          "20260322-083015-v61-hmid-visit_taskgrad_half-32-l-s4234"
+        ],
+        "k3": {
+          "mean": 0.02734375,
+          "std": 0.027621358640099514
+        },
+        "last_k3": {
+          "mean": 0.02734375,
+          "std": 0.027621358640099514
+        },
+        "k7": {
+          "mean": 0.03125,
+          "std": 0.011048543456039806
+        },
+        "last_k7": {
+          "mean": 0.03125,
+          "std": 0.011048543456039806
+        },
+        "k11": {
+          "mean": 0.046875,
+          "std": 0.0
+        },
+        "last_k11": {
+          "mean": 0.046875,
+          "std": 0.0
+        }
+      },
+      "visitonly": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.0625,
+          "std": 0.02946278254943948
+        },
+        "last_val": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "last5_val_mean": {
+          "mean": 0.016666666666666666,
+          "std": 0.01178511301977579
+        },
+        "best_to_last_drop": {
+          "mean": 0.041666666666666664,
+          "std": 0.05892556509887896
+        },
+        "dense_mean": {
+          "mean": 0.046875,
+          "std": 0.005524271728019903
+        },
+        "last_dense_mean": {
+          "mean": 0.046875,
+          "std": 0.005524271728019903
+        },
+        "composite": {
+          "mean": 0.031718750000000004,
+          "std": 0.0054690290107397
+        },
+        "score": {
+          "mean": 0.06770833333333333,
+          "std": 0.02393851082141957
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-081744-v61-hmid-visitonly-32-l-s3234",
+          "20260322-084133-v61-hmid-visitonly-32-l-s4234"
+        ],
+        "k3": {
+          "mean": 0.0390625,
+          "std": 0.02209708691207961
+        },
+        "last_k3": {
+          "mean": 0.0390625,
+          "std": 0.02209708691207961
+        },
+        "k7": {
+          "mean": 0.02734375,
+          "std": 0.016572815184059706
+        },
+        "last_k7": {
+          "mean": 0.02734375,
+          "std": 0.016572815184059706
+        },
+        "k11": {
+          "mean": 0.06640625,
+          "std": 0.005524271728019903
+        },
+        "last_k11": {
+          "mean": 0.06640625,
+          "std": 0.005524271728019903
+        }
+      }
+    },
+    "hmix": {
+      "gate_ingress_pool1": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.04257246376811594,
+          "std": 0.0012809905456278043
+        },
+        "last_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.04257246376811594,
+          "std": 0.0012809905456278043
+        },
+        "dense_mean": {
+          "mean": 0.05078125,
+          "std": 0.005524271728019903
+        },
+        "last_dense_mean": {
+          "mean": 0.05078125,
+          "std": 0.005524271728019903
+        },
+        "composite": {
+          "mean": 0.0228515625,
+          "std": 0.0024859222776089547
+        },
+        "score": {
+          "mean": 0.05078125,
+          "std": 0.005524271728019903
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-083735-v61-hmix-gate_ingress_pool1-32-l-s3234",
+          "20260322-084607-v61-hmix-gate_ingress_pool1-32-l-s4234"
+        ],
+        "k3": {
+          "mean": 0.03125,
+          "std": 0.02209708691207961
+        },
+        "last_k3": {
+          "mean": 0.03125,
+          "std": 0.02209708691207961
+        },
+        "k7": {
+          "mean": 0.05078125,
+          "std": 0.027621358640099514
+        },
+        "last_k7": {
+          "mean": 0.05078125,
+          "std": 0.027621358640099514
+        },
+        "k11": {
+          "mean": 0.05078125,
+          "std": 0.016572815184059706
+        },
+        "last_k11": {
+          "mean": 0.05078125,
+          "std": 0.016572815184059706
+        }
+      },
+      "visit_taskgrad_half": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.04257246376811594,
+          "std": 0.0012809905456278043
+        },
+        "last_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.04257246376811594,
+          "std": 0.0012809905456278043
+        },
+        "dense_mean": {
+          "mean": 0.05078125,
+          "std": 0.005524271728019903
+        },
+        "last_dense_mean": {
+          "mean": 0.05078125,
+          "std": 0.005524271728019903
+        },
+        "composite": {
+          "mean": 0.0228515625,
+          "std": 0.0024859222776089547
+        },
+        "score": {
+          "mean": 0.05078125,
+          "std": 0.005524271728019903
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-083338-v61-hmix-visit_taskgrad_half-32-l-s3234",
+          "20260322-084212-v61-hmix-visit_taskgrad_half-32-l-s4234"
+        ],
+        "k3": {
+          "mean": 0.03125,
+          "std": 0.02209708691207961
+        },
+        "last_k3": {
+          "mean": 0.03125,
+          "std": 0.02209708691207961
+        },
+        "k7": {
+          "mean": 0.05078125,
+          "std": 0.027621358640099514
+        },
+        "last_k7": {
+          "mean": 0.05078125,
+          "std": 0.027621358640099514
+        },
+        "k11": {
+          "mean": 0.05078125,
+          "std": 0.016572815184059706
+        },
+        "last_k11": {
+          "mean": 0.05078125,
+          "std": 0.016572815184059706
+        }
+      },
+      "visitonly": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "last5_val_mean": {
+          "mean": 0.008333333333333333,
+          "std": 0.011785113019775792
+        },
+        "best_to_last_drop": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "dense_mean": {
+          "mean": 0.044921875,
+          "std": 0.0027621358640099515
+        },
+        "last_dense_mean": {
+          "mean": 0.044921875,
+          "std": 0.0027621358640099515
+        },
+        "composite": {
+          "mean": 0.029173177083333335,
+          "std": 0.0114260353574545
+        },
+        "score": {
+          "mean": 0.06575520833333333,
+          "std": 0.026700646685429524
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "runs": [
+          "20260322-082943-v61-hmix-visitonly-32-l-s3234",
+          "20260322-083814-v61-hmix-visitonly-32-l-s4234"
+        ],
+        "k3": {
+          "mean": 0.04296875,
+          "std": 0.005524271728019903
+        },
+        "last_k3": {
+          "mean": 0.04296875,
+          "std": 0.005524271728019903
+        },
+        "k7": {
+          "mean": 0.0390625,
+          "std": 0.011048543456039806
+        },
+        "last_k7": {
+          "mean": 0.0390625,
+          "std": 0.011048543456039806
+        },
+        "k11": {
+          "mean": 0.05078125,
+          "std": 0.005524271728019903
+        },
+        "last_k11": {
+          "mean": 0.05078125,
+          "std": 0.005524271728019903
+        }
+      }
+    }
+  },
+  "known_rule_scores": {
+    "single_selector_v": 0.19421875,
+    "single_selector_vt_half": 0.19986979166666669,
+    "known_keyed_rule": 0.192421875
+  },
+  "config_names": [
+    "configs/v61_core_gate_ingress_pool1_32_p.yaml",
+    "configs/v61_core_gate_ingress_pool1_32_s.yaml",
+    "configs/v61_core_gate_ingress_pool1_or_tightttl_32_p.yaml",
+    "configs/v61_core_gate_meta_a_32_p.yaml",
+    "configs/v61_core_gate_meta_a_32_s.yaml",
+    "configs/v61_core_gate_meta_b_32_p.yaml",
+    "configs/v61_core_gate_online_a_32_p.yaml",
+    "configs/v61_core_gate_online_a_32_s.yaml",
+    "configs/v61_core_gate_online_b_32_p.yaml",
+    "configs/v61_core_gate_writers_le2_32_p.yaml",
+    "configs/v61_core_gate_writers_le2_32_s.yaml",
+    "configs/v61_core_gate_writers_le3_32_p.yaml",
+    "configs/v61_core_visit_taskgrad_half_32_m.yaml",
+    "configs/v61_core_visit_taskgrad_half_32_p.yaml",
+    "configs/v61_core_visitonly_32_m.yaml",
+    "configs/v61_core_visitonly_32_p.yaml",
+    "configs/v61_hmid_gate_ingress_pool1_32_l.yaml",
+    "configs/v61_hmid_visit_taskgrad_half_32_l.yaml",
+    "configs/v61_hmid_visitonly_32_l.yaml",
+    "configs/v61_hmix_gate_ingress_pool1_32_l.yaml",
+    "configs/v61_hmix_visit_taskgrad_half_32_l.yaml",
+    "configs/v61_hmix_visitonly_32_l.yaml",
+    "configs/v61_t1_gate_ingress_pool1_32_p.yaml",
+    "configs/v61_t1_gate_ingress_pool1_32_s.yaml",
+    "configs/v61_t1_gate_ingress_pool1_or_tightttl_32_p.yaml",
+    "configs/v61_t1_gate_meta_a_32_p.yaml",
+    "configs/v61_t1_gate_meta_a_32_s.yaml",
+    "configs/v61_t1_gate_meta_b_32_p.yaml",
+    "configs/v61_t1_gate_online_a_32_p.yaml",
+    "configs/v61_t1_gate_online_a_32_s.yaml",
+    "configs/v61_t1_gate_online_b_32_p.yaml",
+    "configs/v61_t1_gate_writers_le2_32_p.yaml",
+    "configs/v61_t1_gate_writers_le2_32_s.yaml",
+    "configs/v61_t1_gate_writers_le3_32_p.yaml",
+    "configs/v61_t1_visit_taskgrad_half_32_m.yaml",
+    "configs/v61_t1_visit_taskgrad_half_32_p.yaml",
+    "configs/v61_t1_visitonly_32_m.yaml",
+    "configs/v61_t1_visitonly_32_p.yaml",
+    "configs/v61_t1r_visit_taskgrad_half_32_m.yaml",
+    "configs/v61_t1r_visitonly_32_m.yaml",
+    "configs/v61_t2a_gate_ingress_pool1_32_s.yaml",
+    "configs/v61_t2a_gate_meta_a_32_s.yaml",
+    "configs/v61_t2a_gate_online_a_32_s.yaml",
+    "configs/v61_t2a_gate_writers_le2_32_s.yaml",
+    "configs/v61_t2a_visit_taskgrad_half_32_m.yaml",
+    "configs/v61_t2a_visitonly_32_m.yaml",
+    "configs/v61_t2b_visit_taskgrad_half_32_m.yaml",
+    "configs/v61_t2b_visitonly_32_m.yaml",
+    "configs/v61_t2c_visit_taskgrad_half_32_m.yaml",
+    "configs/v61_t2c_visitonly_32_m.yaml"
+  ]
+}

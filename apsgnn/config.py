@@ -140,6 +140,19 @@ class GrowthConfig:
     adaptive_utility_grad_weight: float = 1.0
     adaptive_utility_query_visit_weight: float = 0.0
     adaptive_utility_query_grad_weight: float = 0.0
+    selector_gate_kind: str = "none"
+    selector_gate_label: str = ""
+    selector_gate_writers_threshold: int = -1
+    selector_gate_ingress_start_node_pool_threshold: int = -1
+    selector_gate_ingress_allow_tight_ttl: bool = False
+    selector_gate_meta_writer_weight: float = 0.0
+    selector_gate_meta_ingress_bonus: float = 0.0
+    selector_gate_meta_tight_ttl_bonus: float = 0.0
+    selector_gate_meta_bias: float = 0.0
+    selector_gate_meta_threshold: float = 0.0
+    selector_gate_online_stage_index_min: int = -1
+    selector_gate_online_entropy_high_threshold: float = 1.0e9
+    selector_gate_online_gini_high_threshold: float = 1.0e9
     utility_tail_fraction: float = 1.0
     best_metric_final_stage_only: bool = False
 
@@ -159,24 +172,199 @@ class ExperimentConfig:
 ConfigT = TypeVar("ConfigT")
 
 
-def selector_weights_for_stage(growth: GrowthConfig, next_stage_index: int) -> dict[str, float]:
+def _selector_weight_payload(
+    *,
+    visit_weight: float,
+    grad_weight: float,
+    query_visit_weight: float,
+    query_grad_weight: float,
+) -> dict[str, float]:
+    return {
+        "utility_visit_weight": float(visit_weight),
+        "utility_grad_weight": float(grad_weight),
+        "utility_query_visit_weight": float(query_visit_weight),
+        "utility_query_grad_weight": float(query_grad_weight),
+    }
+
+
+def _selector_label_for_weights(weights: dict[str, float]) -> str:
+    if (
+        float(weights["utility_visit_weight"]) == 1.0
+        and float(weights["utility_grad_weight"]) == 0.5
+        and float(weights["utility_query_visit_weight"]) == 0.0
+        and float(weights["utility_query_grad_weight"]) == 0.0
+    ):
+        return "VT-0.5"
+    if (
+        float(weights["utility_visit_weight"]) == 1.0
+        and float(weights["utility_grad_weight"]) == 0.0
+        and float(weights["utility_query_visit_weight"]) == 0.0
+        and float(weights["utility_query_grad_weight"]) == 0.0
+    ):
+        return "V"
+    return "custom"
+
+
+def _static_selector_weights(growth: GrowthConfig) -> dict[str, float]:
+    return _selector_weight_payload(
+        visit_weight=growth.utility_visit_weight,
+        grad_weight=growth.utility_grad_weight,
+        query_visit_weight=growth.utility_query_visit_weight,
+        query_grad_weight=growth.utility_query_grad_weight,
+    )
+
+
+def _adaptive_selector_weights(growth: GrowthConfig) -> dict[str, float]:
+    return _selector_weight_payload(
+        visit_weight=growth.adaptive_utility_visit_weight,
+        grad_weight=growth.adaptive_utility_grad_weight,
+        query_visit_weight=growth.adaptive_utility_query_visit_weight,
+        query_grad_weight=growth.adaptive_utility_query_grad_weight,
+    )
+
+
+def _vt_half_weights() -> dict[str, float]:
+    return _selector_weight_payload(
+        visit_weight=1.0,
+        grad_weight=0.5,
+        query_visit_weight=0.0,
+        query_grad_weight=0.0,
+    )
+
+
+def _v_weights() -> dict[str, float]:
+    return _selector_weight_payload(
+        visit_weight=1.0,
+        grad_weight=0.0,
+        query_visit_weight=0.0,
+        query_grad_weight=0.0,
+    )
+
+
+def _tight_ttl(task: TaskConfig) -> bool:
+    return int(task.query_ttl_min) == int(task.query_ttl_max)
+
+
+def selector_decision_for_stage(
+    growth: GrowthConfig,
+    next_stage_index: int,
+    *,
+    task: TaskConfig | None = None,
+    current_snapshot: dict[str, float] | None = None,
+) -> dict[str, Any]:
+    task = task or TaskConfig()
+    snapshot = current_snapshot or {}
+    gate_kind = str(growth.selector_gate_kind or "none")
+
+    if gate_kind != "none":
+        use_vt_half = False
+        gate_metrics: dict[str, float | int] = {"next_stage_index": int(next_stage_index)}
+        if gate_kind == "writers":
+            threshold = int(growth.selector_gate_writers_threshold)
+            writers = int(task.writers_per_episode)
+            use_vt_half = threshold >= 0 and writers <= threshold
+            gate_metrics.update({"writers_per_episode": writers, "writers_threshold": threshold})
+        elif gate_kind == "ingress":
+            threshold = int(growth.selector_gate_ingress_start_node_pool_threshold)
+            pool_size = int(task.start_node_pool_size)
+            tight_ttl = int(_tight_ttl(task))
+            use_vt_half = threshold >= 0 and pool_size <= threshold
+            if not use_vt_half and bool(growth.selector_gate_ingress_allow_tight_ttl):
+                use_vt_half = bool(tight_ttl)
+            gate_metrics.update(
+                {
+                    "start_node_pool_size": pool_size,
+                    "ingress_pool_threshold": threshold,
+                    "tight_ttl": tight_ttl,
+                    "tight_ttl_allowed": int(bool(growth.selector_gate_ingress_allow_tight_ttl)),
+                }
+            )
+        elif gate_kind == "meta":
+            writers = float(task.writers_per_episode)
+            pool_is_single = 1.0 if int(task.start_node_pool_size) == 1 else 0.0
+            tight_ttl = 1.0 if _tight_ttl(task) else 0.0
+            meta_score = (
+                float(growth.selector_gate_meta_writer_weight) * writers
+                + float(growth.selector_gate_meta_ingress_bonus) * pool_is_single
+                + float(growth.selector_gate_meta_tight_ttl_bonus) * tight_ttl
+                + float(growth.selector_gate_meta_bias)
+            )
+            threshold = float(growth.selector_gate_meta_threshold)
+            use_vt_half = meta_score <= threshold
+            gate_metrics.update(
+                {
+                    "writers_per_episode": writers,
+                    "start_node_pool_size": int(task.start_node_pool_size),
+                    "tight_ttl": int(tight_ttl),
+                    "meta_score": meta_score,
+                    "meta_threshold": threshold,
+                }
+            )
+        elif gate_kind == "online":
+            min_stage = int(growth.selector_gate_online_stage_index_min)
+            entropy_threshold = float(growth.selector_gate_online_entropy_high_threshold)
+            gini_threshold = float(growth.selector_gate_online_gini_high_threshold)
+            entropy = float(snapshot.get("task_visit_entropy", 0.0))
+            gini = float(snapshot.get("task_visit_gini", 0.0))
+            use_vt_half = (
+                min_stage >= 0
+                and int(next_stage_index) >= min_stage
+                and (entropy >= entropy_threshold or gini >= gini_threshold)
+            )
+            gate_metrics.update(
+                {
+                    "task_visit_entropy": entropy,
+                    "task_visit_gini": gini,
+                    "online_stage_index_min": min_stage,
+                    "online_entropy_high_threshold": entropy_threshold,
+                    "online_gini_high_threshold": gini_threshold,
+                }
+            )
+        else:
+            raise ValueError(f"Unknown selector gate kind: {gate_kind}")
+
+        weights = _vt_half_weights() if use_vt_half else _v_weights()
+        return {
+            "mode": "gate",
+            "gate_kind": gate_kind,
+            "gate_label": str(growth.selector_gate_label or gate_kind),
+            "selected_selector": "visit_taskgrad_half" if use_vt_half else "visitonly",
+            "selected_selector_label": "VT-0.5" if use_vt_half else "V",
+            "used_vt_half": int(use_vt_half),
+            "weights": weights,
+            "gate_metrics": gate_metrics,
+        }
+
     use_adaptive = (
         int(growth.adaptive_selector_stage_index_min) >= 0
         and int(next_stage_index) >= int(growth.adaptive_selector_stage_index_min)
     )
-    if use_adaptive:
-        return {
-            "utility_visit_weight": float(growth.adaptive_utility_visit_weight),
-            "utility_grad_weight": float(growth.adaptive_utility_grad_weight),
-            "utility_query_visit_weight": float(growth.adaptive_utility_query_visit_weight),
-            "utility_query_grad_weight": float(growth.adaptive_utility_query_grad_weight),
-        }
+    weights = _adaptive_selector_weights(growth) if use_adaptive else _static_selector_weights(growth)
     return {
-        "utility_visit_weight": float(growth.utility_visit_weight),
-        "utility_grad_weight": float(growth.utility_grad_weight),
-        "utility_query_visit_weight": float(growth.utility_query_visit_weight),
-        "utility_query_grad_weight": float(growth.utility_query_grad_weight),
+        "mode": "adaptive" if use_adaptive else "static",
+        "gate_kind": "none",
+        "gate_label": "",
+        "selected_selector": _selector_label_for_weights(weights),
+        "selected_selector_label": _selector_label_for_weights(weights),
+        "used_vt_half": int(_selector_label_for_weights(weights) == "VT-0.5"),
+        "weights": weights,
+        "gate_metrics": {"next_stage_index": int(next_stage_index)},
     }
+
+
+def selector_weights_for_stage(
+    growth: GrowthConfig,
+    next_stage_index: int,
+    *,
+    task: TaskConfig | None = None,
+    current_snapshot: dict[str, float] | None = None,
+) -> dict[str, float]:
+    return selector_decision_for_stage(
+        growth,
+        next_stage_index,
+        task=task,
+        current_snapshot=current_snapshot,
+    )["weights"]
 
 
 def _merge_dataclass(instance: ConfigT, updates: dict[str, Any]) -> ConfigT:
