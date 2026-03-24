@@ -52,6 +52,21 @@ class PacketBatch:
             packet_id=self.packet_id[mask],
         )
 
+    def detach_state(self) -> "PacketBatch":
+        return PacketBatch(
+            residual=self.residual.detach(),
+            routing_key=self.routing_key.detach(),
+            ttl=self.ttl,
+            batch_index=self.batch_index,
+            current_node=self.current_node,
+            role=self.role,
+            target_label=self.target_label,
+            target_home=self.target_home,
+            hop_index=self.hop_index,
+            has_visited_home=self.has_visited_home,
+            packet_id=self.packet_id,
+        )
+
 
 @dataclass
 class CacheWriteEvent:
@@ -64,6 +79,13 @@ class CacheWriteEvent:
             residual=self.residual[mask],
             batch_index=self.batch_index[mask],
             node_index=self.node_index[mask],
+        )
+
+    def detach_state(self) -> "CacheWriteEvent":
+        return CacheWriteEvent(
+            residual=self.residual.detach(),
+            batch_index=self.batch_index,
+            node_index=self.node_index,
         )
 
 
@@ -84,6 +106,16 @@ class OutputEvent:
             target_label=self.target_label[mask],
             hop_index=self.hop_index[mask],
             packet_id=self.packet_id[mask],
+        )
+
+    def detach_state(self) -> "OutputEvent":
+        return OutputEvent(
+            residual=self.residual.detach(),
+            batch_index=self.batch_index,
+            role=self.role,
+            target_label=self.target_label,
+            hop_index=self.hop_index,
+            packet_id=self.packet_id,
         )
 
 
@@ -383,6 +415,7 @@ class APSGNNModel(nn.Module):
         self.bootstrap_active = False
         self.active_node_ids_tensor: Tensor | None = None
         self.clockwise_successor_lookup_tensor: Tensor | None = None
+        self.rollout_steps_override: int | None = None
 
         self.node_cells = nn.ModuleList(
             [
@@ -427,6 +460,9 @@ class APSGNNModel(nn.Module):
             None if clockwise_successor_lookup is None else clockwise_successor_lookup.detach().to(dtype=torch.long)
         )
 
+    def set_rollout_steps_override(self, steps: int | None) -> None:
+        self.rollout_steps_override = None if steps is None else max(int(steps), 1)
+
     def uses_legacy_first_hop_router(self) -> bool:
         return self.config.model.first_hop_router_variant == "legacy"
 
@@ -446,6 +482,21 @@ class APSGNNModel(nn.Module):
 
     def uses_growth_curriculum(self) -> bool:
         return self.config.growth.enabled
+
+    def effective_rollout_steps(self) -> int:
+        if self.rollout_steps_override is not None:
+            return int(self.rollout_steps_override)
+        return int(self.config.task.max_rollout_steps)
+
+    def _should_detach_temporal_state(self, step: int, total_steps: int, device: torch.device) -> bool:
+        contract = self.config.train
+        if not self.training or not bool(contract.contract_detach_temporal_state):
+            return False
+        keep_prob = float(contract.contract_penultimate_keep_prob)
+        penultimate_step = max(int(total_steps) - 2, 0)
+        if keep_prob > 0.0 and int(step) == penultimate_step:
+            return not bool((torch.rand((), device=device) < keep_prob).item())
+        return True
 
     def _active_node_mask(self, device: torch.device, dtype: torch.dtype) -> Tensor:
         mask = torch.zeros(self.config.model.nodes_total, device=device, dtype=dtype)
@@ -650,9 +701,11 @@ class APSGNNModel(nn.Module):
             )
             live_buffer.schedule(cfg.task.writer_inject_step, coverage_packets)
 
-        first_query_logits: list[Tensor | None] = [None for _ in range(batch_size)]
+        query_logits_for_loss: list[Tensor | None] = [None for _ in range(batch_size)]
         query_delivered = torch.zeros(batch_size, device=device, dtype=torch.bool)
         query_last_hops = torch.zeros(batch_size, device=device, dtype=torch.long)
+        query_supervision = str(cfg.train.contract_query_supervision or "first_output")
+        rollout_steps = self.effective_rollout_steps()
 
         loss_main_sum = zero
         loss_writer_sum = zero
@@ -697,7 +750,7 @@ class APSGNNModel(nn.Module):
             "bootstrap": torch.zeros(cfg.model.num_compute_nodes, device=device, dtype=torch.float32),
         }
 
-        for step in range(cfg.task.max_rollout_steps):
+        for step in range(rollout_steps):
             cache_events = _concat_cache_events(cache_buffer.pop_current())
             if cache_events is not None:
                 cache.write(cache_events.residual, cache_events.batch_index, cache_events.node_index)
@@ -712,10 +765,12 @@ class APSGNNModel(nn.Module):
                     hops = output_events.hop_index[query_mask]
                     for i in range(logits.size(0)):
                         sample = int(batch_index[i].item())
-                        if first_query_logits[sample] is None:
-                            first_query_logits[sample] = logits[i]
-                            query_delivered[sample] = True
-                            query_last_hops[sample] = hops[i]
+                        if query_supervision == "final_output":
+                            query_logits_for_loss[sample] = logits[i]
+                        elif query_logits_for_loss[sample] is None:
+                            query_logits_for_loss[sample] = logits[i]
+                        query_delivered[sample] = True
+                        query_last_hops[sample] = hops[i]
 
             cache_mean, cache_max = cache.occupancy_stats()
             cache_mean_sum = cache_mean_sum + cache_mean
@@ -860,10 +915,14 @@ class APSGNNModel(nn.Module):
             output_mask = dest_index == 0
             cache_write_mask = (~output_mask) & (ttl_after == 0)
             live_mask = (~output_mask) & (ttl_after > 0)
+            detach_temporal_state = self._should_detach_temporal_state(step, rollout_steps, device)
 
             if output_mask.any():
+                output_residual = next_residual[output_mask]
+                if detach_temporal_state:
+                    output_residual = output_residual.detach()
                 output_events_to_schedule = OutputEvent(
-                    residual=next_residual[output_mask],
+                    residual=output_residual,
                     batch_index=active_packets.batch_index[output_mask],
                     role=active_packets.role[output_mask],
                     target_label=active_packets.target_label[output_mask],
@@ -873,17 +932,25 @@ class APSGNNModel(nn.Module):
                 self._schedule_output_events(output_buffer, scheduled_step[output_mask], output_events_to_schedule)
 
             if cache_write_mask.any():
+                cache_residual = next_residual[cache_write_mask]
+                if detach_temporal_state:
+                    cache_residual = cache_residual.detach()
                 cache_events_to_schedule = CacheWriteEvent(
-                    residual=next_residual[cache_write_mask],
+                    residual=cache_residual,
                     batch_index=active_packets.batch_index[cache_write_mask],
                     node_index=dest_index[cache_write_mask],
                 )
                 self._schedule_cache_events(cache_buffer, scheduled_step[cache_write_mask], cache_events_to_schedule)
 
             if live_mask.any():
+                live_residual = next_residual[live_mask]
+                live_routing_key = active_packets.routing_key[live_mask]
+                if detach_temporal_state:
+                    live_residual = live_residual.detach()
+                    live_routing_key = live_routing_key.detach()
                 next_packets = PacketBatch(
-                    residual=next_residual[live_mask],
-                    routing_key=active_packets.routing_key[live_mask],
+                    residual=live_residual,
+                    routing_key=live_routing_key,
                     ttl=ttl_after[live_mask],
                     batch_index=active_packets.batch_index[live_mask],
                     current_node=dest_index[live_mask],
@@ -896,13 +963,16 @@ class APSGNNModel(nn.Module):
                 )
                 self._schedule_packets(live_buffer, scheduled_step[live_mask], next_packets)
 
+            if detach_temporal_state:
+                cache.detach_()
+
             live_buffer.advance()
             cache_buffer.advance()
             output_buffer.advance()
 
-        delivered_mask = torch.tensor([item is not None for item in first_query_logits], device=device, dtype=torch.bool)
+        delivered_mask = torch.tensor([item is not None for item in query_logits_for_loss], device=device, dtype=torch.bool)
         if delivered_mask.any():
-            logits = torch.stack([item for item in first_query_logits if item is not None], dim=0)
+            logits = torch.stack([item for item in query_logits_for_loss if item is not None], dim=0)
             labels = batch.query_labels[delivered_mask]
             loss_main_sum = F.cross_entropy(logits, labels, reduction="sum")
             query_correct = (logits.argmax(dim=-1) == labels).sum().to(dtype)
@@ -1025,7 +1095,7 @@ class APSGNNModel(nn.Module):
         delay_count = zero
         processed_packets_sum = zero
 
-        for step in range(cfg.task.max_rollout_steps):
+        for step in range(self.effective_rollout_steps()):
             cache_events = _concat_cache_events(cache_buffer.pop_current())
             if cache_events is not None:
                 cache.write(cache_events.residual, cache_events.batch_index, cache_events.node_index)

@@ -1,0 +1,6710 @@
+{
+  "budgets": {
+    "p": 420,
+    "s": 1134,
+    "m": 2268,
+    "l": 3024
+  },
+  "visible_gpu_count": 2,
+  "selected_settings": {
+    "visitonly_b": {
+      "lr_multiplier": 0.8,
+      "p_keep_prev": 0.0
+    },
+    "visit_taskgrad_half_b": {
+      "lr_multiplier": 0.8,
+      "p_keep_prev": 0.0
+    },
+    "visit_taskgrad_half_d": {
+      "lr_multiplier": 0.8,
+      "p_keep_prev": 0.0
+    },
+    "visitonly_d": {
+      "lr_multiplier": 0.8,
+      "p_keep_prev": 0.0
+    },
+    "visit_taskgrad_half_ds": {
+      "lr_multiplier": 1.0,
+      "p_keep_prev": 0.1
+    },
+    "visitonly_ds": {
+      "lr_multiplier": 1.0,
+      "p_keep_prev": 0.1
+    },
+    "visit_taskgrad_half_dsg": {
+      "lr_multiplier": 0.6,
+      "p_keep_prev": 0.1
+    },
+    "visitonly_dsg": {
+      "lr_multiplier": 0.6,
+      "p_keep_prev": 0.1
+    }
+  },
+  "screening_rankings": [
+    {
+      "pair": "visit_taskgrad_half_dsg",
+      "pair_label": "VT-0.5/DSG",
+      "selector": "visit_taskgrad_half",
+      "selector_label": "VT-0.5",
+      "contract": "dsg",
+      "contract_label": "DSG",
+      "summary": {
+        "count": 3,
+        "best_val": {
+          "mean": 0.07309941520467836,
+          "std": 0.017725666159330616
+        },
+        "last_val": {
+          "mean": 0.05555555555555555,
+          "std": 0.024056261216234404
+        },
+        "last5_val_mean": {
+          "mean": 0.05555555555555555,
+          "std": 0.024056261216234404
+        },
+        "best_to_last_drop": {
+          "mean": 0.017543859649122806,
+          "std": 0.021598372372359877
+        },
+        "dense_mean": {
+          "mean": 0.04050925925925926,
+          "std": 0.005303907054347036
+        },
+        "last_dense_mean": {
+          "mean": 0.04050925925925926,
+          "std": 0.005303907054347036
+        },
+        "composite": {
+          "mean": 0.038572124756335285,
+          "std": 0.01419961236289811
+        },
+        "score": {
+          "mean": 0.078520955165692,
+          "std": 0.0451985325425238
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.1388888888888889,
+          "std": 0.04811252243246881
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.6666666666666666,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 0.9444444378217062,
+          "std": 0.09622505633585686
+        },
+        "task_visit_cov_100": {
+          "mean": 0.3333333432674408,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.6388888955116272,
+          "std": 0.048112545374307286
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 0.9444444378217062,
+          "std": 0.09622505633585686
+        },
+        "task_grad_cov_100": {
+          "mean": 0.3055555621782939,
+          "std": 0.04811252816792843
+        },
+        "task_grad_cov_200": {
+          "mean": 0.3194444477558136,
+          "std": 0.024056272687153643
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 27.666666666666668,
+          "std": 30.072135496724094
+        },
+        "time_to_grad_50": {
+          "mean": 9.666666666666666,
+          "std": 9.60902353693305
+        },
+        "time_to_grad_75": {
+          "mean": 213.33333333333334,
+          "std": 38.214307966170644
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.036977639174548015,
+          "std": 0.025651785998639036
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.07142857142857142,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.06255938342130826,
+          "std": 0.01536188425046035
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "runs": [
+          "20260323-232326-v63-core-visit_taskgrad_half_dsg-32-s-s1234",
+          "20260323-232513-v63-t1-visit_taskgrad_half_dsg-32-s-s1234",
+          "20260323-232703-v63-t2a-visit_taskgrad_half_dsg-32-s-s1234"
+        ]
+      }
+    },
+    {
+      "pair": "visitonly_dsg",
+      "pair_label": "V/DSG",
+      "selector": "visitonly",
+      "selector_label": "V",
+      "contract": "dsg",
+      "contract_label": "DSG",
+      "summary": {
+        "count": 3,
+        "best_val": {
+          "mean": 0.07309941520467836,
+          "std": 0.017725666159330616
+        },
+        "last_val": {
+          "mean": 0.05555555555555555,
+          "std": 0.024056261216234404
+        },
+        "last5_val_mean": {
+          "mean": 0.05555555555555555,
+          "std": 0.024056261216234404
+        },
+        "best_to_last_drop": {
+          "mean": 0.017543859649122806,
+          "std": 0.021598372372359877
+        },
+        "dense_mean": {
+          "mean": 0.04050925925925926,
+          "std": 0.005303907054347036
+        },
+        "last_dense_mean": {
+          "mean": 0.04050925925925926,
+          "std": 0.005303907054347036
+        },
+        "composite": {
+          "mean": 0.038572124756335285,
+          "std": 0.01419961236289811
+        },
+        "score": {
+          "mean": 0.078520955165692,
+          "std": 0.0451985325425238
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.1388888888888889,
+          "std": 0.04811252243246881
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.6666666666666666,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 0.9444444378217062,
+          "std": 0.09622505633585686
+        },
+        "task_visit_cov_100": {
+          "mean": 0.3333333432674408,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.6388888955116272,
+          "std": 0.048112545374307286
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 0.9444444378217062,
+          "std": 0.09622505633585686
+        },
+        "task_grad_cov_100": {
+          "mean": 0.3055555621782939,
+          "std": 0.04811252816792843
+        },
+        "task_grad_cov_200": {
+          "mean": 0.3194444477558136,
+          "std": 0.024056272687153643
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 27.666666666666668,
+          "std": 30.072135496724094
+        },
+        "time_to_grad_50": {
+          "mean": 9.666666666666666,
+          "std": 9.60902353693305
+        },
+        "time_to_grad_75": {
+          "mean": 213.33333333333334,
+          "std": 38.214307966170644
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.03697326241153198,
+          "std": 0.02565206558734611
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.07142857142857142,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.06255938342130826,
+          "std": 0.01536188425046035
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "runs": [
+          "20260323-232329-v63-core-visitonly_dsg-32-s-s1234",
+          "20260323-232516-v63-t1-visitonly_dsg-32-s-s1234",
+          "20260323-232707-v63-t2a-visitonly_dsg-32-s-s1234"
+        ]
+      }
+    },
+    {
+      "pair": "visitonly_d",
+      "pair_label": "V/D",
+      "selector": "visitonly",
+      "selector_label": "V",
+      "contract": "d",
+      "contract_label": "D",
+      "summary": {
+        "count": 3,
+        "best_val": {
+          "mean": 0.07142857142857142,
+          "std": 0.020619652471058063
+        },
+        "last_val": {
+          "mean": 0.05555555555555555,
+          "std": 0.024056261216234404
+        },
+        "last5_val_mean": {
+          "mean": 0.05555555555555555,
+          "std": 0.024056261216234404
+        },
+        "best_to_last_drop": {
+          "mean": 0.015873015873015872,
+          "std": 0.022535350578572512
+        },
+        "dense_mean": {
+          "mean": 0.03935185185185185,
+          "std": 0.007228006942590738
+        },
+        "last_dense_mean": {
+          "mean": 0.03935185185185185,
+          "std": 0.007228006942590738
+        },
+        "composite": {
+          "mean": 0.03835978835978836,
+          "std": 0.014736512410267652
+        },
+        "score": {
+          "mean": 0.07903439153439153,
+          "std": 0.04690145630882339
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.1388888888888889,
+          "std": 0.04811252243246881
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.6666666666666666,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 0.9444444378217062,
+          "std": 0.09622505633585686
+        },
+        "task_visit_cov_100": {
+          "mean": 0.3888888855775197,
+          "std": 0.04811251096154958
+        },
+        "task_visit_cov_200": {
+          "mean": 0.7083333333333334,
+          "std": 0.04166665673256276
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 0.9444444378217062,
+          "std": 0.09622505633585686
+        },
+        "task_grad_cov_100": {
+          "mean": 0.3611111144224803,
+          "std": 0.04811251096154958
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4861111243565877,
+          "std": 0.09622505633585686
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 54.333333333333336,
+          "std": 57.500724633115134
+        },
+        "time_to_grad_50": {
+          "mean": 34.333333333333336,
+          "std": 40.5010287935175
+        },
+        "time_to_grad_75": {
+          "mean": 159.0,
+          "std": 98.36157786453
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.03822685202574355,
+          "std": 0.024634374665966095
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.07142857142857142,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.05442469712293435,
+          "std": 0.008821900869004235
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "runs": [
+          "20260323-230910-v63-core-visitonly_d-32-s-s1234",
+          "20260323-231130-v63-t1-visitonly_d-32-s-s1234",
+          "20260323-231356-v63-t2a-visitonly_d-32-s-s1234"
+        ]
+      }
+    },
+    {
+      "pair": "visit_taskgrad_half_d",
+      "pair_label": "VT-0.5/D",
+      "selector": "visit_taskgrad_half",
+      "selector_label": "VT-0.5",
+      "contract": "d",
+      "contract_label": "D",
+      "summary": {
+        "count": 3,
+        "best_val": {
+          "mean": 0.07142857142857142,
+          "std": 0.020619652471058063
+        },
+        "last_val": {
+          "mean": 0.05555555555555555,
+          "std": 0.024056261216234404
+        },
+        "last5_val_mean": {
+          "mean": 0.05555555555555555,
+          "std": 0.024056261216234404
+        },
+        "best_to_last_drop": {
+          "mean": 0.015873015873015872,
+          "std": 0.022535350578572512
+        },
+        "dense_mean": {
+          "mean": 0.03935185185185185,
+          "std": 0.007228006942590738
+        },
+        "last_dense_mean": {
+          "mean": 0.03935185185185185,
+          "std": 0.007228006942590738
+        },
+        "composite": {
+          "mean": 0.03835978835978836,
+          "std": 0.014736512410267652
+        },
+        "score": {
+          "mean": 0.07903439153439153,
+          "std": 0.04690145630882339
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.1388888888888889,
+          "std": 0.04811252243246881
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.6666666666666666,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 0.9444444378217062,
+          "std": 0.09622505633585686
+        },
+        "task_visit_cov_100": {
+          "mean": 0.3888888855775197,
+          "std": 0.04811251096154958
+        },
+        "task_visit_cov_200": {
+          "mean": 0.7083333333333334,
+          "std": 0.04166665673256276
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 0.9444444378217062,
+          "std": 0.09622505633585686
+        },
+        "task_grad_cov_100": {
+          "mean": 0.3611111144224803,
+          "std": 0.04811251096154958
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4861111243565877,
+          "std": 0.09622505633585686
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 54.333333333333336,
+          "std": 57.500724633115134
+        },
+        "time_to_grad_50": {
+          "mean": 34.333333333333336,
+          "std": 40.5010287935175
+        },
+        "time_to_grad_75": {
+          "mean": 159.0,
+          "std": 98.36157786453
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.03822966301590432,
+          "std": 0.024635910852146337
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.07142857142857142,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.05442469712293435,
+          "std": 0.008821900869004235
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "runs": [
+          "20260323-230911-v63-core-visit_taskgrad_half_d-32-s-s1234",
+          "20260323-231130-v63-t1-visit_taskgrad_half_d-32-s-s1234",
+          "20260323-231355-v63-t2a-visit_taskgrad_half_d-32-s-s1234"
+        ]
+      }
+    },
+    {
+      "pair": "visit_taskgrad_half_ds",
+      "pair_label": "VT-0.5/DS",
+      "selector": "visit_taskgrad_half",
+      "selector_label": "VT-0.5",
+      "contract": "ds",
+      "contract_label": "DS",
+      "summary": {
+        "count": 3,
+        "best_val": {
+          "mean": 0.07309941520467836,
+          "std": 0.017725666159330616
+        },
+        "last_val": {
+          "mean": 0.05555555555555555,
+          "std": 0.024056261216234404
+        },
+        "last5_val_mean": {
+          "mean": 0.055676328502415454,
+          "std": 0.02395235386968514
+        },
+        "best_to_last_drop": {
+          "mean": 0.017543859649122806,
+          "std": 0.021598372372359877
+        },
+        "dense_mean": {
+          "mean": 0.03935185185185185,
+          "std": 0.007228006942590738
+        },
+        "last_dense_mean": {
+          "mean": 0.03935185185185185,
+          "std": 0.007228006942590738
+        },
+        "composite": {
+          "mean": 0.0381272777354013,
+          "std": 0.014799794080456612
+        },
+        "score": {
+          "mean": 0.07736354775828459,
+          "std": 0.04689355023400596
+        },
+        "lr_multiplier": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.16666666666666666,
+          "std": 0.04166666666666667
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.7103174603174603,
+          "std": 0.041808149812907716
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 0.4999999900658925,
+          "std": 0.08333332836628005
+        },
+        "task_visit_cov_200": {
+          "mean": 0.6527777711550394,
+          "std": 0.04811251096154958
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 0.3888888955116272,
+          "std": 0.09622503912947801
+        },
+        "task_grad_cov_200": {
+          "mean": 0.3888888855775197,
+          "std": 0.04811251096154958
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 40.666666666666664,
+          "std": 32.34707611722168
+        },
+        "time_to_grad_50": {
+          "mean": 32.666666666666664,
+          "std": 56.58032638058332
+        },
+        "time_to_grad_75": {
+          "mean": 138.66666666666666,
+          "std": 79.12226825194873
+        },
+        "time_to_grad_100": {
+          "mean": 628.6666666666666,
+          "std": 37.09896674212549
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.03699074588018633,
+          "std": 0.02553931828963581
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.07142857142857142,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.06845238095240752,
+          "std": 0.005154913117718482
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "runs": [
+          "20260323-231619-v63-core-visit_taskgrad_half_ds-32-s-s1234",
+          "20260323-231839-v63-t1-visit_taskgrad_half_ds-32-s-s1234",
+          "20260323-232103-v63-t2a-visit_taskgrad_half_ds-32-s-s1234"
+        ]
+      }
+    },
+    {
+      "pair": "visitonly_ds",
+      "pair_label": "V/DS",
+      "selector": "visitonly",
+      "selector_label": "V",
+      "contract": "ds",
+      "contract_label": "DS",
+      "summary": {
+        "count": 3,
+        "best_val": {
+          "mean": 0.07309941520467836,
+          "std": 0.017725666159330616
+        },
+        "last_val": {
+          "mean": 0.05555555555555555,
+          "std": 0.024056261216234404
+        },
+        "last5_val_mean": {
+          "mean": 0.055676328502415454,
+          "std": 0.02395235386968514
+        },
+        "best_to_last_drop": {
+          "mean": 0.017543859649122806,
+          "std": 0.021598372372359877
+        },
+        "dense_mean": {
+          "mean": 0.03935185185185185,
+          "std": 0.007228006942590738
+        },
+        "last_dense_mean": {
+          "mean": 0.03935185185185185,
+          "std": 0.007228006942590738
+        },
+        "composite": {
+          "mean": 0.0381272777354013,
+          "std": 0.014799794080456612
+        },
+        "score": {
+          "mean": 0.07736354775828459,
+          "std": 0.04689355023400596
+        },
+        "lr_multiplier": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.16666666666666666,
+          "std": 0.04166666666666667
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.7103174603174603,
+          "std": 0.041808149812907716
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 0.4999999900658925,
+          "std": 0.08333332836628005
+        },
+        "task_visit_cov_200": {
+          "mean": 0.6527777711550394,
+          "std": 0.04811251096154958
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 0.3888888955116272,
+          "std": 0.09622503912947801
+        },
+        "task_grad_cov_200": {
+          "mean": 0.3888888855775197,
+          "std": 0.04811251096154958
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 40.666666666666664,
+          "std": 32.34707611722168
+        },
+        "time_to_grad_50": {
+          "mean": 32.666666666666664,
+          "std": 56.58032638058332
+        },
+        "time_to_grad_75": {
+          "mean": 138.66666666666666,
+          "std": 79.12226825194873
+        },
+        "time_to_grad_100": {
+          "mean": 628.6666666666666,
+          "std": 37.09896674212549
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.03698612028723801,
+          "std": 0.02553966112915087
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.07142857142857142,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.06845238095240752,
+          "std": 0.005154913117718482
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "runs": [
+          "20260323-231620-v63-core-visitonly_ds-32-s-s1234",
+          "20260323-231841-v63-t1-visitonly_ds-32-s-s1234",
+          "20260323-232106-v63-t2a-visitonly_ds-32-s-s1234"
+        ]
+      }
+    },
+    {
+      "pair": "visit_taskgrad_half_b",
+      "pair_label": "VT-0.5/B",
+      "selector": "visit_taskgrad_half",
+      "selector_label": "VT-0.5",
+      "contract": "b",
+      "contract_label": "B",
+      "summary": {
+        "count": 3,
+        "best_val": {
+          "mean": 0.16666666666666666,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.06944444444444445,
+          "std": 0.06364688465216445
+        },
+        "last5_val_mean": {
+          "mean": 0.06388888888888888,
+          "std": 0.05091750772173156
+        },
+        "best_to_last_drop": {
+          "mean": 0.09722222222222221,
+          "std": 0.06364688465216445
+        },
+        "dense_mean": {
+          "mean": 0.030671296296296297,
+          "std": 0.014765452340478094
+        },
+        "last_dense_mean": {
+          "mean": 0.030671296296296297,
+          "std": 0.014765452340478094
+        },
+        "composite": {
+          "mean": 0.028101851851851854,
+          "std": 0.030548399835511646
+        },
+        "score": {
+          "mean": 0.0028935185185185266,
+          "std": 0.11294511423577608
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.1388888888888889,
+          "std": 0.0240562612162344
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.6722222222222222,
+          "std": 0.07515416254704825
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 0.4444444378217061,
+          "std": 0.04811252816792843
+        },
+        "task_visit_cov_200": {
+          "mean": 0.6666666666666666,
+          "std": 0.11023965673472326
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 0.4444444378217061,
+          "std": 0.04811252816792843
+        },
+        "task_grad_cov_200": {
+          "mean": 0.6666666666666666,
+          "std": 0.11023965673472326
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 6.666666666666667,
+          "std": 2.516611478423583
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 407.6666666666667,
+          "std": 311.66702317270165
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.03745084373974892,
+          "std": 0.02468520070067114
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.07142857142857142,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.07142857142857142,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "runs": [
+          "20260323-230155-v63-core-visit_taskgrad_half_b-32-s-s1234",
+          "20260323-230417-v63-t1-visit_taskgrad_half_b-32-s-s1234",
+          "20260323-230645-v63-t2a-visit_taskgrad_half_b-32-s-s1234"
+        ]
+      }
+    },
+    {
+      "pair": "visitonly_b",
+      "pair_label": "V/B",
+      "selector": "visitonly",
+      "selector_label": "V",
+      "contract": "b",
+      "contract_label": "B",
+      "summary": {
+        "count": 3,
+        "best_val": {
+          "mean": 0.16666666666666666,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.06944444444444445,
+          "std": 0.06364688465216445
+        },
+        "last5_val_mean": {
+          "mean": 0.06388888888888888,
+          "std": 0.05091750772173156
+        },
+        "best_to_last_drop": {
+          "mean": 0.09722222222222221,
+          "std": 0.06364688465216445
+        },
+        "dense_mean": {
+          "mean": 0.030671296296296297,
+          "std": 0.014765452340478094
+        },
+        "last_dense_mean": {
+          "mean": 0.030671296296296297,
+          "std": 0.014765452340478094
+        },
+        "composite": {
+          "mean": 0.028101851851851854,
+          "std": 0.030548399835511646
+        },
+        "score": {
+          "mean": 0.0028935185185185266,
+          "std": 0.11294511423577608
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.1388888888888889,
+          "std": 0.0240562612162344
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.6722222222222222,
+          "std": 0.07515416254704825
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 0.4444444378217061,
+          "std": 0.04811252816792843
+        },
+        "task_visit_cov_200": {
+          "mean": 0.6666666666666666,
+          "std": 0.11023965673472326
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 0.4444444378217061,
+          "std": 0.04811252816792843
+        },
+        "task_grad_cov_200": {
+          "mean": 0.6666666666666666,
+          "std": 0.11023965673472326
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 6.666666666666667,
+          "std": 2.516611478423583
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 407.6666666666667,
+          "std": 311.66702317270165
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.037085360412950366,
+          "std": 0.02480381857609361
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.07142857142857142,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.07142857142857142,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "runs": [
+          "20260323-230156-v63-core-visitonly_b-32-s-s1234",
+          "20260323-230417-v63-t1-visitonly_b-32-s-s1234",
+          "20260323-230644-v63-t2a-visitonly_b-32-s-s1234"
+        ]
+      }
+    }
+  ],
+  "promoted_pairs": [
+    "visit_taskgrad_half_dsg",
+    "visitonly_dsg",
+    "visitonly_d",
+    "visit_taskgrad_half_d"
+  ],
+  "confirmation_rankings": [
+    {
+      "pair": "visit_taskgrad_half_dsg",
+      "pair_label": "VT-0.5/DSG",
+      "selector": "visit_taskgrad_half",
+      "selector_label": "VT-0.5",
+      "contract": "dsg",
+      "contract_label": "DSG",
+      "summary": {
+        "count": 6,
+        "best_val": {
+          "mean": 0.06944444444444445,
+          "std": 0.04303314829119352
+        },
+        "last_val": {
+          "mean": 0.05555555555555555,
+          "std": 0.04303314829119352
+        },
+        "last5_val_mean": {
+          "mean": 0.0556159420289855,
+          "std": 0.045850586773763594
+        },
+        "best_to_last_drop": {
+          "mean": 0.01388888888888889,
+          "std": 0.02151657414559676
+        },
+        "dense_mean": {
+          "mean": 0.033275462962962965,
+          "std": 0.011112015298858153
+        },
+        "last_dense_mean": {
+          "mean": 0.033275462962962965,
+          "std": 0.011112015298858153
+        },
+        "composite": {
+          "mean": 0.03623590982286634,
+          "std": 0.021248421610452227
+        },
+        "score": {
+          "mean": 0.07494212962962962,
+          "std": 0.05648545400040338
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.25,
+          "std": 0.05270462766947298
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.7847883597883598,
+          "std": 0.04727499163544278
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.4999999900658925,
+          "std": 0.10540924434390402
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4583333283662796,
+          "std": 0.08740073071725313
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 497.1666666666667,
+          "std": 770.6543756228642
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.1180831913493318,
+          "std": 0.018936150650973798
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.047910765671939595,
+          "std": 0.01504268136251282
+        },
+        "child_visit_share": {
+          "mean": 0.20833333333333331,
+          "std": 0.009221388919541464
+        },
+        "child_grad_share": {
+          "mean": 0.17261904769781236,
+          "std": 0.020097551279667794
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.09260159748479353,
+          "std": 0.07604062120174152
+        },
+        "runs": [
+          "20260323-233908-v63-core-visit_taskgrad_half_dsg-32-m-s2234",
+          "20260323-234144-v63-core-visit_taskgrad_half_dsg-32-m-s3234",
+          "20260323-234423-v63-t1-visit_taskgrad_half_dsg-32-m-s2234",
+          "20260323-234709-v63-t1-visit_taskgrad_half_dsg-32-m-s3234",
+          "20260323-234955-v63-t2a-visit_taskgrad_half_dsg-32-m-s2234",
+          "20260323-235236-v63-t2a-visit_taskgrad_half_dsg-32-m-s3234"
+        ]
+      }
+    },
+    {
+      "pair": "visitonly_dsg",
+      "pair_label": "V/DSG",
+      "selector": "visitonly",
+      "selector_label": "V",
+      "contract": "dsg",
+      "contract_label": "DSG",
+      "summary": {
+        "count": 6,
+        "best_val": {
+          "mean": 0.06944444444444445,
+          "std": 0.04303314829119352
+        },
+        "last_val": {
+          "mean": 0.05555555555555555,
+          "std": 0.04303314829119352
+        },
+        "last5_val_mean": {
+          "mean": 0.0556159420289855,
+          "std": 0.045850586773763594
+        },
+        "best_to_last_drop": {
+          "mean": 0.01388888888888889,
+          "std": 0.02151657414559676
+        },
+        "dense_mean": {
+          "mean": 0.033275462962962965,
+          "std": 0.011112015298858153
+        },
+        "last_dense_mean": {
+          "mean": 0.033275462962962965,
+          "std": 0.011112015298858153
+        },
+        "composite": {
+          "mean": 0.03623590982286634,
+          "std": 0.021248421610452227
+        },
+        "score": {
+          "mean": 0.07494212962962962,
+          "std": 0.05648545400040338
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.2569444444444444,
+          "std": 0.04871021643541717
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.7887566137566138,
+          "std": 0.05283692035737192
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.4999999900658925,
+          "std": 0.10540924434390402
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4583333283662796,
+          "std": 0.08740073071725313
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 497.1666666666667,
+          "std": 770.6543756228642
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.11873297836365379,
+          "std": 0.020150409031573075
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.04789760354426795,
+          "std": 0.015030418820666585
+        },
+        "child_visit_share": {
+          "mean": 0.20833333333333331,
+          "std": 0.009221388919541464
+        },
+        "child_grad_share": {
+          "mean": 0.1711309524597171,
+          "std": 0.01989823180447622
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.08768855238964123,
+          "std": 0.06804025572064186
+        },
+        "runs": [
+          "20260323-235519-v63-core-visitonly_dsg-32-m-s2234",
+          "20260323-235759-v63-core-visitonly_dsg-32-m-s3234",
+          "20260324-000039-v63-t1-visitonly_dsg-32-m-s2234",
+          "20260324-000326-v63-t1-visitonly_dsg-32-m-s3234",
+          "20260324-000611-v63-t2a-visitonly_dsg-32-m-s2234",
+          "20260324-000855-v63-t2a-visitonly_dsg-32-m-s3234"
+        ]
+      }
+    },
+    {
+      "pair": "visit_taskgrad_half_d",
+      "pair_label": "VT-0.5/D",
+      "selector": "visit_taskgrad_half",
+      "selector_label": "VT-0.5",
+      "contract": "d",
+      "contract_label": "D",
+      "summary": {
+        "count": 6,
+        "best_val": {
+          "mean": 0.07759661835748792,
+          "std": 0.049578361183489635
+        },
+        "last_val": {
+          "mean": 0.048611111111111105,
+          "std": 0.040966336677090626
+        },
+        "last5_val_mean": {
+          "mean": 0.04728260869565217,
+          "std": 0.038270029371273474
+        },
+        "best_to_last_drop": {
+          "mean": 0.028985507246376812,
+          "std": 0.035959118190723206
+        },
+        "dense_mean": {
+          "mean": 0.031280587698560826,
+          "std": 0.010450282093240337
+        },
+        "last_dense_mean": {
+          "mean": 0.031280587698560826,
+          "std": 0.010450282093240337
+        },
+        "composite": {
+          "mean": 0.029840133630148966,
+          "std": 0.02050529776134891
+        },
+        "score": {
+          "mean": 0.050906191563295115,
+          "std": 0.06362070066175983
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.2847222222222222,
+          "std": 0.0667534157816551
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.8025793650793651,
+          "std": 0.05909568256359207
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.5555555522441864,
+          "std": 0.06804138498844464
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4861111094554265,
+          "std": 0.08193266493423676
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.6666666666666666,
+          "std": 1.632993161855452
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.11854815804347453,
+          "std": 0.019206122807646584
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.049331927672233114,
+          "std": 0.01738732049044225
+        },
+        "child_visit_share": {
+          "mean": 0.2113095238095238,
+          "std": 0.004610694459770732
+        },
+        "child_grad_share": {
+          "mean": 0.1830357142857143,
+          "std": 0.016703827619526518
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.10447292114520548,
+          "std": 0.07690644783086441
+        },
+        "runs": [
+          "20260323-235957-v63-core-visit_taskgrad_half_d-32-m-s2234",
+          "20260324-000323-v63-core-visit_taskgrad_half_d-32-m-s3234",
+          "20260324-000647-v63-t1-visit_taskgrad_half_d-32-m-s2234",
+          "20260324-001017-v63-t1-visit_taskgrad_half_d-32-m-s3234",
+          "20260324-001344-v63-t2a-visit_taskgrad_half_d-32-m-s2234",
+          "20260324-001701-v63-t2a-visit_taskgrad_half_d-32-m-s3234"
+        ]
+      }
+    },
+    {
+      "pair": "visitonly_d",
+      "pair_label": "V/D",
+      "selector": "visitonly",
+      "selector_label": "V",
+      "contract": "d",
+      "contract_label": "D",
+      "summary": {
+        "count": 6,
+        "best_val": {
+          "mean": 0.07759661835748792,
+          "std": 0.049578361183489635
+        },
+        "last_val": {
+          "mean": 0.048611111111111105,
+          "std": 0.040966336677090626
+        },
+        "last5_val_mean": {
+          "mean": 0.04728260869565217,
+          "std": 0.038270029371273474
+        },
+        "best_to_last_drop": {
+          "mean": 0.028985507246376812,
+          "std": 0.035959118190723206
+        },
+        "dense_mean": {
+          "mean": 0.030412532143005266,
+          "std": 0.01116440492502538
+        },
+        "last_dense_mean": {
+          "mean": 0.030412532143005266,
+          "std": 0.01116440492502538
+        },
+        "composite": {
+          "mean": 0.029492911407926745,
+          "std": 0.020281399648794267
+        },
+        "score": {
+          "mean": 0.05003813600773956,
+          "std": 0.06338067697143601
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.2916666666666667,
+          "std": 0.06454972243679029
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.8046837421837422,
+          "std": 0.05400571664236463
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.5555555522441864,
+          "std": 0.06804138498844464
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4861111094554265,
+          "std": 0.08193266493423676
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.6666666666666666,
+          "std": 1.632993161855452
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.11892537065094134,
+          "std": 0.018893688826634163
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.04913858495781237,
+          "std": 0.01783003741251754
+        },
+        "child_visit_share": {
+          "mean": 0.20833333333333331,
+          "std": 0.007290148043997551
+        },
+        "child_grad_share": {
+          "mean": 0.17857142857142858,
+          "std": 0.011293848786315636
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.1507327793495383,
+          "std": 0.0537533328813341
+        },
+        "runs": [
+          "20260323-233908-v63-core-visitonly_d-32-m-s2234",
+          "20260323-234233-v63-core-visitonly_d-32-m-s3234",
+          "20260323-234556-v63-t1-visitonly_d-32-m-s2234",
+          "20260323-234928-v63-t1-visitonly_d-32-m-s3234",
+          "20260323-235301-v63-t2a-visitonly_d-32-m-s2234",
+          "20260323-235629-v63-t2a-visitonly_d-32-m-s3234"
+        ]
+      }
+    }
+  ],
+  "top2_pairs_after_confirmation": [
+    "visit_taskgrad_half_dsg",
+    "visitonly_dsg"
+  ],
+  "top2_pairs_after_holdout": [
+    "visit_taskgrad_half_dsg",
+    "visitonly_dsg"
+  ],
+  "final_rerun_regimes": [
+    "core",
+    "t1"
+  ],
+  "extra_depth_summary": {
+    "visit_taskgrad_half_dsg": {
+      "t2a": {
+        "best": {
+          "standard": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "plus50": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "plus100": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "settle": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          }
+        },
+        "last": {
+          "standard": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "plus50": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "plus100": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "settle": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          }
+        }
+      },
+      "hmix": {
+        "best": {
+          "standard": {
+            "dense_mean": 0.02734375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.02734375,
+            "non_settling_rate": 0.0
+          },
+          "plus50": {
+            "dense_mean": 0.02734375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.02734375,
+            "non_settling_rate": 0.0
+          },
+          "plus100": {
+            "dense_mean": 0.02734375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.02734375,
+            "non_settling_rate": 0.0
+          },
+          "settle": {
+            "dense_mean": 0.02734375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.02734375,
+            "non_settling_rate": 0.0
+          }
+        },
+        "last": {
+          "standard": {
+            "dense_mean": 0.02734375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.02734375,
+            "non_settling_rate": 0.0
+          },
+          "plus50": {
+            "dense_mean": 0.02734375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.02734375,
+            "non_settling_rate": 0.0
+          },
+          "plus100": {
+            "dense_mean": 0.02734375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.02734375,
+            "non_settling_rate": 0.0
+          },
+          "settle": {
+            "dense_mean": 0.02734375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.02734375,
+            "non_settling_rate": 0.0
+          }
+        }
+      }
+    },
+    "visitonly_dsg": {
+      "t2a": {
+        "best": {
+          "standard": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "plus50": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "plus100": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "settle": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          }
+        },
+        "last": {
+          "standard": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "plus50": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "plus100": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "settle": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          }
+        }
+      },
+      "hmix": {
+        "best": {
+          "standard": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "plus50": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "plus100": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "settle": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          }
+        },
+        "last": {
+          "standard": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "plus50": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "plus100": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          },
+          "settle": {
+            "dense_mean": 0.0234375,
+            "settle_rate": 1.0,
+            "steps_to_settle": 2.0,
+            "settled_accuracy": 0.0234375,
+            "non_settling_rate": 0.0
+          }
+        }
+      }
+    }
+  },
+  "overall_ranking": [
+    {
+      "pair": "visit_taskgrad_half_dsg",
+      "pair_label": "VT-0.5/DSG",
+      "selector": "visit_taskgrad_half",
+      "contract": "dsg",
+      "score": 0.3176660628019323,
+      "std": 0.03811056072833025,
+      "regimes": [
+        "core",
+        "t1",
+        "t2a",
+        "t1r",
+        "t2b",
+        "t2c",
+        "hmid",
+        "hmix",
+        "core",
+        "t1",
+        "core"
+      ]
+    },
+    {
+      "pair": "visitonly_dsg",
+      "pair_label": "V/DSG",
+      "selector": "visitonly",
+      "contract": "dsg",
+      "score": 0.3134993961352657,
+      "std": 0.03811056072833025,
+      "regimes": [
+        "core",
+        "t1",
+        "t2a",
+        "t1r",
+        "t2b",
+        "t2c",
+        "hmid",
+        "hmix",
+        "core",
+        "t1",
+        "core"
+      ]
+    }
+  ],
+  "outcome": {
+    "outcome": "unresolved",
+    "winner": "",
+    "score_gap": 0.004166666666666652
+  },
+  "counts": {
+    "p": 72,
+    "s": 24,
+    "m": 24,
+    "l_holdout": 10,
+    "l_rerun": 4,
+    "l_ambiguity": 2
+  },
+  "per_regime_confirmation": {
+    "core": {
+      "visit_taskgrad_half_d": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.10416666666666666,
+          "std": 0.029462782549439483
+        },
+        "last_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.020833333333333336,
+          "std": 0.029462782549439483
+        },
+        "dense_mean": {
+          "mean": 0.03645833333333333,
+          "std": 0.014731391274719742
+        },
+        "last_dense_mean": {
+          "mean": 0.03645833333333333,
+          "std": 0.014731391274719742
+        },
+        "composite": {
+          "mean": 0.048958333333333326,
+          "std": 0.010311973892303816
+        },
+        "score": {
+          "mean": 0.09895833333333331,
+          "std": 0.04419417382415921
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.33333333333333337,
+          "std": 0.11785113019775793
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.7916666666666667,
+          "std": 0.05892556509887899
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.5833333432674408,
+          "std": 0.11785114424670742
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4583333283662796,
+          "std": 0.17677667422321264
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.1039874379360098,
+          "std": 0.014961346067784695
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.03134264092284152,
+          "std": 0.007150453766461186
+        },
+        "child_visit_share": {
+          "mean": 0.20982142857142855,
+          "std": 0.006313453403451314
+        },
+        "child_grad_share": {
+          "mean": 0.1830357142857143,
+          "std": 0.018940360210353942
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.16063550688314382,
+          "std": 0.025984613129656615
+        },
+        "runs": [
+          "20260323-235957-v63-core-visit_taskgrad_half_d-32-m-s2234",
+          "20260324-000323-v63-core-visit_taskgrad_half_d-32-m-s3234"
+        ],
+        "k2": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k2": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k6": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "last_k6": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "k10": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        },
+        "last_k10": {
+          "mean": 0.026041666666666664,
+          "std": 0.007365695637359871
+        }
+      },
+      "visit_taskgrad_half_dsg": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.10416666666666666,
+          "std": 0.029462782549439483
+        },
+        "last_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.09583333333333333,
+          "std": 0.017677669529663695
+        },
+        "best_to_last_drop": {
+          "mean": 0.020833333333333336,
+          "std": 0.029462782549439483
+        },
+        "dense_mean": {
+          "mean": 0.0390625,
+          "std": 0.01841423909339968
+        },
+        "last_dense_mean": {
+          "mean": 0.0390625,
+          "std": 0.01841423909339968
+        },
+        "composite": {
+          "mean": 0.051875000000000004,
+          "std": 0.00913346259032624
+        },
+        "score": {
+          "mean": 0.1015625,
+          "std": 0.04787702164283915
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.3125,
+          "std": 0.029462782549439456
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.788888888888889,
+          "std": 0.015713484026367745
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.5416666567325592,
+          "std": 0.058925551049929456
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4583333283662796,
+          "std": 0.05892557212335371
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 766.5,
+          "std": 1083.9946955589774
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.10254910362582409,
+          "std": 0.015233586832652482
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.031708031313567635,
+          "std": 0.0062016884905308645
+        },
+        "child_visit_share": {
+          "mean": 0.20535714285714285,
+          "std": 0.012626906806902628
+        },
+        "child_grad_share": {
+          "mean": 0.16071428571507151,
+          "std": 0.0378807204218192
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.11585072833470464,
+          "std": 0.06941861818203948
+        },
+        "runs": [
+          "20260323-233908-v63-core-visit_taskgrad_half_dsg-32-m-s2234",
+          "20260323-234144-v63-core-visit_taskgrad_half_dsg-32-m-s3234"
+        ],
+        "k2": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k2": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k6": {
+          "mean": 0.05729166666666667,
+          "std": 0.022097086912079615
+        },
+        "last_k6": {
+          "mean": 0.05729166666666667,
+          "std": 0.022097086912079615
+        },
+        "k10": {
+          "mean": 0.020833333333333332,
+          "std": 0.01473139127471974
+        },
+        "last_k10": {
+          "mean": 0.020833333333333332,
+          "std": 0.01473139127471974
+        }
+      },
+      "visitonly_d": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.10416666666666666,
+          "std": 0.029462782549439483
+        },
+        "last_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.020833333333333336,
+          "std": 0.029462782549439483
+        },
+        "dense_mean": {
+          "mean": 0.033854166666666664,
+          "std": 0.018414239093399676
+        },
+        "last_dense_mean": {
+          "mean": 0.033854166666666664,
+          "std": 0.018414239093399676
+        },
+        "composite": {
+          "mean": 0.04791666666666666,
+          "std": 0.01178511301977579
+        },
+        "score": {
+          "mean": 0.09635416666666666,
+          "std": 0.04787702164283915
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.3541666666666667,
+          "std": 0.08838834764831845
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.797979797979798,
+          "std": 0.02856997095703225
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.5833333432674408,
+          "std": 0.11785114424670742
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4583333283662796,
+          "std": 0.17677667422321264
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.10531634335041395,
+          "std": 0.01611617796979817
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.030252026870478572,
+          "std": 0.008423028043528234
+        },
+        "child_visit_share": {
+          "mean": 0.20535714285714285,
+          "std": 0.012626906806902628
+        },
+        "child_grad_share": {
+          "mean": 0.17857142857142858,
+          "std": 0.012626906806902628
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.1989805545545057,
+          "std": 0.011318191053632746
+        },
+        "runs": [
+          "20260323-233908-v63-core-visitonly_d-32-m-s2234",
+          "20260323-234233-v63-core-visitonly_d-32-m-s3234"
+        ],
+        "k2": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k2": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k6": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "last_k6": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "k10": {
+          "mean": 0.020833333333333332,
+          "std": 0.01473139127471974
+        },
+        "last_k10": {
+          "mean": 0.020833333333333332,
+          "std": 0.01473139127471974
+        }
+      },
+      "visitonly_dsg": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.10416666666666666,
+          "std": 0.029462782549439483
+        },
+        "last_val": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.09583333333333333,
+          "std": 0.017677669529663695
+        },
+        "best_to_last_drop": {
+          "mean": 0.020833333333333336,
+          "std": 0.029462782549439483
+        },
+        "dense_mean": {
+          "mean": 0.0390625,
+          "std": 0.01841423909339968
+        },
+        "last_dense_mean": {
+          "mean": 0.0390625,
+          "std": 0.01841423909339968
+        },
+        "composite": {
+          "mean": 0.051875000000000004,
+          "std": 0.00913346259032624
+        },
+        "score": {
+          "mean": 0.1015625,
+          "std": 0.04787702164283915
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.3125,
+          "std": 0.029462782549439456
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.788888888888889,
+          "std": 0.015713484026367745
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.5416666567325592,
+          "std": 0.058925551049929456
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4583333283662796,
+          "std": 0.05892557212335371
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 766.5,
+          "std": 1083.9946955589774
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.10251992211310287,
+          "std": 0.015220372944890042
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.03168538703223582,
+          "std": 0.0061996182320964285
+        },
+        "child_visit_share": {
+          "mean": 0.20535714285714285,
+          "std": 0.012626906806902628
+        },
+        "child_grad_share": {
+          "mean": 0.16071428571507151,
+          "std": 0.0378807204218192
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.12394701690979781,
+          "std": 0.07460779750370884
+        },
+        "runs": [
+          "20260323-235519-v63-core-visitonly_dsg-32-m-s2234",
+          "20260323-235759-v63-core-visitonly_dsg-32-m-s3234"
+        ],
+        "k2": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k2": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k6": {
+          "mean": 0.05729166666666667,
+          "std": 0.022097086912079615
+        },
+        "last_k6": {
+          "mean": 0.05729166666666667,
+          "std": 0.022097086912079615
+        },
+        "k10": {
+          "mean": 0.020833333333333332,
+          "std": 0.01473139127471974
+        },
+        "last_k10": {
+          "mean": 0.020833333333333332,
+          "std": 0.01473139127471974
+        }
+      }
+    },
+    "t1": {
+      "visit_taskgrad_half_d": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.06521739130434782,
+          "std": 0.09223131928520185
+        },
+        "last_val": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "last5_val_mean": {
+          "mean": 0.029166666666666664,
+          "std": 0.041247895569215265
+        },
+        "best_to_last_drop": {
+          "mean": 0.044384057971014496,
+          "std": 0.06276853673576238
+        },
+        "dense_mean": {
+          "mean": 0.034722222222222224,
+          "std": 0.009820927516479831
+        },
+        "last_dense_mean": {
+          "mean": 0.034722222222222224,
+          "std": 0.009820927516479831
+        },
+        "composite": {
+          "mean": 0.017856280193236717,
+          "std": 0.001682367583257847
+        },
+        "score": {
+          "mean": 0.011171497584541064,
+          "std": 0.043126681702802726
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.27083333333333337,
+          "std": 0.029462782549439494
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.8660714285714286,
+          "std": 0.012626906806902668
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.5416666567325592,
+          "std": 0.058925551049929456
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.5,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.1393768552763846,
+          "std": 0.015756271659358882
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.05462426102764908,
+          "std": 0.020842500189335294
+        },
+        "child_visit_share": {
+          "mean": 0.21428571428571427,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.1919642857142857,
+          "std": 0.018940360210353942
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.03608277424854061,
+          "std": 0.09497527558730516
+        },
+        "runs": [
+          "20260324-000647-v63-t1-visit_taskgrad_half_d-32-m-s2234",
+          "20260324-001017-v63-t1-visit_taskgrad_half_d-32-m-s3234"
+        ],
+        "k4": {
+          "mean": 0.03645833333333333,
+          "std": 0.007365695637359868
+        },
+        "last_k4": {
+          "mean": 0.03645833333333333,
+          "std": 0.007365695637359868
+        },
+        "k8": {
+          "mean": 0.046875,
+          "std": 0.0073656956373598734
+        },
+        "last_k8": {
+          "mean": 0.046875,
+          "std": 0.0073656956373598734
+        },
+        "k12": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "last_k12": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "k14": {
+          "mean": 0.04166666666666667,
+          "std": 0.014731391274719742
+        },
+        "last_k14": {
+          "mean": 0.04166666666666667,
+          "std": 0.014731391274719742
+        }
+      },
+      "visit_taskgrad_half_dsg": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.05892556509887896
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.05892556509887896
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.05892556509887896
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.034722222222222224,
+          "std": 0.009820927516479831
+        },
+        "last_dense_mean": {
+          "mean": 0.034722222222222224,
+          "std": 0.009820927516479831
+        },
+        "composite": {
+          "mean": 0.032638888888888884,
+          "std": 0.022588133287903593
+        },
+        "score": {
+          "mean": 0.0763888888888889,
+          "std": 0.04910463758239913
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.20833333333333334,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.8333333333333334,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.4999999850988388,
+          "std": 0.11785112317328317
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4999999850988388,
+          "std": 0.11785112317328317
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 725.0,
+          "std": 1025.304832720494
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.13920244579428545,
+          "std": 0.009035833458734687
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.05237507922343206,
+          "std": 0.015478246347410702
+        },
+        "child_visit_share": {
+          "mean": 0.20535714285714285,
+          "std": 0.012626906806902628
+        },
+        "child_grad_share": {
+          "mean": 0.17410714285714285,
+          "std": 0.006313453403451314
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.07393062950861412,
+          "std": 0.13542956738024492
+        },
+        "runs": [
+          "20260323-234423-v63-t1-visit_taskgrad_half_dsg-32-m-s2234",
+          "20260323-234709-v63-t1-visit_taskgrad_half_dsg-32-m-s3234"
+        ],
+        "k4": {
+          "mean": 0.036458333333333336,
+          "std": 0.02209708691207961
+        },
+        "last_k4": {
+          "mean": 0.036458333333333336,
+          "std": 0.02209708691207961
+        },
+        "k8": {
+          "mean": 0.046875,
+          "std": 0.0073656956373598734
+        },
+        "last_k8": {
+          "mean": 0.046875,
+          "std": 0.0073656956373598734
+        },
+        "k12": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "last_k12": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "k14": {
+          "mean": 0.04166666666666667,
+          "std": 0.014731391274719742
+        },
+        "last_k14": {
+          "mean": 0.04166666666666667,
+          "std": 0.014731391274719742
+        }
+      },
+      "visitonly_d": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.06521739130434782,
+          "std": 0.09223131928520185
+        },
+        "last_val": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "last5_val_mean": {
+          "mean": 0.029166666666666664,
+          "std": 0.041247895569215265
+        },
+        "best_to_last_drop": {
+          "mean": 0.044384057971014496,
+          "std": 0.06276853673576238
+        },
+        "dense_mean": {
+          "mean": 0.034722222222222224,
+          "std": 0.009820927516479831
+        },
+        "last_dense_mean": {
+          "mean": 0.034722222222222224,
+          "std": 0.009820927516479831
+        },
+        "composite": {
+          "mean": 0.017856280193236717,
+          "std": 0.001682367583257847
+        },
+        "score": {
+          "mean": 0.011171497584541064,
+          "std": 0.043126681702802726
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.27083333333333337,
+          "std": 0.029462782549439494
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.8660714285714286,
+          "std": 0.012626906806902668
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.5416666567325592,
+          "std": 0.058925551049929456
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.5,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.13920004216465437,
+          "std": 0.015548287318920658
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.05517286577271399,
+          "std": 0.020041437416230566
+        },
+        "child_visit_share": {
+          "mean": 0.20982142857142855,
+          "std": 0.006313453403451314
+        },
+        "child_grad_share": {
+          "mean": 0.1830357142857143,
+          "std": 0.006313453403451314
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.11908006520710951,
+          "std": 0.0008589938069674883
+        },
+        "runs": [
+          "20260323-234556-v63-t1-visitonly_d-32-m-s2234",
+          "20260323-234928-v63-t1-visitonly_d-32-m-s3234"
+        ],
+        "k4": {
+          "mean": 0.03645833333333333,
+          "std": 0.007365695637359868
+        },
+        "last_k4": {
+          "mean": 0.03645833333333333,
+          "std": 0.007365695637359868
+        },
+        "k8": {
+          "mean": 0.046875,
+          "std": 0.0073656956373598734
+        },
+        "last_k8": {
+          "mean": 0.046875,
+          "std": 0.0073656956373598734
+        },
+        "k12": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "last_k12": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "k14": {
+          "mean": 0.04166666666666667,
+          "std": 0.014731391274719742
+        },
+        "last_k14": {
+          "mean": 0.04166666666666667,
+          "std": 0.014731391274719742
+        }
+      },
+      "visitonly_dsg": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.05892556509887896
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.05892556509887896
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.05892556509887896
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.034722222222222224,
+          "std": 0.009820927516479831
+        },
+        "last_dense_mean": {
+          "mean": 0.034722222222222224,
+          "std": 0.009820927516479831
+        },
+        "composite": {
+          "mean": 0.032638888888888884,
+          "std": 0.022588133287903593
+        },
+        "score": {
+          "mean": 0.0763888888888889,
+          "std": 0.04910463758239913
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.22916666666666669,
+          "std": 0.029462782549439473
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.8452380952380952,
+          "std": 0.016835875742536786
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.4999999850988388,
+          "std": 0.11785112317328317
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4999999850988388,
+          "std": 0.11785112317328317
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 725.0,
+          "std": 1025.304832720494
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.14120900118218782,
+          "std": 0.01191640494356307
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.052397889488720185,
+          "std": 0.015420606583195218
+        },
+        "child_visit_share": {
+          "mean": 0.20535714285714285,
+          "std": 0.012626906806902628
+        },
+        "child_grad_share": {
+          "mean": 0.16964285714285715,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.028090668194487724,
+          "std": 0.061744169061905385
+        },
+        "runs": [
+          "20260324-000039-v63-t1-visitonly_dsg-32-m-s2234",
+          "20260324-000326-v63-t1-visitonly_dsg-32-m-s3234"
+        ],
+        "k4": {
+          "mean": 0.036458333333333336,
+          "std": 0.02209708691207961
+        },
+        "last_k4": {
+          "mean": 0.036458333333333336,
+          "std": 0.02209708691207961
+        },
+        "k8": {
+          "mean": 0.046875,
+          "std": 0.0073656956373598734
+        },
+        "last_k8": {
+          "mean": 0.046875,
+          "std": 0.0073656956373598734
+        },
+        "k12": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "last_k12": {
+          "mean": 0.015625,
+          "std": 0.00736569563735987
+        },
+        "k14": {
+          "mean": 0.04166666666666667,
+          "std": 0.014731391274719742
+        },
+        "last_k14": {
+          "mean": 0.04166666666666667,
+          "std": 0.014731391274719742
+        }
+      }
+    },
+    "t2a": {
+      "visit_taskgrad_half_d": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.06340579710144928,
+          "std": 0.028181792003811674
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.05892556509887896
+        },
+        "last5_val_mean": {
+          "mean": 0.02934782608695652,
+          "std": 0.04150409367834083
+        },
+        "best_to_last_drop": {
+          "mean": 0.021739130434782608,
+          "std": 0.030743773095067282
+        },
+        "dense_mean": {
+          "mean": 0.02266120754012691,
+          "std": 0.002585004493559445
+        },
+        "last_dense_mean": {
+          "mean": 0.02266120754012691,
+          "std": 0.002585004493559445
+        },
+        "composite": {
+          "mean": 0.02270578736387685,
+          "std": 0.02954885134309868
+        },
+        "score": {
+          "mean": 0.04258874377201097,
+          "std": 0.09225434268750568
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.25,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.5416666567325592,
+          "std": 0.058925551049929456
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.5,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 2.0,
+          "std": 2.8284271247461903
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.11228018091802919,
+          "std": 0.001414327515796336
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.06202888106620874,
+          "std": 0.0006197215560853964
+        },
+        "child_visit_share": {
+          "mean": 0.20982142857142855,
+          "std": 0.006313453403451314
+        },
+        "child_grad_share": {
+          "mean": 0.17410714285714285,
+          "std": 0.018940360210353942
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.11670048230393204,
+          "std": 0.06257461573998446
+        },
+        "runs": [
+          "20260324-001344-v63-t2a-visit_taskgrad_half_d-32-m-s2234",
+          "20260324-001701-v63-t2a-visit_taskgrad_half_d-32-m-s3234"
+        ],
+        "k4": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "last_k4": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "k8": {
+          "mean": 0.015625,
+          "std": 0.02209708691207961
+        },
+        "last_k8": {
+          "mean": 0.015625,
+          "std": 0.02209708691207961
+        },
+        "k12": {
+          "mean": 0.015735815602836878,
+          "std": 0.007208978708905404
+        },
+        "last_k12": {
+          "mean": 0.015735815602836878,
+          "std": 0.007208978708905404
+        },
+        "k14": {
+          "mean": 0.03662280701754386,
+          "std": 0.007133094722495872
+        },
+        "last_k14": {
+          "mean": 0.03662280701754386,
+          "std": 0.007133094722495872
+        }
+      },
+      "visit_taskgrad_half_dsg": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.0625,
+          "std": 0.02946278254943948
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.05892556509887896
+        },
+        "last5_val_mean": {
+          "mean": 0.02934782608695652,
+          "std": 0.04150409367834083
+        },
+        "best_to_last_drop": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "dense_mean": {
+          "mean": 0.026041666666666664,
+          "std": 0.002455231879119955
+        },
+        "last_dense_mean": {
+          "mean": 0.026041666666666664,
+          "std": 0.002455231879119955
+        },
+        "composite": {
+          "mean": 0.024193840579710142,
+          "std": 0.029304793715478714
+        },
+        "score": {
+          "mean": 0.046875,
+          "std": 0.09084357952743839
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.22916666666666669,
+          "std": 0.029462782549439473
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.7321428571428572,
+          "std": 0.025253813613805257
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.4583333283662796,
+          "std": 0.17677667422321264
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4166666716337204,
+          "std": 0.11785112317328317
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.11249802462788586,
+          "std": 0.006490824235994614
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.05964918647881909,
+          "std": 0.0035882898878102252
+        },
+        "child_visit_share": {
+          "mean": 0.21428571428571427,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.1830357145212227,
+          "std": 0.006313453736510474
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.08802343461106182,
+          "std": 0.06269445494734906
+        },
+        "runs": [
+          "20260323-234955-v63-t2a-visit_taskgrad_half_dsg-32-m-s2234",
+          "20260323-235236-v63-t2a-visit_taskgrad_half_dsg-32-m-s3234"
+        ],
+        "k4": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_k4": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "k8": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "last_k8": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "k12": {
+          "mean": 0.005208333333333333,
+          "std": 0.00736569563735987
+        },
+        "last_k12": {
+          "mean": 0.005208333333333333,
+          "std": 0.00736569563735987
+        },
+        "k14": {
+          "mean": 0.05208333333333333,
+          "std": 0.014731391274719742
+        },
+        "last_k14": {
+          "mean": 0.05208333333333333,
+          "std": 0.014731391274719742
+        }
+      },
+      "visitonly_d": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.06340579710144928,
+          "std": 0.028181792003811674
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.05892556509887896
+        },
+        "last5_val_mean": {
+          "mean": 0.02934782608695652,
+          "std": 0.04150409367834083
+        },
+        "best_to_last_drop": {
+          "mean": 0.021739130434782608,
+          "std": 0.030743773095067282
+        },
+        "dense_mean": {
+          "mean": 0.02266120754012691,
+          "std": 0.002585004493559445
+        },
+        "last_dense_mean": {
+          "mean": 0.02266120754012691,
+          "std": 0.002585004493559445
+        },
+        "composite": {
+          "mean": 0.02270578736387685,
+          "std": 0.02954885134309868
+        },
+        "score": {
+          "mean": 0.04258874377201097,
+          "std": 0.09225434268750568
+        },
+        "lr_multiplier": {
+          "mean": 0.8,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.25,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.5416666567325592,
+          "std": 0.058925551049929456
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.5,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 2.0,
+          "std": 2.8284271247461903
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.11225972643775571,
+          "std": 0.0014069373895102026
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.061990862230244546,
+          "std": 0.000594348950134714
+        },
+        "child_visit_share": {
+          "mean": 0.20982142857142855,
+          "std": 0.006313453403451314
+        },
+        "child_grad_share": {
+          "mean": 0.17410714285714285,
+          "std": 0.018940360210353942
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.13413771828699972,
+          "std": 0.08430888628851116
+        },
+        "runs": [
+          "20260323-235301-v63-t2a-visitonly_d-32-m-s2234",
+          "20260323-235629-v63-t2a-visitonly_d-32-m-s3234"
+        ],
+        "k4": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "last_k4": {
+          "mean": 0.046875,
+          "std": 0.02209708691207961
+        },
+        "k8": {
+          "mean": 0.015625,
+          "std": 0.02209708691207961
+        },
+        "last_k8": {
+          "mean": 0.015625,
+          "std": 0.02209708691207961
+        },
+        "k12": {
+          "mean": 0.015735815602836878,
+          "std": 0.007208978708905404
+        },
+        "last_k12": {
+          "mean": 0.015735815602836878,
+          "std": 0.007208978708905404
+        },
+        "k14": {
+          "mean": 0.03662280701754386,
+          "std": 0.007133094722495872
+        },
+        "last_k14": {
+          "mean": 0.03662280701754386,
+          "std": 0.007133094722495872
+        }
+      },
+      "visitonly_dsg": {
+        "count": 2,
+        "best_val": {
+          "mean": 0.0625,
+          "std": 0.02946278254943948
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.05892556509887896
+        },
+        "last5_val_mean": {
+          "mean": 0.02934782608695652,
+          "std": 0.04150409367834083
+        },
+        "best_to_last_drop": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "dense_mean": {
+          "mean": 0.026041666666666664,
+          "std": 0.002455231879119955
+        },
+        "last_dense_mean": {
+          "mean": 0.026041666666666664,
+          "std": 0.002455231879119955
+        },
+        "composite": {
+          "mean": 0.024193840579710142,
+          "std": 0.029304793715478714
+        },
+        "score": {
+          "mean": 0.046875,
+          "std": 0.09084357952743839
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.22916666666666669,
+          "std": 0.029462782549439473
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.7321428571428572,
+          "std": 0.025253813613805257
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.4583333283662796,
+          "std": 0.17677667422321264
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.4166666716337204,
+          "std": 0.11785112317328317
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.11247001179567065,
+          "std": 0.006481926521418132
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.05960953411184784,
+          "std": 0.0035806933876705014
+        },
+        "child_visit_share": {
+          "mean": 0.21428571428571427,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.1830357145212227,
+          "std": 0.006313453736510474
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.11102797206463812,
+          "std": 0.05427790535590037
+        },
+        "runs": [
+          "20260324-000611-v63-t2a-visitonly_dsg-32-m-s2234",
+          "20260324-000855-v63-t2a-visitonly_dsg-32-m-s3234"
+        ],
+        "k4": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_k4": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "k8": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "last_k8": {
+          "mean": 0.020833333333333332,
+          "std": 0.02946278254943948
+        },
+        "k12": {
+          "mean": 0.005208333333333333,
+          "std": 0.00736569563735987
+        },
+        "last_k12": {
+          "mean": 0.005208333333333333,
+          "std": 0.00736569563735987
+        },
+        "k14": {
+          "mean": 0.05208333333333333,
+          "std": 0.014731391274719742
+        },
+        "last_k14": {
+          "mean": 0.05208333333333333,
+          "std": 0.014731391274719742
+        }
+      }
+    }
+  },
+  "per_regime_holdout": {
+    "hmid": {
+      "visit_taskgrad_half_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.024999999999999998,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.03515625,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.03515625,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.0115625,
+          "std": 0.0
+        },
+        "score": {
+          "mean": -0.006510416666666664,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.4166666666666667,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 0.8333333134651184,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.5890194846907509,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.05948659883115127,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.4107142857142857,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.5095244906736278,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-004004-v63-hmid-visit_taskgrad_half_dsg-32-l-s4234"
+        ],
+        "k3": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k3": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k7": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "last_k7": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "k11": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k11": {
+          "mean": 0.03125,
+          "std": 0.0
+        }
+      },
+      "visitonly_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.024999999999999998,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.010000000000000002,
+          "std": 0.0
+        },
+        "score": {
+          "mean": -0.010416666666666664,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.5,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 0.8333333134651184,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.45385283427846834,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.07346197181545233,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.4301024791749664,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-003959-v63-hmid-visitonly_dsg-32-l-s4234"
+        ],
+        "k3": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "last_k3": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "k7": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "last_k7": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "k11": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "last_k11": {
+          "mean": 0.0234375,
+          "std": 0.0
+        }
+      }
+    },
+    "hmix": {
+      "visit_taskgrad_half_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.02734375,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.02734375,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.0296875,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.06901041666666666,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.4583333333333333,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 0.8333333134651184,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.4727883830606953,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.05666824861456716,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.5917064791761089,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-004309-v63-hmix-visit_taskgrad_half_dsg-32-l-s4234"
+        ],
+        "k3": {
+          "mean": 0.0625,
+          "std": 0.0
+        },
+        "last_k3": {
+          "mean": 0.0625,
+          "std": 0.0
+        },
+        "k7": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "last_k7": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "k11": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k11": {
+          "mean": 0.03125,
+          "std": 0.0
+        }
+      },
+      "visitonly_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.028124999999999997,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.06510416666666666,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.5416666666666666,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 0.8333333134651184,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.46811354636064095,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.06862924537239143,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.3839285714285714,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.4961805463873319,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-004304-v63-hmix-visitonly_dsg-32-l-s4234"
+        ],
+        "k3": {
+          "mean": 0.0625,
+          "std": 0.0
+        },
+        "last_k3": {
+          "mean": 0.0625,
+          "std": 0.0
+        },
+        "k7": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "last_k7": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "k11": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "last_k11": {
+          "mean": 0.0234375,
+          "std": 0.0
+        }
+      }
+    },
+    "t1r": {
+      "visit_taskgrad_half_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.034374999999999996,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.08072916666666666,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.25,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.8571428571428571,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 0.8333333134651184,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 0.8333333134651184,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.5976486632043617,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.14374262388549128,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.4107142857142857,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.34984129917152335,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-003036-v63-t1r-visit_taskgrad_half_dsg-32-l-s4234"
+        ],
+        "k4": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "last_k4": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "k8": {
+          "mean": 0.015625,
+          "std": 0.0
+        },
+        "last_k8": {
+          "mean": 0.015625,
+          "std": 0.0
+        },
+        "k12": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k12": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k14": {
+          "mean": 0.0703125,
+          "std": 0.0
+        },
+        "last_k14": {
+          "mean": 0.0703125,
+          "std": 0.0
+        }
+      },
+      "visitonly_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.034374999999999996,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.08072916666666666,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.25,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.8571428571428571,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 0.8333333134651184,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 0.8333333134651184,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.5394752469434808,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.08222525544737332,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.41103973925811366,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.43587910489702025,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-003036-v63-t1r-visitonly_dsg-32-l-s4234"
+        ],
+        "k4": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "last_k4": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "k8": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "last_k8": {
+          "mean": 0.0234375,
+          "std": 0.0
+        },
+        "k12": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k12": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k14": {
+          "mean": 0.0625,
+          "std": 0.0
+        },
+        "last_k14": {
+          "mean": 0.0625,
+          "std": 0.0
+        }
+      }
+    },
+    "t2b": {
+      "visit_taskgrad_half_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.036458333333333336,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.036458333333333336,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.03333333333333333,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.078125,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.2916666666666667,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.875,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.644558050839768,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.05176960437066866,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.41964285715658994,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.6162932820104408,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-003345-v63-t2b-visit_taskgrad_half_dsg-32-l-s4234"
+        ],
+        "k4": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k4": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k8": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k8": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k12": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k12": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k14": {
+          "mean": 0.046875,
+          "std": 0.0
+        },
+        "last_k14": {
+          "mean": 0.046875,
+          "std": 0.0
+        }
+      },
+      "visitonly_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.033854166666666664,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.033854166666666664,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.03229166666666666,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.07552083333333333,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.2916666666666667,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.875,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.6450368776723933,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.05496405194956076,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.41964285714285715,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.6441590667227423,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-003343-v63-t2b-visitonly_dsg-32-l-s4234"
+        ],
+        "k4": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k4": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k8": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k8": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k12": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k12": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "k14": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "last_k14": {
+          "mean": 0.0390625,
+          "std": 0.0
+        }
+      }
+    },
+    "t2c": {
+      "visit_taskgrad_half_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.035416666666666666,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.5,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.7999370795789082,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.07274088253998365,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.41964285714285715,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.5711749764037124,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-003650-v63-t2c-visit_taskgrad_half_dsg-32-l-s4234"
+        ],
+        "k6": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "last_k6": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "last_k10": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "k14": {
+          "mean": 0.046875,
+          "std": 0.0
+        },
+        "last_k14": {
+          "mean": 0.046875,
+          "std": 0.0
+        },
+        "k16": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "last_k16": {
+          "mean": 0.0390625,
+          "std": 0.0
+        }
+      },
+      "visitonly_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.035416666666666666,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.08333333333333333,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.5,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.7401681486561946,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.05588881096638958,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.44000027515848866,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-003648-v63-t2c-visitonly_dsg-32-l-s4234"
+        ],
+        "k6": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "last_k6": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "last_k10": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "k14": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "last_k14": {
+          "mean": 0.0390625,
+          "std": 0.0
+        },
+        "k16": {
+          "mean": 0.046875,
+          "std": 0.0
+        },
+        "last_k16": {
+          "mean": 0.046875,
+          "std": 0.0
+        }
+      }
+    }
+  },
+  "per_regime_rerun": {
+    "core": {
+      "visit_taskgrad_half_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.021875,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.021875,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.008749999999999999,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.021875,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.25,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.38815155134701756,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.055824488561239324,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.557000855790077,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-011703-v63-core-visit_taskgrad_half_dsg-32-l-rerun-s5234"
+        ],
+        "k2": {
+          "mean": 0.0375,
+          "std": 0.0
+        },
+        "last_k2": {
+          "mean": 0.0375,
+          "std": 0.0
+        },
+        "k6": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "last_k6": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.01875,
+          "std": 0.0
+        },
+        "last_k10": {
+          "mean": 0.01875,
+          "std": 0.0
+        }
+      },
+      "visitonly_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.021875,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.021875,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.008749999999999999,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.021875,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.25,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.38756053182878597,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.06123430011138388,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.41964285714285715,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.38418120802796,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-011703-v63-core-visitonly_dsg-32-l-rerun-s5234"
+        ],
+        "k2": {
+          "mean": 0.0375,
+          "std": 0.0
+        },
+        "last_k2": {
+          "mean": 0.0375,
+          "std": 0.0
+        },
+        "k6": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "last_k6": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.01875,
+          "std": 0.0
+        },
+        "last_k10": {
+          "mean": 0.01875,
+          "std": 0.0
+        }
+      }
+    },
+    "t1": {
+      "visit_taskgrad_half_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.03333333333333333,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.020833333333333332,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.020833333333333332,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.025833333333333333,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.0625,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.20833333333333334,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.8333333333333334,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.6689554363190384,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.07199704706003822,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.39285714285714285,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.6153423323479295,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-012003-v63-t1-visit_taskgrad_half_dsg-32-l-rerun-s5234"
+        ],
+        "k4": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "last_k4": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "k8": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "last_k8": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "k12": {
+          "mean": 0.01875,
+          "std": 0.0
+        },
+        "last_k12": {
+          "mean": 0.01875,
+          "std": 0.0
+        },
+        "k14": {
+          "mean": 0.01875,
+          "std": 0.0
+        },
+        "last_k14": {
+          "mean": 0.01875,
+          "std": 0.0
+        }
+      },
+      "visitonly_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.03333333333333333,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.020833333333333332,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.020833333333333332,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.025833333333333333,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.0625,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.20833333333333334,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.8333333333333334,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.6686114532299248,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.07182221113808898,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.39285714285714285,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.6835709293892744,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-012004-v63-t1-visitonly_dsg-32-l-rerun-s5234"
+        ],
+        "k4": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "last_k4": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "k8": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "last_k8": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "k12": {
+          "mean": 0.01875,
+          "std": 0.0
+        },
+        "last_k12": {
+          "mean": 0.01875,
+          "std": 0.0
+        },
+        "k14": {
+          "mean": 0.01875,
+          "std": 0.0
+        },
+        "last_k14": {
+          "mean": 0.01875,
+          "std": 0.0
+        }
+      }
+    }
+  },
+  "per_regime_ambiguity": {
+    "core": {
+      "visit_taskgrad_half_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.028125,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.028125,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.03,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.06979166666666667,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.5,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.8571428571428571,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 0.875,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 0.875,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.47797512567082884,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.08537913945965431,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.5700420337861866,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-012517-v63-core-visit_taskgrad_half_dsg-32-l-amb-s6234"
+        ],
+        "k2": {
+          "mean": 0.05,
+          "std": 0.0
+        },
+        "last_k2": {
+          "mean": 0.05,
+          "std": 0.0
+        },
+        "k6": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "last_k6": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k10": {
+          "mean": 0.03125,
+          "std": 0.0
+        }
+      },
+      "visitonly_dsg": {
+        "count": 1,
+        "best_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last_val": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "last5_val_mean": {
+          "mean": 0.041666666666666664,
+          "std": 0.0
+        },
+        "best_to_last_drop": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "dense_mean": {
+          "mean": 0.028125,
+          "std": 0.0
+        },
+        "last_dense_mean": {
+          "mean": 0.028125,
+          "std": 0.0
+        },
+        "composite": {
+          "mean": 0.03,
+          "std": 0.0
+        },
+        "score": {
+          "mean": 0.06979166666666667,
+          "std": 0.0
+        },
+        "lr_multiplier": {
+          "mean": 0.6,
+          "std": 0.0
+        },
+        "p_keep_prev": {
+          "mean": 0.1,
+          "std": 0.0
+        },
+        "query_first_hop_home_rate": {
+          "mean": 0.5416666666666666,
+          "std": 0.0
+        },
+        "delivery_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "home_to_out_rate": {
+          "mean": 0.8666666666666667,
+          "std": 0.0
+        },
+        "task_visit_cov_10": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_visit_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_visit_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_10": {
+          "mean": 0.75,
+          "std": 0.0
+        },
+        "task_grad_cov_50": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_100": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "task_grad_cov_200": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "time_to_visit_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_visit_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_50": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_75": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "time_to_grad_100": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "selected_parent_child_usefulness_mean": {
+          "mean": 0.4651555304765505,
+          "std": 0.0
+        },
+        "unselected_parent_child_usefulness_mean": {
+          "mean": 0.0567165242326387,
+          "std": 0.0
+        },
+        "child_visit_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "child_grad_share": {
+          "mean": 0.42857142857142855,
+          "std": 0.0
+        },
+        "utility_usefulness_correlation": {
+          "mean": 0.5468557056354771,
+          "std": 0.0
+        },
+        "runs": [
+          "20260324-012806-v63-core-visitonly_dsg-32-l-amb-s6234"
+        ],
+        "k2": {
+          "mean": 0.0625,
+          "std": 0.0
+        },
+        "last_k2": {
+          "mean": 0.0625,
+          "std": 0.0
+        },
+        "k6": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "last_k6": {
+          "mean": 0.025,
+          "std": 0.0
+        },
+        "k10": {
+          "mean": 0.03125,
+          "std": 0.0
+        },
+        "last_k10": {
+          "mean": 0.03125,
+          "std": 0.0
+        }
+      }
+    }
+  }
+}

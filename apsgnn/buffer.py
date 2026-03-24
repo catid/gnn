@@ -103,3 +103,6 @@ class NodeCache:
     def occupancy_stats(self) -> tuple[Tensor, Tensor]:
         counts = self.counts.to(torch.float32)
         return counts.mean(), counts.max()
+
+    def detach_(self) -> None:
+        self.values = self.values.detach()

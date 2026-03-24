@@ -108,6 +108,7 @@ def run_evaluation(
     writers_per_episode: int | None = None,
     desc: str = "eval",
     topology: GrowthTopology | None = None,
+    rollout_steps: int | None = None,
 ) -> dict[str, float]:
     config = load_config(config_path)
     task_name = config.task.name
@@ -124,6 +125,7 @@ def run_evaluation(
     model.eval()
     unwrapped = model.module if isinstance(model, DDP) else model
     unwrapped.set_first_hop_teacher_force_ratio(0.0)
+    unwrapped.set_rollout_steps_override(rollout_steps)
     unwrapped.set_growth_context(
         active_compute_nodes=eval_active_compute_nodes,
         bootstrap_active=False,
@@ -191,6 +193,7 @@ def main() -> None:
     parser.add_argument("--checkpoint", required=True, help="Checkpoint to evaluate.")
     parser.add_argument("--writers-per-episode", type=int, default=None, help="Override writers_per_episode.")
     parser.add_argument("--batches", type=int, default=None, help="Override validation batch count.")
+    parser.add_argument("--rollout-steps", type=int, default=None, help="Optional rollout-depth override.")
     parser.add_argument("--tag", default="eval", help="Output tag.")
     parser.add_argument("--output", default=None, help="Optional output JSON path.")
     args = parser.parse_args()
@@ -215,9 +218,11 @@ def main() -> None:
         writers_per_episode=args.writers_per_episode,
         desc=args.tag,
         topology=GrowthTopology.from_dict(checkpoint["growth_topology"]) if "growth_topology" in checkpoint else None,
+        rollout_steps=args.rollout_steps,
     )
     metrics["checkpoint_step"] = int(checkpoint.get("step", -1))
     metrics["writers_per_episode"] = args.writers_per_episode or config.task.writers_per_episode
+    metrics["rollout_steps"] = int(args.rollout_steps or config.task.max_rollout_steps)
 
     if is_main_process():
         output_path = Path(args.output) if args.output else ensure_dir(Path(args.checkpoint).parent) / f"{args.tag}.json"

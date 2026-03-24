@@ -50,6 +50,18 @@ def first_hop_teacher_force_ratio(config_step: int, config: ExperimentConfig) ->
     return float(start + (end - start) * progress)
 
 
+def training_rollout_steps(config_step: int, config: ExperimentConfig) -> int:
+    full_steps = int(config.task.max_rollout_steps)
+    shallow_steps = int(config.train.contract_shallow_rollout_steps)
+    shallow_fraction = float(config.train.contract_shallow_train_fraction)
+    if shallow_steps <= 0 or shallow_fraction <= 0.0:
+        return full_steps
+    cutoff = max(int(config.train.train_steps * shallow_fraction), 1)
+    if int(config_step) <= cutoff:
+        return max(1, min(shallow_steps, full_steps))
+    return full_steps
+
+
 def is_first_hop_router_checkpoint_key(key: str) -> bool:
     return key.startswith("first_hop_router") or key.startswith("first_hop_router_ln")
 
@@ -119,6 +131,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--benchmark-only", action="store_true", help="Run warmup + throughput benchmark only.")
     parser.add_argument("--checkpoint", default=None, help="Optional checkpoint to resume from.")
     parser.add_argument("--init-checkpoint", default=None, help="Optional model-only warm-start checkpoint.")
+    parser.add_argument(
+        "--contract-penultimate-keep-prob",
+        type=float,
+        default=None,
+        help="Optional override for stochastic penultimate temporal-credit keep probability.",
+    )
     return parser
 
 
@@ -192,6 +210,8 @@ def main() -> None:
         config.train.lr = float(config.train.lr) * float(args.lr_scale)
     if args.init_checkpoint is not None:
         config.train.init_checkpoint = args.init_checkpoint
+    if args.contract_penultimate_keep_prob is not None:
+        config.train.contract_penultimate_keep_prob = float(args.contract_penultimate_keep_prob)
 
     seed_everything(config.train.seed + rank)
     task_name = config.task.name
@@ -382,6 +402,8 @@ def main() -> None:
         model.train()
         unwrapped_model = unwrap_model(model)
         unwrapped_model.set_first_hop_teacher_force_ratio(first_hop_teacher_force_ratio(step, config))
+        current_rollout_steps = training_rollout_steps(step, config)
+        unwrapped_model.set_rollout_steps_override(current_rollout_steps)
         unwrapped_model.set_growth_context(
             active_compute_nodes=stage.active_compute_nodes,
             bootstrap_active=stage.bootstrap_active(step),
@@ -500,6 +522,7 @@ def main() -> None:
                         row[f"train/{key}"] = float(value)
                     row["train/stage_local_step"] = int(coverage_snapshot.get("stage_local_step", stage.local_step(step)))
                     row["train/stage_bootstrap_active"] = float(stage.bootstrap_active(step))
+                row["train/effective_rollout_steps"] = int(current_rollout_steps)
             interval_metric_sums = {}
             interval_start_time = time.perf_counter()
 
@@ -513,6 +536,7 @@ def main() -> None:
                 writers_per_episode=config.task.writers_per_episode if task_name == "memory" else None,
                 desc="val",
                 topology=topology,
+                rollout_steps=None,
             )
             stage_val_history.setdefault(stage.index, []).append(
                 float(val_metrics.get("query_accuracy", val_metrics.get("query_delivery_rate", 0.0)))

@@ -91,6 +91,12 @@ class TrainConfig:
     benchmark_steps: int = 100
     init_checkpoint: str = ""
     freeze_first_hop_router: bool = False
+    contract_kind: str = "baseline"
+    contract_detach_temporal_state: bool = False
+    contract_query_supervision: str = "first_output"
+    contract_penultimate_keep_prob: float = 0.0
+    contract_shallow_train_fraction: float = 0.0
+    contract_shallow_rollout_steps: int = 0
 
 
 @dataclass
