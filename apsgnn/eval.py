@@ -78,6 +78,11 @@ def finalize_metrics(metric_sums: dict[str, float]) -> dict[str, float]:
     metrics["accept_on_settle_coverage"] = metrics["query_delivery_rate"]
     metrics["settled_accuracy"] = metrics["query_accuracy"]
     metrics["average_delay"] = metric_sums.get("delay_sum", 0.0) / max(metric_sums.get("delay_count", 0.0), 1.0)
+    if "routing_aux_multiplier_sum" in metric_sums:
+        metrics["routing_aux_multiplier"] = metric_sums.get("routing_aux_multiplier_sum", 0.0) / max(
+            metric_sums.get("routing_aux_multiplier_count", 0.0),
+            1.0,
+        )
     if "cache_mean_sum" in metric_sums:
         metrics["cache_mean_occupancy"] = metric_sums.get("cache_mean_sum", 0.0) / max(
             metric_sums.get("cache_mean_count", 0.0),

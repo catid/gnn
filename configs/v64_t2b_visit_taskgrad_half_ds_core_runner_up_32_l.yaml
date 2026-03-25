@@ -1,0 +1,97 @@
+model:
+  nodes_total: 33
+  max_ttl: 32
+  d_model: 128
+  address_dim: 128
+  nhead: 4
+  delay_bins: 8
+  cache_capacity: 48
+  use_first_hop_key_hint: false
+  use_learned_first_hop_router: true
+  first_hop_router_variant: key_mlp_ce
+  first_hop_router_hidden_dim: 256
+  first_hop_router_layers: 3
+  first_hop_router_use_residual: false
+  first_hop_router_separate_heads: true
+  first_hop_router_aux_type: none
+  cache_read_variant: learned_implicit
+  cache_read_hidden_dim: 256
+  cache_read_layers: 3
+task:
+  name: memory_growth
+  display: T2b
+  writers_per_episode: 4
+  start_node_pool_size: 2
+  query_ttl_min: 2
+  query_ttl_max: 2
+  max_rollout_steps: 12
+  train_eval_writers:
+  - 4
+  - 8
+  - 12
+  - 14
+train:
+  batch_size_per_gpu: 1
+  val_batches: 24
+  lr: 0.0002
+  aux_writer_weight: 2.0
+  aux_query_weight: 2.0
+  aux_home_out_weight: 1.0
+  first_hop_teacher_force_start: 1.0
+  first_hop_teacher_force_end: 0.0
+  first_hop_teacher_force_anneal_steps: 800
+  contract_kind: ds_core_runner_up_from_ds_fixed2step
+  contract_detach_temporal_state: true
+  contract_query_supervision: final_output
+  contract_penultimate_keep_prob: 1.0
+  contract_shallow_train_fraction: 0.0
+  contract_shallow_rollout_steps: 0
+  contract_aux_anneal_start_fraction: 1.0
+  contract_aux_anneal_final_multiplier: 1.0
+  contract_rand_depth_train_fraction: 0.0
+  contract_rand_depth_multipliers: []
+  train_steps: 3024
+  eval_interval: 180
+  save_interval: 180
+runtime:
+  run_name: v64-t2b-visit_taskgrad_half_ds_core_runner_up-32-l
+  notes: selector=VT-0.5;contract=DS-core-runner-up;source=ds_fixed2step;core_best=ds_p010;core_runner_up=ds_fixed2step;aux_final=0.50
+growth:
+  enabled: true
+  transition_mode: split
+  topology_mode: selective
+  bootstrap_steps: 75
+  clock_prior_bias: 0.35
+  delay_zero_bias: 0.25
+  bootstrap_clock_prior_bias: 6.0
+  bootstrap_delay_zero_bias: 6.0
+  bootstrap_route_weight: 1.0
+  bootstrap_delay_weight: 0.1
+  split_parent_policy: utility
+  split_mode: clone
+  split_mutation_scale: 0.02
+  gradient_norm_threshold: 1.0e-08
+  utility_ema_decay: 0.95
+  utility_success_alpha: 0.0
+  utility_query_visit_weight: 0.0
+  utility_query_grad_weight: 0.0
+  utility_tail_fraction: 0.5
+  best_metric_final_stage_only: true
+  stage_active_counts:
+  - 4
+  - 6
+  - 8
+  - 12
+  - 16
+  - 24
+  - 32
+  utility_visit_weight: 1.0
+  utility_grad_weight: 0.5
+  stage_steps:
+  - 79
+  - 79
+  - 99
+  - 99
+  - 119
+  - 145
+  - 2404

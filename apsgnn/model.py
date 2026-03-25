@@ -416,6 +416,8 @@ class APSGNNModel(nn.Module):
         self.active_node_ids_tensor: Tensor | None = None
         self.clockwise_successor_lookup_tensor: Tensor | None = None
         self.rollout_steps_override: int | None = None
+        self.training_progress_step = 0
+        self.training_progress_total_steps = max(int(config.train.train_steps), 1)
 
         self.node_cells = nn.ModuleList(
             [
@@ -463,6 +465,10 @@ class APSGNNModel(nn.Module):
     def set_rollout_steps_override(self, steps: int | None) -> None:
         self.rollout_steps_override = None if steps is None else max(int(steps), 1)
 
+    def set_training_progress(self, step: int, total_steps: int) -> None:
+        self.training_progress_step = max(int(step), 0)
+        self.training_progress_total_steps = max(int(total_steps), 1)
+
     def uses_legacy_first_hop_router(self) -> bool:
         return self.config.model.first_hop_router_variant == "legacy"
 
@@ -505,6 +511,21 @@ class APSGNNModel(nn.Module):
         start_fraction = float(self.config.train.late_stage_stability_start_fraction)
         start_step = max(int(math.floor(total_steps * start_fraction)), 0)
         return int(step) >= start_step
+
+    def _routing_aux_multiplier(self) -> float:
+        if not self.training:
+            return 1.0
+        final_multiplier = float(self.config.train.contract_aux_anneal_final_multiplier)
+        if final_multiplier >= 0.999999:
+            return 1.0
+        total_steps = max(int(self.training_progress_total_steps), 1)
+        start_fraction = float(self.config.train.contract_aux_anneal_start_fraction)
+        start_step = max(int(math.floor(total_steps * start_fraction)), 0)
+        if int(self.training_progress_step) <= start_step:
+            return 1.0
+        remaining = max(total_steps - start_step, 1)
+        progress = min(max((int(self.training_progress_step) - start_step) / remaining, 0.0), 1.0)
+        return 1.0 + progress * (final_multiplier - 1.0)
 
     def _active_node_mask(self, device: torch.device, dtype: torch.dtype) -> Tensor:
         mask = torch.zeros(self.config.model.nodes_total, device=device, dtype=dtype)
@@ -1025,17 +1046,18 @@ class APSGNNModel(nn.Module):
         success_ratio = query_correct / max(float(delivered_mask.sum().item()), 1.0)
         success_visit_counts_sum = query_visit_counts_sum * success_ratio
 
+        routing_aux_multiplier = self._routing_aux_multiplier()
         total_loss_sum = (
             loss_main_sum
-            + cfg.train.aux_writer_weight * loss_writer_sum
-            + cfg.train.aux_query_weight * loss_query_sum
-            + loss_first_hop_aux_sum
-            + cfg.train.aux_home_out_weight * loss_home_out_sum
+            + routing_aux_multiplier * cfg.train.aux_writer_weight * loss_writer_sum
+            + routing_aux_multiplier * cfg.train.aux_query_weight * loss_query_sum
+            + routing_aux_multiplier * loss_first_hop_aux_sum
+            + routing_aux_multiplier * cfg.train.aux_home_out_weight * loss_home_out_sum
             + cfg.train.delay_reg_weight * loss_delay_sum
             + cfg.train.gravity_weight * loss_gravity_sum
             + cfg.train.late_stage_stability_weight * loss_stability_sum
-            + cfg.growth.bootstrap_route_weight * loss_bootstrap_route_sum
-            + cfg.growth.bootstrap_delay_weight * loss_bootstrap_delay_sum
+            + routing_aux_multiplier * cfg.growth.bootstrap_route_weight * loss_bootstrap_route_sum
+            + routing_aux_multiplier * cfg.growth.bootstrap_delay_weight * loss_bootstrap_delay_sum
             + loss_missing_sum
         )
         total_loss = total_loss_sum / batch_size
@@ -1055,6 +1077,8 @@ class APSGNNModel(nn.Module):
                 "loss_bootstrap_route": loss_bootstrap_route_sum.detach(),
                 "loss_bootstrap_delay": loss_bootstrap_delay_sum.detach(),
                 "loss_missing_output": loss_missing_sum.detach(),
+                "routing_aux_multiplier_sum": torch.tensor(routing_aux_multiplier, device=device, dtype=dtype),
+                "routing_aux_multiplier_count": torch.tensor(1.0, device=device, dtype=dtype),
                 "query_accuracy_hit": query_correct.detach(),
                 "query_accuracy_count": delivered_mask.sum().to(dtype),
                 "query_delivery_hit": query_delivered.to(dtype).sum(),

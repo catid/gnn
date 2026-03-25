@@ -97,6 +97,10 @@ class TrainConfig:
     contract_penultimate_keep_prob: float = 0.0
     contract_shallow_train_fraction: float = 0.0
     contract_shallow_rollout_steps: int = 0
+    contract_aux_anneal_start_fraction: float = 1.0
+    contract_aux_anneal_final_multiplier: float = 1.0
+    contract_rand_depth_train_fraction: float = 0.0
+    contract_rand_depth_multipliers: list[float] = field(default_factory=list)
     late_stage_stability_weight: float = 0.0
     late_stage_stability_start_fraction: float = 0.5
     late_stage_stability_after_home_only: bool = True

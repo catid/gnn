@@ -54,6 +54,16 @@ def training_rollout_steps(config_step: int, config: ExperimentConfig) -> int:
     full_steps = int(config.task.max_rollout_steps)
     shallow_steps = int(config.train.contract_shallow_rollout_steps)
     shallow_fraction = float(config.train.contract_shallow_train_fraction)
+    rand_fraction = float(getattr(config.train, "contract_rand_depth_train_fraction", 0.0))
+    rand_multipliers = [float(value) for value in getattr(config.train, "contract_rand_depth_multipliers", [])]
+    if rand_multipliers and rand_fraction > 0.0:
+        cutoff = max(int(config.train.train_steps * rand_fraction), 1)
+        if int(config_step) <= cutoff:
+            choice_index = (
+                int(config.train.seed) * 1_315_423_911 + int(config_step) * 2_654_435_761
+            ) % len(rand_multipliers)
+            multiplier = rand_multipliers[choice_index]
+            return max(1, int(round(full_steps * multiplier)))
     if shallow_steps <= 0 or shallow_fraction <= 0.0:
         return full_steps
     cutoff = max(int(config.train.train_steps * shallow_fraction), 1)
@@ -142,6 +152,29 @@ def build_parser() -> argparse.ArgumentParser:
         type=float,
         default=None,
         help="Optional override for the late-stage route-stability penalty weight.",
+    )
+    parser.add_argument(
+        "--contract-aux-anneal-final-multiplier",
+        type=float,
+        default=None,
+        help="Optional override for the final routing-auxiliary anneal multiplier.",
+    )
+    parser.add_argument(
+        "--contract-aux-anneal-start-fraction",
+        type=float,
+        default=None,
+        help="Optional override for the fraction of training after which routing auxiliaries begin annealing.",
+    )
+    parser.add_argument(
+        "--contract-rand-depth-train-fraction",
+        type=float,
+        default=None,
+        help="Optional override for the fraction of training that uses randomized rollout depth.",
+    )
+    parser.add_argument(
+        "--contract-rand-depth-multipliers",
+        default=None,
+        help="Optional comma-separated override for randomized rollout-depth multipliers.",
     )
     parser.add_argument(
         "--slow-commit-interval",
@@ -244,6 +277,18 @@ def main() -> None:
         config.train.contract_penultimate_keep_prob = float(args.contract_penultimate_keep_prob)
     if args.late_stage_stability_weight is not None:
         config.train.late_stage_stability_weight = float(args.late_stage_stability_weight)
+    if args.contract_aux_anneal_final_multiplier is not None:
+        config.train.contract_aux_anneal_final_multiplier = float(args.contract_aux_anneal_final_multiplier)
+    if args.contract_aux_anneal_start_fraction is not None:
+        config.train.contract_aux_anneal_start_fraction = float(args.contract_aux_anneal_start_fraction)
+    if args.contract_rand_depth_train_fraction is not None:
+        config.train.contract_rand_depth_train_fraction = float(args.contract_rand_depth_train_fraction)
+    if args.contract_rand_depth_multipliers is not None:
+        config.train.contract_rand_depth_multipliers = [
+            float(part.strip())
+            for part in str(args.contract_rand_depth_multipliers).split(",")
+            if part.strip()
+        ]
     if args.slow_commit_interval is not None:
         config.train.slow_commit_interval = int(args.slow_commit_interval)
     if args.selector_gate_online_stage_index_min is not None:
@@ -442,6 +487,7 @@ def main() -> None:
         model.train()
         unwrapped_model = unwrap_model(model)
         unwrapped_model.set_first_hop_teacher_force_ratio(first_hop_teacher_force_ratio(step, config))
+        unwrapped_model.set_training_progress(step, config.train.train_steps)
         current_rollout_steps = training_rollout_steps(step, config)
         unwrapped_model.set_rollout_steps_override(current_rollout_steps)
         unwrapped_model.set_growth_context(
