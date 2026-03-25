@@ -97,6 +97,10 @@ class TrainConfig:
     contract_penultimate_keep_prob: float = 0.0
     contract_shallow_train_fraction: float = 0.0
     contract_shallow_rollout_steps: int = 0
+    late_stage_stability_weight: float = 0.0
+    late_stage_stability_start_fraction: float = 0.5
+    late_stage_stability_after_home_only: bool = True
+    slow_commit_interval: int = 0
 
 
 @dataclass

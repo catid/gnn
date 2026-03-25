@@ -56,6 +56,8 @@ def finalize_metrics(metric_sums: dict[str, float]) -> dict[str, float]:
         metric_sums.get("query_accuracy_hit", 0.0) / max(metric_sums.get("query_accuracy_count", 0.0), 1.0)
     )
     metrics["query_delivery_rate"] = metric_sums.get("query_delivery_hit", 0.0) / sample_count
+    metrics["settle_rate"] = metrics["query_delivery_rate"]
+    metrics["non_settling_rate"] = 1.0 - metrics["query_delivery_rate"]
     metrics["writer_first_hop_home_rate"] = (
         metric_sums.get("writer_home_hit", 0.0) / max(metric_sums.get("writer_home_count", 0.0), 1.0)
     )
@@ -71,6 +73,10 @@ def finalize_metrics(metric_sums: dict[str, float]) -> dict[str, float]:
         / max(metric_sums.get("first_hop_teacher_force_count", 0.0), 1.0)
     )
     metrics["average_hops"] = metric_sums.get("avg_hops_sum", 0.0) / max(metric_sums.get("avg_hops_count", 0.0), 1.0)
+    metrics["steps_to_settle"] = metrics["average_hops"]
+    metrics["accept_on_settle_accuracy"] = metrics["query_accuracy"]
+    metrics["accept_on_settle_coverage"] = metrics["query_delivery_rate"]
+    metrics["settled_accuracy"] = metrics["query_accuracy"]
     metrics["average_delay"] = metric_sums.get("delay_sum", 0.0) / max(metric_sums.get("delay_count", 0.0), 1.0)
     if "cache_mean_sum" in metric_sums:
         metrics["cache_mean_occupancy"] = metric_sums.get("cache_mean_sum", 0.0) / max(
@@ -106,11 +112,22 @@ def run_evaluation(
     batches: int,
     rank: int,
     writers_per_episode: int | None = None,
+    start_node_pool_size: int | None = None,
+    query_ttl_min: int | None = None,
+    query_ttl_max: int | None = None,
     desc: str = "eval",
     topology: GrowthTopology | None = None,
     rollout_steps: int | None = None,
 ) -> dict[str, float]:
     config = load_config(config_path)
+    if writers_per_episode is not None:
+        config.task.writers_per_episode = int(writers_per_episode)
+    if start_node_pool_size is not None:
+        config.task.start_node_pool_size = int(start_node_pool_size)
+    if query_ttl_min is not None:
+        config.task.query_ttl_min = int(query_ttl_min)
+    if query_ttl_max is not None:
+        config.task.query_ttl_max = int(query_ttl_max)
     task_name = config.task.name
     if task_name == "memory_growth":
         task = GrowthMemoryRoutingTask(config)
@@ -192,6 +209,9 @@ def main() -> None:
     parser.add_argument("--config", required=True, help="Path to YAML config.")
     parser.add_argument("--checkpoint", required=True, help="Checkpoint to evaluate.")
     parser.add_argument("--writers-per-episode", type=int, default=None, help="Override writers_per_episode.")
+    parser.add_argument("--start-node-pool-size", type=int, default=None, help="Override start_node_pool_size.")
+    parser.add_argument("--query-ttl-min", type=int, default=None, help="Override query_ttl_min.")
+    parser.add_argument("--query-ttl-max", type=int, default=None, help="Override query_ttl_max.")
     parser.add_argument("--batches", type=int, default=None, help="Override validation batch count.")
     parser.add_argument("--rollout-steps", type=int, default=None, help="Optional rollout-depth override.")
     parser.add_argument("--tag", default="eval", help="Output tag.")
@@ -216,12 +236,18 @@ def main() -> None:
         batches=batches,
         rank=rank,
         writers_per_episode=args.writers_per_episode,
+        start_node_pool_size=args.start_node_pool_size,
+        query_ttl_min=args.query_ttl_min,
+        query_ttl_max=args.query_ttl_max,
         desc=args.tag,
         topology=GrowthTopology.from_dict(checkpoint["growth_topology"]) if "growth_topology" in checkpoint else None,
         rollout_steps=args.rollout_steps,
     )
     metrics["checkpoint_step"] = int(checkpoint.get("step", -1))
     metrics["writers_per_episode"] = args.writers_per_episode or config.task.writers_per_episode
+    metrics["start_node_pool_size"] = args.start_node_pool_size or config.task.start_node_pool_size
+    metrics["query_ttl_min"] = args.query_ttl_min or config.task.query_ttl_min
+    metrics["query_ttl_max"] = args.query_ttl_max or config.task.query_ttl_max
     metrics["rollout_steps"] = int(args.rollout_steps or config.task.max_rollout_steps)
 
     if is_main_process():

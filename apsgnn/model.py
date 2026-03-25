@@ -498,6 +498,14 @@ class APSGNNModel(nn.Module):
             return not bool((torch.rand((), device=device) < keep_prob).item())
         return True
 
+    def _should_apply_late_stage_stability(self, step: int, total_steps: int) -> bool:
+        weight = float(self.config.train.late_stage_stability_weight)
+        if weight <= 0.0 or total_steps <= 0:
+            return False
+        start_fraction = float(self.config.train.late_stage_stability_start_fraction)
+        start_step = max(int(math.floor(total_steps * start_fraction)), 0)
+        return int(step) >= start_step
+
     def _active_node_mask(self, device: torch.device, dtype: torch.dtype) -> Tensor:
         mask = torch.zeros(self.config.model.nodes_total, device=device, dtype=dtype)
         mask[0] = 1.0
@@ -632,6 +640,10 @@ class APSGNNModel(nn.Module):
         live_buffer: TemporalRingBuffer[PacketBatch] = TemporalRingBuffer(ring_size)
         cache_buffer: TemporalRingBuffer[CacheWriteEvent] = TemporalRingBuffer(ring_size)
         output_buffer: TemporalRingBuffer[OutputEvent] = TemporalRingBuffer(ring_size)
+        slow_commit_interval = max(int(cfg.train.slow_commit_interval), 0)
+        commit_buffer: TemporalRingBuffer[CacheWriteEvent] | None = None
+        if slow_commit_interval > 1:
+            commit_buffer = TemporalRingBuffer(ring_size)
 
         writer_residual = self.encode_writers(batch)
         writer_batch_index = torch.arange(batch_size, device=device).repeat_interleave(writers_per_episode)
@@ -702,6 +714,7 @@ class APSGNNModel(nn.Module):
             live_buffer.schedule(cfg.task.writer_inject_step, coverage_packets)
 
         query_logits_for_loss: list[Tensor | None] = [None for _ in range(batch_size)]
+        query_route_probs_prev: list[Tensor | None] = [None for _ in range(batch_size)]
         query_delivered = torch.zeros(batch_size, device=device, dtype=torch.bool)
         query_last_hops = torch.zeros(batch_size, device=device, dtype=torch.long)
         query_supervision = str(cfg.train.contract_query_supervision or "first_output")
@@ -714,6 +727,7 @@ class APSGNNModel(nn.Module):
         loss_home_out_sum = zero
         loss_delay_sum = zero
         loss_gravity_sum = zero
+        loss_stability_sum = zero
         loss_missing_sum = zero
         loss_bootstrap_route_sum = zero
         loss_bootstrap_delay_sum = zero
@@ -751,9 +765,16 @@ class APSGNNModel(nn.Module):
         }
 
         for step in range(rollout_steps):
+            if commit_buffer is not None:
+                commit_events = _concat_cache_events(commit_buffer.pop_current())
+                if commit_events is not None:
+                    cache.write(commit_events.residual, commit_events.batch_index, commit_events.node_index)
             cache_events = _concat_cache_events(cache_buffer.pop_current())
             if cache_events is not None:
-                cache.write(cache_events.residual, cache_events.batch_index, cache_events.node_index)
+                if commit_buffer is None:
+                    cache.write(cache_events.residual, cache_events.batch_index, cache_events.node_index)
+                else:
+                    commit_buffer.schedule(step + slow_commit_interval - 1, cache_events)
 
             output_events = _concat_output_events(output_buffer.pop_current())
             if output_events is not None and len(output_events.batch_index) > 0:
@@ -783,6 +804,8 @@ class APSGNNModel(nn.Module):
                 live_buffer.advance()
                 cache_buffer.advance()
                 output_buffer.advance()
+                if commit_buffer is not None:
+                    commit_buffer.advance()
                 continue
 
             processed_packets_sum = processed_packets_sum + float(len(active_packets))
@@ -876,8 +899,26 @@ class APSGNNModel(nn.Module):
                 retrieval_entropy_count = retrieval_entropy_count + first_home_mask.sum()
                 retrieval_top_mass_sum = retrieval_top_mass_sum + retrieval_top_mass[first_home_mask].sum()
                 retrieval_top_mass_count = retrieval_top_mass_count + first_home_mask.sum()
-                retrieval_entry_sum = retrieval_entry_sum + retrieval_entry_count_values[first_home_mask].sum()
-                retrieval_entry_count = retrieval_entry_count + first_home_mask.sum()
+            retrieval_entry_sum = retrieval_entry_sum + retrieval_entry_count_values[first_home_mask].sum()
+            retrieval_entry_count = retrieval_entry_count + first_home_mask.sum()
+
+            if self._should_apply_late_stage_stability(step, rollout_steps):
+                stability_mask = active_packets.role == ROLE_QUERY
+                if bool(cfg.train.late_stage_stability_after_home_only):
+                    stability_mask = stability_mask & (active_packets.has_visited_home | entered_home)
+                if stability_mask.any():
+                    stability_probs = route_logits[stability_mask].softmax(dim=-1)
+                    stability_batch_index = active_packets.batch_index[stability_mask]
+                    for i in range(stability_probs.size(0)):
+                        sample = int(stability_batch_index[i].item())
+                        previous = query_route_probs_prev[sample]
+                        if previous is not None:
+                            loss_stability_sum = loss_stability_sum + F.mse_loss(
+                                stability_probs[i],
+                                previous,
+                                reduction="sum",
+                            )
+                        query_route_probs_prev[sample] = stability_probs[i].detach()
 
             gravity_mask = (active_packets.role == ROLE_QUERY) & (active_packets.has_visited_home | entered_home)
             if gravity_mask.any():
@@ -969,6 +1010,8 @@ class APSGNNModel(nn.Module):
             live_buffer.advance()
             cache_buffer.advance()
             output_buffer.advance()
+            if commit_buffer is not None:
+                commit_buffer.advance()
 
         delivered_mask = torch.tensor([item is not None for item in query_logits_for_loss], device=device, dtype=torch.bool)
         if delivered_mask.any():
@@ -990,6 +1033,7 @@ class APSGNNModel(nn.Module):
             + cfg.train.aux_home_out_weight * loss_home_out_sum
             + cfg.train.delay_reg_weight * loss_delay_sum
             + cfg.train.gravity_weight * loss_gravity_sum
+            + cfg.train.late_stage_stability_weight * loss_stability_sum
             + cfg.growth.bootstrap_route_weight * loss_bootstrap_route_sum
             + cfg.growth.bootstrap_delay_weight * loss_bootstrap_delay_sum
             + loss_missing_sum
@@ -1007,6 +1051,7 @@ class APSGNNModel(nn.Module):
                 "loss_home_to_output": loss_home_out_sum.detach(),
                 "loss_delay": loss_delay_sum.detach(),
                 "loss_gravity": loss_gravity_sum.detach(),
+                "loss_stability": loss_stability_sum.detach(),
                 "loss_bootstrap_route": loss_bootstrap_route_sum.detach(),
                 "loss_bootstrap_delay": loss_bootstrap_delay_sum.detach(),
                 "loss_missing_output": loss_missing_sum.detach(),
@@ -1062,6 +1107,10 @@ class APSGNNModel(nn.Module):
         live_buffer: TemporalRingBuffer[PacketBatch] = TemporalRingBuffer(cfg.model.delay_bins)
         cache_buffer: TemporalRingBuffer[CacheWriteEvent] = TemporalRingBuffer(cfg.model.delay_bins)
         output_buffer: TemporalRingBuffer[OutputEvent] = TemporalRingBuffer(cfg.model.delay_bins)
+        slow_commit_interval = max(int(cfg.train.slow_commit_interval), 0)
+        commit_buffer: TemporalRingBuffer[CacheWriteEvent] | None = None
+        if slow_commit_interval > 1:
+            commit_buffer = TemporalRingBuffer(cfg.model.delay_bins)
         cache = NodeCache(
             batch_size=batch_size,
             nodes_total=cfg.model.nodes_total,

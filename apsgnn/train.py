@@ -137,6 +137,36 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional override for stochastic penultimate temporal-credit keep probability.",
     )
+    parser.add_argument(
+        "--late-stage-stability-weight",
+        type=float,
+        default=None,
+        help="Optional override for the late-stage route-stability penalty weight.",
+    )
+    parser.add_argument(
+        "--slow-commit-interval",
+        type=int,
+        default=None,
+        help="Optional override for delayed cache commit interval. <=1 disables delayed commit.",
+    )
+    parser.add_argument(
+        "--selector-gate-online-stage-index-min",
+        type=int,
+        default=None,
+        help="Optional override for the minimum stage index where the online gate may switch selectors.",
+    )
+    parser.add_argument(
+        "--selector-gate-online-entropy-high-threshold",
+        type=float,
+        default=None,
+        help="Optional override for the online-gate entropy threshold.",
+    )
+    parser.add_argument(
+        "--selector-gate-online-gini-high-threshold",
+        type=float,
+        default=None,
+        help="Optional override for the online-gate Gini threshold.",
+    )
     return parser
 
 
@@ -212,6 +242,16 @@ def main() -> None:
         config.train.init_checkpoint = args.init_checkpoint
     if args.contract_penultimate_keep_prob is not None:
         config.train.contract_penultimate_keep_prob = float(args.contract_penultimate_keep_prob)
+    if args.late_stage_stability_weight is not None:
+        config.train.late_stage_stability_weight = float(args.late_stage_stability_weight)
+    if args.slow_commit_interval is not None:
+        config.train.slow_commit_interval = int(args.slow_commit_interval)
+    if args.selector_gate_online_stage_index_min is not None:
+        config.growth.selector_gate_online_stage_index_min = int(args.selector_gate_online_stage_index_min)
+    if args.selector_gate_online_entropy_high_threshold is not None:
+        config.growth.selector_gate_online_entropy_high_threshold = float(args.selector_gate_online_entropy_high_threshold)
+    if args.selector_gate_online_gini_high_threshold is not None:
+        config.growth.selector_gate_online_gini_high_threshold = float(args.selector_gate_online_gini_high_threshold)
 
     seed_everything(config.train.seed + rank)
     task_name = config.task.name
