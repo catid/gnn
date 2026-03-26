@@ -33,6 +33,17 @@ class PacketBatch:
     hop_index: Tensor
     has_visited_home: Tensor
     packet_id: Tensor
+    target_packet_id: Tensor | None = None
+    required_delay: Tensor | None = None
+    delay_accumulated: Tensor | None = None
+
+    def __post_init__(self) -> None:
+        if self.target_packet_id is None:
+            self.target_packet_id = self.packet_id.clone()
+        if self.required_delay is None:
+            self.required_delay = torch.zeros_like(self.packet_id)
+        if self.delay_accumulated is None:
+            self.delay_accumulated = torch.zeros_like(self.packet_id)
 
     def __len__(self) -> int:
         return int(self.ttl.numel())
@@ -47,6 +58,9 @@ class PacketBatch:
             role=self.role[mask],
             target_label=self.target_label[mask],
             target_home=self.target_home[mask],
+            target_packet_id=self.target_packet_id[mask],
+            required_delay=self.required_delay[mask],
+            delay_accumulated=self.delay_accumulated[mask],
             hop_index=self.hop_index[mask],
             has_visited_home=self.has_visited_home[mask],
             packet_id=self.packet_id[mask],
@@ -62,6 +76,9 @@ class PacketBatch:
             role=self.role,
             target_label=self.target_label,
             target_home=self.target_home,
+            target_packet_id=self.target_packet_id,
+            required_delay=self.required_delay,
+            delay_accumulated=self.delay_accumulated,
             hop_index=self.hop_index,
             has_visited_home=self.has_visited_home,
             packet_id=self.packet_id,
@@ -131,6 +148,9 @@ def _concat_packets(batches: list[PacketBatch]) -> PacketBatch | None:
         role=torch.cat([batch.role for batch in batches], dim=0),
         target_label=torch.cat([batch.target_label for batch in batches], dim=0),
         target_home=torch.cat([batch.target_home for batch in batches], dim=0),
+        target_packet_id=torch.cat([batch.target_packet_id for batch in batches], dim=0),
+        required_delay=torch.cat([batch.required_delay for batch in batches], dim=0),
+        delay_accumulated=torch.cat([batch.delay_accumulated for batch in batches], dim=0),
         hop_index=torch.cat([batch.hop_index for batch in batches], dim=0),
         has_visited_home=torch.cat([batch.has_visited_home for batch in batches], dim=0),
         packet_id=torch.cat([batch.packet_id for batch in batches], dim=0),
@@ -418,6 +438,7 @@ class APSGNNModel(nn.Module):
         self.rollout_steps_override: int | None = None
         self.training_progress_step = 0
         self.training_progress_total_steps = max(int(config.train.train_steps), 1)
+        self.collect_probe_outputs = False
 
         self.node_cells = nn.ModuleList(
             [
@@ -468,6 +489,9 @@ class APSGNNModel(nn.Module):
     def set_training_progress(self, step: int, total_steps: int) -> None:
         self.training_progress_step = max(int(step), 0)
         self.training_progress_total_steps = max(int(total_steps), 1)
+
+    def set_probe_collection(self, enabled: bool) -> None:
+        self.collect_probe_outputs = bool(enabled)
 
     def uses_legacy_first_hop_router(self) -> bool:
         return self.config.model.first_hop_router_variant == "legacy"
@@ -612,10 +636,14 @@ class APSGNNModel(nn.Module):
         flat_keys = batch.writer_keys.reshape(-1, self.config.model.key_dim)
         flat_labels = batch.writer_labels.reshape(-1)
         structured[:, : self.config.model.key_dim] = flat_keys
-        structured[:, self.config.model.key_dim : self.config.model.key_dim + self.config.model.num_classes] = F.one_hot(
-            flat_labels,
-            num_classes=self.config.model.num_classes,
-        ).to(learned.dtype)
+        if bool(self.config.model.use_reserved_class_slice):
+            structured[
+                :,
+                self.config.model.key_dim : self.config.model.key_dim + self.config.model.num_classes,
+            ] = F.one_hot(
+                flat_labels,
+                num_classes=self.config.model.num_classes,
+            ).to(learned.dtype)
         encoded = self.input_ln(learned) + structured
         return encoded.view(batch.batch_size * writers, self.config.model.d_model)
 
@@ -658,13 +686,25 @@ class APSGNNModel(nn.Module):
             dtype=dtype,
             enabled=cfg.model.enable_cache,
         )
+        cache_meta = NodeCache(
+            batch_size=batch_size,
+            nodes_total=cfg.model.nodes_total,
+            capacity=cfg.model.cache_capacity,
+            d_model=2,
+            device=device,
+            dtype=torch.float32,
+            enabled=cfg.model.enable_cache,
+        )
         live_buffer: TemporalRingBuffer[PacketBatch] = TemporalRingBuffer(ring_size)
         cache_buffer: TemporalRingBuffer[CacheWriteEvent] = TemporalRingBuffer(ring_size)
+        cache_meta_buffer: TemporalRingBuffer[CacheWriteEvent] = TemporalRingBuffer(ring_size)
         output_buffer: TemporalRingBuffer[OutputEvent] = TemporalRingBuffer(ring_size)
         slow_commit_interval = max(int(cfg.train.slow_commit_interval), 0)
         commit_buffer: TemporalRingBuffer[CacheWriteEvent] | None = None
+        commit_meta_buffer: TemporalRingBuffer[CacheWriteEvent] | None = None
         if slow_commit_interval > 1:
             commit_buffer = TemporalRingBuffer(ring_size)
+            commit_meta_buffer = TemporalRingBuffer(ring_size)
 
         writer_residual = self.encode_writers(batch)
         writer_batch_index = torch.arange(batch_size, device=device).repeat_interleave(writers_per_episode)
@@ -672,6 +712,7 @@ class APSGNNModel(nn.Module):
         writer_target_home = batch.writer_home_nodes.reshape(-1)
         writer_start_nodes = batch.writer_start_nodes.reshape(-1)
         writer_ttl = torch.ones_like(writer_target_label)
+        writer_packet_id = torch.arange(batch_size * writers_per_episode, device=device)
         writer_packets = PacketBatch(
             residual=writer_residual,
             routing_key=batch.writer_keys.reshape(-1, cfg.model.key_dim),
@@ -681,13 +722,24 @@ class APSGNNModel(nn.Module):
             role=torch.full_like(writer_target_label, ROLE_WRITER),
             target_label=writer_target_label,
             target_home=writer_target_home,
+            target_packet_id=writer_packet_id,
+            required_delay=torch.zeros_like(writer_target_label),
+            delay_accumulated=torch.zeros_like(writer_target_label),
             hop_index=torch.zeros_like(writer_target_label),
             has_visited_home=torch.zeros_like(writer_target_label, dtype=torch.bool),
-            packet_id=torch.arange(batch_size * writers_per_episode, device=device),
+            packet_id=writer_packet_id,
         )
         live_buffer.schedule(cfg.task.writer_inject_step, writer_packets)
 
         query_residual = self.encode_queries(batch)
+        query_required_delay = (
+            batch.query_required_delay.to(device=device, dtype=torch.long)
+            if batch.query_required_delay is not None
+            else torch.zeros(batch_size, device=device, dtype=torch.long)
+        )
+        query_target_packet_id = batch.query_writer_index + (
+            torch.arange(batch_size, device=device, dtype=torch.long) * writers_per_episode
+        )
         query_packets = PacketBatch(
             residual=query_residual,
             routing_key=batch.query_keys,
@@ -697,6 +749,9 @@ class APSGNNModel(nn.Module):
             role=torch.full((batch_size,), ROLE_QUERY, device=device, dtype=torch.long),
             target_label=batch.query_labels,
             target_home=batch.query_home_nodes,
+            target_packet_id=query_target_packet_id,
+            required_delay=query_required_delay,
+            delay_accumulated=torch.zeros(batch_size, device=device, dtype=torch.long),
             hop_index=torch.zeros(batch_size, device=device, dtype=torch.long),
             has_visited_home=torch.zeros(batch_size, device=device, dtype=torch.bool),
             packet_id=torch.arange(batch_size, device=device) + batch_size * writers_per_episode,
@@ -727,6 +782,9 @@ class APSGNNModel(nn.Module):
                 role=torch.full((coverage_count,), ROLE_SANITY, device=device, dtype=torch.long),
                 target_label=torch.zeros(coverage_count, device=device, dtype=torch.long),
                 target_home=torch.zeros(coverage_count, device=device, dtype=torch.long),
+                target_packet_id=torch.zeros(coverage_count, device=device, dtype=torch.long),
+                required_delay=torch.zeros(coverage_count, device=device, dtype=torch.long),
+                delay_accumulated=torch.zeros(coverage_count, device=device, dtype=torch.long),
                 hop_index=torch.zeros(coverage_count, device=device, dtype=torch.long),
                 has_visited_home=torch.zeros(coverage_count, device=device, dtype=torch.bool),
                 packet_id=torch.arange(coverage_count, device=device, dtype=torch.long)
@@ -740,6 +798,23 @@ class APSGNNModel(nn.Module):
         query_last_hops = torch.zeros(batch_size, device=device, dtype=torch.long)
         query_supervision = str(cfg.train.contract_query_supervision or "first_output")
         rollout_steps = self.effective_rollout_steps()
+        probe_states: dict[str, Tensor] | None = None
+        if self.collect_probe_outputs:
+            probe_states = {
+                "labels": batch.query_labels.detach().clone(),
+                "required_delay": query_required_delay.detach().clone(),
+                "first_hop_delay": torch.full((batch_size,), -1, device=device, dtype=torch.long),
+                "delivered": torch.zeros(batch_size, device=device, dtype=torch.bool),
+                "final_sink_state": torch.zeros(batch_size, cfg.model.d_model, device=device, dtype=dtype),
+                "home_hidden_state": torch.zeros(batch_size, cfg.model.d_model, device=device, dtype=dtype),
+                "home_cache_mean_state": torch.zeros(batch_size, cfg.model.d_model, device=device, dtype=dtype),
+                "home_entry_count": torch.zeros(batch_size, device=device, dtype=dtype),
+                "home_competing_entries": torch.zeros(batch_size, device=device, dtype=dtype),
+                "home_retrieval_top_mass": torch.zeros(batch_size, device=device, dtype=dtype),
+                "home_retrieval_entropy": torch.zeros(batch_size, device=device, dtype=dtype),
+                "home_target_entry_hit": torch.zeros(batch_size, device=device, dtype=dtype),
+                "home_delay_ready": torch.zeros(batch_size, device=device, dtype=torch.bool),
+            }
 
         loss_main_sum = zero
         loss_writer_sum = zero
@@ -749,6 +824,7 @@ class APSGNNModel(nn.Module):
         loss_delay_sum = zero
         loss_gravity_sum = zero
         loss_stability_sum = zero
+        loss_adaptive_compute_sum = zero
         loss_missing_sum = zero
         loss_bootstrap_route_sum = zero
         loss_bootstrap_delay_sum = zero
@@ -763,6 +839,10 @@ class APSGNNModel(nn.Module):
         teacher_force_count = zero
         delay_sum = zero
         delay_count = zero
+        query_first_delay_sum = zero
+        query_first_delay_count = zero
+        query_first_delay_nonzero_hit = zero
+        query_first_delay_match_hit = zero
         processed_packets_sum = zero
         cache_mean_sum = zero
         cache_mean_count = zero
@@ -774,6 +854,8 @@ class APSGNNModel(nn.Module):
         retrieval_top_mass_count = zero
         retrieval_entry_sum = zero
         retrieval_entry_count = zero
+        retrieval_target_hit_sum = zero
+        retrieval_target_hit_count = zero
         all_visit_counts_sum = torch.zeros(cfg.model.num_compute_nodes, device=device, dtype=dtype)
         task_visit_counts_sum = torch.zeros_like(all_visit_counts_sum)
         query_visit_counts_sum = torch.zeros_like(all_visit_counts_sum)
@@ -788,14 +870,22 @@ class APSGNNModel(nn.Module):
         for step in range(rollout_steps):
             if commit_buffer is not None:
                 commit_events = _concat_cache_events(commit_buffer.pop_current())
+                commit_meta_events = _concat_cache_events(commit_meta_buffer.pop_current()) if commit_meta_buffer is not None else None
                 if commit_events is not None:
                     cache.write(commit_events.residual, commit_events.batch_index, commit_events.node_index)
+                if commit_meta_events is not None:
+                    cache_meta.write(commit_meta_events.residual, commit_meta_events.batch_index, commit_meta_events.node_index)
             cache_events = _concat_cache_events(cache_buffer.pop_current())
+            cache_meta_events = _concat_cache_events(cache_meta_buffer.pop_current())
             if cache_events is not None:
                 if commit_buffer is None:
                     cache.write(cache_events.residual, cache_events.batch_index, cache_events.node_index)
+                    if cache_meta_events is not None:
+                        cache_meta.write(cache_meta_events.residual, cache_meta_events.batch_index, cache_meta_events.node_index)
                 else:
                     commit_buffer.schedule(step + slow_commit_interval - 1, cache_events)
+                    if cache_meta_events is not None and commit_meta_buffer is not None:
+                        commit_meta_buffer.schedule(step + slow_commit_interval - 1, cache_meta_events)
 
             output_events = _concat_output_events(output_buffer.pop_current())
             if output_events is not None and len(output_events.batch_index) > 0:
@@ -813,6 +903,9 @@ class APSGNNModel(nn.Module):
                             query_logits_for_loss[sample] = logits[i]
                         query_delivered[sample] = True
                         query_last_hops[sample] = hops[i]
+                        if probe_states is not None:
+                            probe_states["delivered"][sample] = True
+                            probe_states["final_sink_state"][sample] = output_events.residual[query_mask][i].detach()
 
             cache_mean, cache_max = cache.occupancy_stats()
             cache_mean_sum = cache_mean_sum + cache_mean
@@ -831,7 +924,12 @@ class APSGNNModel(nn.Module):
 
             processed_packets_sum = processed_packets_sum + float(len(active_packets))
 
-            predictions = self._run_compute_nodes(active_packets, cache, gradient_buffers=gradient_buffers)
+            predictions = self._run_compute_nodes(
+                active_packets,
+                cache,
+                cache_meta=cache_meta,
+                gradient_buffers=gradient_buffers,
+            )
             route_logits = predictions["route_logits"]
             delay_logits = predictions["delay_logits"]
             dest_index = predictions["dest_index"]
@@ -845,6 +943,9 @@ class APSGNNModel(nn.Module):
             retrieval_entropy = predictions["retrieval_entropy"]
             retrieval_top_mass = predictions["retrieval_top_mass"]
             retrieval_entry_count_values = predictions["retrieval_entry_count"]
+            hidden_state = predictions["hidden_state"]
+            cache_mean_state = predictions["cache_mean_state"]
+            target_entry_hit = predictions["target_entry_hit"]
             clockwise_targets = predictions["clockwise_target"]
             all_visit_counts_sum = all_visit_counts_sum + predictions["visit_counts"].to(dtype)
             task_visit_counts_sum = task_visit_counts_sum + predictions["task_visit_counts"].to(dtype)
@@ -896,32 +997,75 @@ class APSGNNModel(nn.Module):
                 query_hit_count = query_hit_count + query_targets.numel()
                 teacher_force_sum = teacher_force_sum + teacher_forced_mask[query_first_mask].sum()
                 teacher_force_count = teacher_force_count + query_targets.numel()
-                zeros = torch.zeros(query_targets.numel(), device=device, dtype=torch.long)
-                loss_delay_sum = loss_delay_sum + F.cross_entropy(delay_logits[query_first_mask], zeros, reduction="sum")
+                if str(cfg.task.delay_mode or "none") == "required_wait":
+                    delay_targets = active_packets.required_delay[query_first_mask].clamp(min=0, max=cfg.model.delay_bins - 1)
+                else:
+                    delay_targets = torch.zeros(query_targets.numel(), device=device, dtype=torch.long)
+                loss_delay_sum = loss_delay_sum + F.cross_entropy(
+                    delay_logits[query_first_mask],
+                    delay_targets,
+                    reduction="sum",
+                )
+                query_first_delay_sum = query_first_delay_sum + delay_index[query_first_mask].sum().to(dtype)
+                query_first_delay_count = query_first_delay_count + query_first_mask.sum().to(dtype)
+                query_first_delay_nonzero_hit = query_first_delay_nonzero_hit + (
+                    delay_index[query_first_mask] > 0
+                ).sum().to(dtype)
+                query_first_delay_match_hit = query_first_delay_match_hit + (
+                    delay_index[query_first_mask] == delay_targets
+                ).sum().to(dtype)
+                if probe_states is not None:
+                    probe_states["first_hop_delay"][active_packets.batch_index[query_first_mask]] = delay_index[
+                        query_first_mask
+                    ].detach()
 
             entered_home = (active_packets.role == ROLE_QUERY) & (active_packets.current_node == active_packets.target_home)
             first_home_mask = entered_home & (~active_packets.has_visited_home)
+            delay_ready_mask = first_home_mask
+            if str(cfg.task.delay_mode or "none") == "required_wait":
+                delay_ready_mask = first_home_mask & (
+                    active_packets.delay_accumulated >= active_packets.required_delay
+                )
             if first_home_mask.any():
-                loss_home_out_sum = loss_home_out_sum + F.cross_entropy(
-                    route_logits[first_home_mask],
-                    torch.zeros(first_home_mask.sum(), device=device, dtype=torch.long),
-                    reduction="sum",
-                )
-                loss_home_out_sum = loss_home_out_sum + cfg.train.address_aux_weight * F.mse_loss(
-                    predicted_address[first_home_mask],
-                    torch.zeros_like(predicted_address[first_home_mask]),
-                    reduction="sum",
-                )
-                home_out_hit_sum = home_out_hit_sum + (dest_index[first_home_mask] == 0).sum()
-                home_out_count = home_out_count + first_home_mask.sum()
-                zeros = torch.zeros(first_home_mask.sum(), device=device, dtype=torch.long)
-                loss_delay_sum = loss_delay_sum + F.cross_entropy(delay_logits[first_home_mask], zeros, reduction="sum")
+                if delay_ready_mask.any():
+                    loss_home_out_sum = loss_home_out_sum + F.cross_entropy(
+                        route_logits[delay_ready_mask],
+                        torch.zeros(delay_ready_mask.sum(), device=device, dtype=torch.long),
+                        reduction="sum",
+                    )
+                    loss_home_out_sum = loss_home_out_sum + cfg.train.address_aux_weight * F.mse_loss(
+                        predicted_address[delay_ready_mask],
+                        torch.zeros_like(predicted_address[delay_ready_mask]),
+                        reduction="sum",
+                    )
+                    home_out_hit_sum = home_out_hit_sum + (dest_index[delay_ready_mask] == 0).sum()
+                    home_out_count = home_out_count + delay_ready_mask.sum()
+                    zeros = torch.zeros(delay_ready_mask.sum(), device=device, dtype=torch.long)
+                    loss_delay_sum = loss_delay_sum + F.cross_entropy(
+                        delay_logits[delay_ready_mask],
+                        zeros,
+                        reduction="sum",
+                    )
                 retrieval_entropy_sum = retrieval_entropy_sum + retrieval_entropy[first_home_mask].sum()
                 retrieval_entropy_count = retrieval_entropy_count + first_home_mask.sum()
                 retrieval_top_mass_sum = retrieval_top_mass_sum + retrieval_top_mass[first_home_mask].sum()
                 retrieval_top_mass_count = retrieval_top_mass_count + first_home_mask.sum()
-            retrieval_entry_sum = retrieval_entry_sum + retrieval_entry_count_values[first_home_mask].sum()
-            retrieval_entry_count = retrieval_entry_count + first_home_mask.sum()
+                retrieval_entry_sum = retrieval_entry_sum + retrieval_entry_count_values[first_home_mask].sum()
+                retrieval_entry_count = retrieval_entry_count + first_home_mask.sum()
+                retrieval_target_hit_sum = retrieval_target_hit_sum + target_entry_hit[first_home_mask].sum()
+                retrieval_target_hit_count = retrieval_target_hit_count + first_home_mask.sum().to(dtype)
+                if probe_states is not None:
+                    sample_index = active_packets.batch_index[first_home_mask]
+                    probe_states["home_hidden_state"][sample_index] = hidden_state[first_home_mask].detach()
+                    probe_states["home_cache_mean_state"][sample_index] = cache_mean_state[first_home_mask].detach()
+                    probe_states["home_entry_count"][sample_index] = retrieval_entry_count_values[first_home_mask].detach()
+                    probe_states["home_competing_entries"][sample_index] = (
+                        retrieval_entry_count_values[first_home_mask] - 1.0
+                    ).clamp_min(0.0).detach()
+                    probe_states["home_retrieval_top_mass"][sample_index] = retrieval_top_mass[first_home_mask].detach()
+                    probe_states["home_retrieval_entropy"][sample_index] = retrieval_entropy[first_home_mask].detach()
+                    probe_states["home_target_entry_hit"][sample_index] = target_entry_hit[first_home_mask].detach()
+                    probe_states["home_delay_ready"][sample_index] = delay_ready_mask[first_home_mask].detach()
 
             if self._should_apply_late_stage_stability(step, rollout_steps):
                 stability_mask = active_packets.role == ROLE_QUERY
@@ -944,6 +1088,13 @@ class APSGNNModel(nn.Module):
             gravity_mask = (active_packets.role == ROLE_QUERY) & (active_packets.has_visited_home | entered_home)
             if gravity_mask.any():
                 loss_gravity_sum = loss_gravity_sum + address_norm[gravity_mask].square().sum()
+            adaptive_compute_weight = float(cfg.train.adaptive_compute_penalty_weight)
+            if adaptive_compute_weight > 0.0:
+                adaptive_compute_mask = (active_packets.role == ROLE_QUERY) & (active_packets.has_visited_home | entered_home)
+                if adaptive_compute_mask.any():
+                    loss_adaptive_compute_sum = loss_adaptive_compute_sum + (dest_index[adaptive_compute_mask] != 0).to(
+                        dtype
+                    ).sum()
 
             bootstrap_mask = (active_packets.role == ROLE_SANITY) & torch.tensor(
                 self.bootstrap_active,
@@ -971,6 +1122,7 @@ class APSGNNModel(nn.Module):
                 query_last_hops[active_packets.batch_index[query_mask]] = active_packets.hop_index[query_mask] + 1
 
             updated_has_visited = active_packets.has_visited_home | entered_home
+            updated_delay_accumulated = active_packets.delay_accumulated + delay_index.to(active_packets.delay_accumulated.dtype)
             ttl_after = active_packets.ttl - 1
             scheduled_step = step + 1 + delay_index
 
@@ -1003,6 +1155,22 @@ class APSGNNModel(nn.Module):
                     node_index=dest_index[cache_write_mask],
                 )
                 self._schedule_cache_events(cache_buffer, scheduled_step[cache_write_mask], cache_events_to_schedule)
+                cache_meta_events_to_schedule = CacheWriteEvent(
+                    residual=torch.stack(
+                        [
+                            active_packets.packet_id[cache_write_mask].to(torch.float32),
+                            active_packets.target_label[cache_write_mask].to(torch.float32),
+                        ],
+                        dim=-1,
+                    ),
+                    batch_index=active_packets.batch_index[cache_write_mask],
+                    node_index=dest_index[cache_write_mask],
+                )
+                self._schedule_cache_events(
+                    cache_meta_buffer,
+                    scheduled_step[cache_write_mask],
+                    cache_meta_events_to_schedule,
+                )
 
             if live_mask.any():
                 live_residual = next_residual[live_mask]
@@ -1019,6 +1187,9 @@ class APSGNNModel(nn.Module):
                     role=active_packets.role[live_mask],
                     target_label=active_packets.target_label[live_mask],
                     target_home=active_packets.target_home[live_mask],
+                    target_packet_id=active_packets.target_packet_id[live_mask],
+                    required_delay=active_packets.required_delay[live_mask],
+                    delay_accumulated=updated_delay_accumulated[live_mask],
                     hop_index=active_packets.hop_index[live_mask] + 1,
                     has_visited_home=updated_has_visited[live_mask],
                     packet_id=active_packets.packet_id[live_mask],
@@ -1030,9 +1201,12 @@ class APSGNNModel(nn.Module):
 
             live_buffer.advance()
             cache_buffer.advance()
+            cache_meta_buffer.advance()
             output_buffer.advance()
             if commit_buffer is not None:
                 commit_buffer.advance()
+            if commit_meta_buffer is not None:
+                commit_meta_buffer.advance()
 
         delivered_mask = torch.tensor([item is not None for item in query_logits_for_loss], device=device, dtype=torch.bool)
         if delivered_mask.any():
@@ -1056,6 +1230,7 @@ class APSGNNModel(nn.Module):
             + cfg.train.delay_reg_weight * loss_delay_sum
             + cfg.train.gravity_weight * loss_gravity_sum
             + cfg.train.late_stage_stability_weight * loss_stability_sum
+            + cfg.train.adaptive_compute_penalty_weight * loss_adaptive_compute_sum
             + routing_aux_multiplier * cfg.growth.bootstrap_route_weight * loss_bootstrap_route_sum
             + routing_aux_multiplier * cfg.growth.bootstrap_delay_weight * loss_bootstrap_delay_sum
             + loss_missing_sum
@@ -1074,6 +1249,7 @@ class APSGNNModel(nn.Module):
                 "loss_delay": loss_delay_sum.detach(),
                 "loss_gravity": loss_gravity_sum.detach(),
                 "loss_stability": loss_stability_sum.detach(),
+                "loss_adaptive_compute": loss_adaptive_compute_sum.detach(),
                 "loss_bootstrap_route": loss_bootstrap_route_sum.detach(),
                 "loss_bootstrap_delay": loss_bootstrap_delay_sum.detach(),
                 "loss_missing_output": loss_missing_sum.detach(),
@@ -1095,6 +1271,10 @@ class APSGNNModel(nn.Module):
                 "avg_hops_count": torch.tensor(float(batch_size), device=device, dtype=dtype),
                 "delay_sum": delay_sum.detach().to(dtype),
                 "delay_count": delay_count.detach().to(dtype),
+                "query_first_delay_sum": query_first_delay_sum.detach(),
+                "query_first_delay_count": query_first_delay_count.detach(),
+                "query_first_delay_nonzero_hit": query_first_delay_nonzero_hit.detach(),
+                "query_first_delay_match_hit": query_first_delay_match_hit.detach(),
                 "cache_mean_sum": cache_mean_sum.detach(),
                 "cache_mean_count": cache_mean_count.detach().to(dtype),
                 "cache_max_sum": cache_max_sum.detach(),
@@ -1105,6 +1285,8 @@ class APSGNNModel(nn.Module):
                 "retrieval_top_mass_count": retrieval_top_mass_count.detach().to(dtype),
                 "retrieval_entry_sum": retrieval_entry_sum.detach(),
                 "retrieval_entry_count": retrieval_entry_count.detach().to(dtype),
+                "retrieval_target_hit_sum": retrieval_target_hit_sum.detach(),
+                "retrieval_target_hit_count": retrieval_target_hit_count.detach(),
                 "packets_processed_sum": processed_packets_sum.detach().to(dtype),
             },
             "diagnostics": {
@@ -1119,6 +1301,7 @@ class APSGNNModel(nn.Module):
                 "query_gradient_signal": gradient_buffers["query"],
                 "bootstrap_gradient_signal": gradient_buffers["bootstrap"],
             },
+            "probe_states": probe_states,
         }
 
     def forward_sanity(self, batch: SanityBatch) -> dict[str, object]:
@@ -1154,6 +1337,9 @@ class APSGNNModel(nn.Module):
             role=torch.full((batch_size,), ROLE_SANITY, device=device, dtype=torch.long),
             target_label=torch.zeros(batch_size, device=device, dtype=torch.long),
             target_home=torch.zeros(batch_size, device=device, dtype=torch.long),
+            target_packet_id=torch.zeros(batch_size, device=device, dtype=torch.long),
+            required_delay=torch.zeros(batch_size, device=device, dtype=torch.long),
+            delay_accumulated=torch.zeros(batch_size, device=device, dtype=torch.long),
             hop_index=torch.zeros(batch_size, device=device, dtype=torch.long),
             has_visited_home=torch.zeros(batch_size, device=device, dtype=torch.bool),
             packet_id=torch.arange(batch_size, device=device),
@@ -1235,6 +1421,11 @@ class APSGNNModel(nn.Module):
                     role=active_packets.role[live_mask],
                     target_label=active_packets.target_label[live_mask],
                     target_home=active_packets.target_home[live_mask],
+                    target_packet_id=active_packets.target_packet_id[live_mask],
+                    required_delay=active_packets.required_delay[live_mask],
+                    delay_accumulated=active_packets.delay_accumulated[live_mask] + delay_index[live_mask].to(
+                        active_packets.delay_accumulated.dtype
+                    ),
                     hop_index=active_packets.hop_index[live_mask] + 1,
                     has_visited_home=active_packets.has_visited_home[live_mask],
                     packet_id=active_packets.packet_id[live_mask],
@@ -1371,18 +1562,24 @@ class APSGNNModel(nn.Module):
         routing_key_tensor: Tensor,
         cache_tensor: Tensor,
         cache_mask: Tensor,
-    ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
+        target_packet_id_tensor: Tensor,
+        packet_index_groups: list[list[int]],
+        cache_meta_tensor: Tensor | None,
+        required_delay_tensor: Tensor,
+        accumulated_delay_tensor: Tensor,
+    ) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         full_read = torch.zeros_like(hidden_tensor)
         entropy = torch.zeros(hidden_tensor.size(0), hidden_tensor.size(1), device=hidden_tensor.device, dtype=hidden_tensor.dtype)
         top_mass = torch.zeros_like(entropy)
         entry_count = torch.zeros_like(entropy)
+        target_hit = torch.zeros_like(entropy)
         rows_with_cache = cache_mask.any(dim=1)
         if not rows_with_cache.any() or self.cache_retriever is None:
-            return full_read, entropy, top_mass, entry_count
+            return full_read, entropy, top_mass, entry_count, target_hit
 
         query_mask = role_tensor[rows_with_cache] == ROLE_QUERY
         if not query_mask.any():
-            return full_read, entropy, top_mass, entry_count
+            return full_read, entropy, top_mass, entry_count, target_hit
 
         hidden_rows = hidden_tensor[rows_with_cache]
         routing_key_rows = routing_key_tensor[rows_with_cache]
@@ -1394,6 +1591,29 @@ class APSGNNModel(nn.Module):
         selected_keys = routing_key_rows[query_positions[:, 0], query_positions[:, 1]]
         selected_cache = cache_rows[query_positions[:, 0]]
         selected_cache_mask = cache_mask_rows[query_positions[:, 0]]
+        selected_target_packet_ids = []
+        selected_required_delay = []
+        selected_accumulated_delay = []
+        for group_idx, position_idx in query_positions.detach().cpu().tolist():
+            packet_index = packet_index_groups[group_idx][position_idx]
+            selected_target_packet_ids.append(int(target_packet_id_tensor[packet_index].item()))
+            selected_required_delay.append(int(required_delay_tensor[packet_index].item()))
+            selected_accumulated_delay.append(int(accumulated_delay_tensor[packet_index].item()))
+        selected_target_packet_ids_tensor = torch.tensor(
+            selected_target_packet_ids,
+            device=hidden_tensor.device,
+            dtype=torch.long,
+        )
+        selected_required_delay_tensor = torch.tensor(
+            selected_required_delay,
+            device=hidden_tensor.device,
+            dtype=torch.long,
+        )
+        selected_accumulated_delay_tensor = torch.tensor(
+            selected_accumulated_delay,
+            device=hidden_tensor.device,
+            dtype=torch.long,
+        )
 
         retrieval_outputs = self.cache_retriever(
             hidden=selected_hidden,
@@ -1411,18 +1631,38 @@ class APSGNNModel(nn.Module):
         entry_count_rows[query_positions[:, 0], query_positions[:, 1]] = retrieval_outputs["entry_count"].to(
             entry_count_rows.dtype
         )
+        if cache_meta_tensor is not None and cache_meta_tensor.numel() > 0:
+            selected_meta = cache_meta_tensor[rows_with_cache][query_positions[:, 0]]
+            top_index = retrieval_outputs["attention_weights"].argmax(dim=-1)
+            selected_packet_ids = selected_meta[
+                torch.arange(selected_meta.size(0), device=selected_meta.device),
+                top_index,
+                0,
+            ].round().to(torch.long)
+            target_hits = (selected_packet_ids == selected_target_packet_ids_tensor).to(entropy_rows.dtype)
+            target_hit_rows = torch.zeros_like(entropy_rows)
+            target_hit_rows[query_positions[:, 0], query_positions[:, 1]] = target_hits
+        else:
+            target_hit_rows = torch.zeros_like(entropy_rows)
+        delay_ready = selected_accumulated_delay_tensor >= selected_required_delay_tensor
+        if not bool(delay_ready.all().item()):
+            update = retrieval_outputs["update"].clone()
+            update[~delay_ready] = 0.0
+            full_read_rows[query_positions[:, 0], query_positions[:, 1]] = update.to(full_read_rows.dtype)
 
         full_read[rows_with_cache] = full_read_rows
         entropy[rows_with_cache] = entropy_rows
         top_mass[rows_with_cache] = top_mass_rows
         entry_count[rows_with_cache] = entry_count_rows
-        return full_read, entropy, top_mass, entry_count
+        target_hit[rows_with_cache] = target_hit_rows
+        return full_read, entropy, top_mass, entry_count, target_hit
 
     def _run_compute_nodes(
         self,
         packets: PacketBatch,
         cache: NodeCache,
         *,
+        cache_meta: NodeCache | None = None,
         gradient_buffers: dict[str, Tensor] | None = None,
     ) -> dict[str, Tensor]:
         cfg = self.config.model
@@ -1435,9 +1675,11 @@ class APSGNNModel(nn.Module):
         )
         hidden = torch.zeros_like(packets.residual)
         memory_update = torch.zeros_like(packets.residual)
+        cache_mean_state = torch.zeros_like(packets.residual)
         retrieval_entropy = torch.zeros(packets.residual.size(0), device=device, dtype=packets.residual.dtype)
         retrieval_top_mass = torch.zeros_like(retrieval_entropy)
         retrieval_entry_count = torch.zeros_like(retrieval_entropy)
+        target_entry_hit = torch.zeros_like(retrieval_entropy)
         visit_counts = torch.zeros(cfg.num_compute_nodes, device=device, dtype=packets.residual.dtype)
         task_visit_counts = torch.zeros_like(visit_counts)
         query_visit_counts = torch.zeros_like(visit_counts)
@@ -1495,6 +1737,22 @@ class APSGNNModel(nn.Module):
             )
 
             cache_tensor, cache_mask = cache.gather(group_batch_index, group_node_index)
+            cache_meta_tensor = None
+            if cache_meta is not None:
+                cache_meta_tensor, _ = cache_meta.gather(group_batch_index, group_node_index)
+            groups_with_cache = [indices for group_idx, (_, indices) in enumerate(groups) if bool(cache_mask[group_idx].any().item())]
+            cache_mean_rows = torch.zeros(
+                group_count,
+                max_packets,
+                cfg.d_model,
+                device=device,
+                dtype=packet_tensor.dtype,
+            )
+            cache_entry_counts = cache_mask.sum(dim=-1, keepdim=True).clamp_min(1).to(packet_tensor.dtype)
+            cache_group_mean = (cache_tensor * cache_mask.unsqueeze(-1).to(cache_tensor.dtype)).sum(dim=1) / cache_entry_counts
+            for group_idx, (_, indices) in enumerate(groups):
+                count = len(indices)
+                cache_mean_rows[group_idx, :count] = cache_group_mean[group_idx]
             if self.uses_explicit_cache_read():
                 packet_tensor, full_memory_update = self._explicit_cache_read(
                     packet_tensor=packet_tensor,
@@ -1518,17 +1776,24 @@ class APSGNNModel(nn.Module):
                     group_entropy,
                     group_top_mass,
                     group_entry_count,
+                    group_target_hit,
                 ) = self._learned_cache_read(
                     hidden_tensor=outputs["hidden"],
                     role_tensor=role_tensor,
                     routing_key_tensor=routing_key_tensor,
                     cache_tensor=cache_tensor,
                     cache_mask=cache_mask,
+                    target_packet_id_tensor=packets.target_packet_id,
+                    packet_index_groups=groups_with_cache,
+                    cache_meta_tensor=cache_meta_tensor,
+                    required_delay_tensor=packets.required_delay,
+                    accumulated_delay_tensor=packets.delay_accumulated,
                 )
             else:
                 group_entropy = torch.zeros(group_count, max_packets, device=device, dtype=packet_tensor.dtype)
                 group_top_mass = torch.zeros_like(group_entropy)
                 group_entry_count = torch.zeros_like(group_entropy)
+                group_target_hit = torch.zeros_like(group_entropy)
 
             self._register_gradient_probe(
                 outputs["hidden"],
@@ -1543,9 +1808,11 @@ class APSGNNModel(nn.Module):
                 index_tensor = torch.tensor(indices, device=device, dtype=torch.long)
                 hidden[index_tensor] = outputs["hidden"][group_idx, :count].to(hidden.dtype)
                 memory_update[index_tensor] = full_memory_update[group_idx, :count].to(memory_update.dtype)
+                cache_mean_state[index_tensor] = cache_mean_rows[group_idx, :count].to(cache_mean_state.dtype)
                 retrieval_entropy[index_tensor] = group_entropy[group_idx, :count].to(retrieval_entropy.dtype)
                 retrieval_top_mass[index_tensor] = group_top_mass[group_idx, :count].to(retrieval_top_mass.dtype)
                 retrieval_entry_count[index_tensor] = group_entry_count[group_idx, :count].to(retrieval_entry_count.dtype)
+                target_entry_hit[index_tensor] = group_target_hit[group_idx, :count].to(target_entry_hit.dtype)
 
         delta = self.delta_head(hidden)
         direction = self.direction_head(hidden)
@@ -1652,6 +1919,20 @@ class APSGNNModel(nn.Module):
             dest_index[teacher_forced_mask] = packets.target_home[teacher_forced_mask]
 
         _, delay_index = sample_delay(delay_logits, temperature=cfg.delay_temperature, training=self.training)
+        delay_override_mode = str(self.config.train.delay_override_mode or "learned")
+        if delay_override_mode == "zero":
+            delay_index = torch.zeros_like(delay_index)
+        elif delay_override_mode == "random":
+            delay_index = torch.randint(
+                0,
+                cfg.delay_bins,
+                delay_index.shape,
+                device=delay_index.device,
+                dtype=delay_index.dtype,
+            )
+        elif delay_override_mode == "fixed":
+            fixed_value = max(0, min(int(self.config.train.delay_override_value), cfg.delay_bins - 1))
+            delay_index = torch.full_like(delay_index, fill_value=fixed_value)
         if self.uses_growth_curriculum():
             coverage_mask = (packets.role == ROLE_SANITY) & torch.tensor(
                 self.bootstrap_active,
@@ -1679,6 +1960,9 @@ class APSGNNModel(nn.Module):
             "retrieval_entropy": retrieval_entropy,
             "retrieval_top_mass": retrieval_top_mass,
             "retrieval_entry_count": retrieval_entry_count,
+            "target_entry_hit": target_entry_hit,
+            "hidden_state": hidden,
+            "cache_mean_state": cache_mean_state,
             "clockwise_target": clockwise_target,
             "visit_counts": visit_counts,
             "task_visit_counts": task_visit_counts,
@@ -1702,10 +1986,13 @@ class APSGNNModel(nn.Module):
         return self.address_table[1:][compute_index]
 
     def _output_logits(self, residual: Tensor) -> Tensor:
+        logits = self.output_head(residual)
+        if not bool(self.config.model.use_reserved_class_slice):
+            return logits
         class_start = self.config.model.key_dim
         class_end = class_start + self.config.model.num_classes
         class_slice = residual[:, class_start:class_end]
-        return self.output_head(residual) + self.config.model.readout_class_scale * class_slice
+        return logits + self.config.model.readout_class_scale * class_slice
 
     def _schedule_cache_events(
         self,

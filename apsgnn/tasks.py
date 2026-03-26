@@ -54,6 +54,7 @@ class MemoryBatch:
     query_labels: Tensor
     query_ttl: Tensor
     query_writer_index: Tensor
+    query_required_delay: Tensor | None = None
     bootstrap_start_nodes: Tensor | None = None
     bootstrap_ttl: Tensor | None = None
 
@@ -73,6 +74,7 @@ class MemoryBatch:
             query_labels=self.query_labels.to(device),
             query_ttl=self.query_ttl.to(device),
             query_writer_index=self.query_writer_index.to(device),
+            query_required_delay=None if self.query_required_delay is None else self.query_required_delay.to(device),
             bootstrap_start_nodes=None if self.bootstrap_start_nodes is None else self.bootstrap_start_nodes.to(device),
             bootstrap_ttl=None if self.bootstrap_ttl is None else self.bootstrap_ttl.to(device),
         )
@@ -106,6 +108,27 @@ class MemoryRoutingTask:
             config.model.num_compute_nodes,
             generator=generator,
         )
+        self.home_candidates = self._home_candidates(
+            num_compute_nodes=config.model.num_compute_nodes,
+            pool_size=config.task.home_node_pool_size,
+        )
+
+    @staticmethod
+    def _home_candidates(*, num_compute_nodes: int, pool_size: int) -> Tensor:
+        if pool_size <= 0 or pool_size >= num_compute_nodes:
+            return torch.arange(1, num_compute_nodes + 1, dtype=torch.long)
+        stride = num_compute_nodes / float(pool_size)
+        candidate_indices = torch.floor(torch.arange(pool_size, dtype=torch.float32) * stride).long()
+        candidate_indices = candidate_indices.clamp_max(num_compute_nodes - 1)
+        return 1 + torch.unique_consecutive(candidate_indices)
+
+    def _sample_home_nodes(self, writer_keys: Tensor) -> Tensor:
+        scores = writer_keys @ self.home_hash
+        if int(self.home_candidates.numel()) == self.config.model.num_compute_nodes:
+            return 1 + scores.argmax(dim=-1)
+        allowed = (self.home_candidates - 1).to(dtype=torch.long)
+        allowed_scores = scores.index_select(-1, allowed)
+        return self.home_candidates[allowed_scores.argmax(dim=-1)]
 
     def generate(
         self,
@@ -123,8 +146,7 @@ class MemoryRoutingTask:
 
         writer_keys = torch.randn(batch_size, writers, cfg.model.key_dim, generator=generator)
         writer_labels = torch.randint(0, cfg.model.num_classes, (batch_size, writers), generator=generator)
-        writer_scores = writer_keys @ self.home_hash
-        writer_home_nodes = 1 + writer_scores.argmax(dim=-1)
+        writer_home_nodes = self._sample_home_nodes(writer_keys)
         writer_start_nodes = sample_start_nodes(
             active_nodes=cfg.model.num_compute_nodes,
             pool_size=cfg.task.start_node_pool_size,
@@ -149,6 +171,14 @@ class MemoryRoutingTask:
             (batch_size,),
             generator=generator,
         )
+        query_required_delay = None
+        if str(cfg.task.delay_mode or "none") == "required_wait":
+            query_required_delay = torch.randint(
+                cfg.task.required_delay_min,
+                cfg.task.required_delay_max + 1,
+                (batch_size,),
+                generator=generator,
+            )
 
         return MemoryBatch(
             writer_keys=writer_keys,
@@ -161,6 +191,7 @@ class MemoryRoutingTask:
             query_labels=query_labels,
             query_ttl=query_ttl,
             query_writer_index=query_writer_index,
+            query_required_delay=query_required_delay,
         )
 
 
@@ -175,6 +206,18 @@ class GrowthMemoryRoutingTask:
             self.final_compute_nodes,
             generator=generator,
         )
+        self.home_candidates = MemoryRoutingTask._home_candidates(
+            num_compute_nodes=self.final_compute_nodes,
+            pool_size=config.task.home_node_pool_size,
+        )
+
+    def _sample_home_leaf(self, writer_keys: Tensor) -> Tensor:
+        scores = writer_keys @ self.home_hash
+        if int(self.home_candidates.numel()) == self.final_compute_nodes:
+            return 1 + scores.argmax(dim=-1)
+        allowed = (self.home_candidates - 1).to(dtype=torch.long)
+        allowed_scores = scores.index_select(-1, allowed)
+        return self.home_candidates[allowed_scores.argmax(dim=-1)]
 
     def generate(
         self,
@@ -194,8 +237,7 @@ class GrowthMemoryRoutingTask:
 
         writer_keys = torch.randn(batch_size, writers, cfg.model.key_dim, generator=generator)
         writer_labels = torch.randint(0, cfg.model.num_classes, (batch_size, writers), generator=generator)
-        writer_scores = writer_keys @ self.home_hash
-        writer_home_leaf = 1 + writer_scores.argmax(dim=-1)
+        writer_home_leaf = self._sample_home_leaf(writer_keys)
         if topology is None:
             writer_home_nodes = project_home_leaves(writer_home_leaf, active_nodes, self.final_compute_nodes)
         else:
@@ -230,6 +272,14 @@ class GrowthMemoryRoutingTask:
             (batch_size,),
             generator=generator,
         )
+        query_required_delay = None
+        if str(cfg.task.delay_mode or "none") == "required_wait":
+            query_required_delay = torch.randint(
+                cfg.task.required_delay_min,
+                cfg.task.required_delay_max + 1,
+                (batch_size,),
+                generator=generator,
+            )
 
         bootstrap_start_nodes = None
         bootstrap_ttl = None
@@ -248,6 +298,7 @@ class GrowthMemoryRoutingTask:
             query_labels=query_labels,
             query_ttl=query_ttl,
             query_writer_index=query_writer_index,
+            query_required_delay=query_required_delay,
             bootstrap_start_nodes=bootstrap_start_nodes,
             bootstrap_ttl=bootstrap_ttl,
         )

@@ -31,6 +31,7 @@ class ModelConfig:
     cache_read_variant: str = "explicit"
     cache_read_hidden_dim: int = 256
     cache_read_layers: int = 2
+    use_reserved_class_slice: bool = True
     first_hop_hint_residual_scale: float = 0.25
     readout_class_scale: float = 8.0
     num_classes: int = 32
@@ -51,9 +52,13 @@ class TaskConfig:
     writer_inject_step: int = 0
     query_inject_step: int = 2
     start_node_pool_size: int = 0
+    home_node_pool_size: int = 0
     query_ttl_min: int = 3
     query_ttl_max: int = 6
     max_rollout_steps: int = 10
+    delay_mode: str = "none"
+    required_delay_min: int = 0
+    required_delay_max: int = 0
     sanity_min_ttl: int = 2
     sanity_max_ttl: int = 4
     train_eval_writers: list[int] = field(default_factory=lambda: [6, 10])
@@ -105,6 +110,9 @@ class TrainConfig:
     late_stage_stability_start_fraction: float = 0.5
     late_stage_stability_after_home_only: bool = True
     slow_commit_interval: int = 0
+    adaptive_compute_penalty_weight: float = 0.0
+    delay_override_mode: str = "learned"
+    delay_override_value: int = 0
 
 
 @dataclass

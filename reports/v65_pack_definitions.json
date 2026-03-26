@@ -1,0 +1,129 @@
+{
+  "budgets": {
+    "l": 2160,
+    "m": 1350,
+    "p": 300
+  },
+  "class_slice_pack": {
+    "conditions": [
+      "classon",
+      "classoff"
+    ],
+    "promotion_gate": {
+      "metric": "class_slice_off_gap",
+      "pass_requires": "modest_drop_or_recoverable_and_decodable"
+    }
+  },
+  "collision_pack": {
+    "promotion_gate": {
+      "metric": "cache_on_minus_cache_off_gap",
+      "pass_requires": "positive_gap_on_c1_or_c2_and_selective_retrieval"
+    },
+    "regimes": {
+      "c0": {
+        "display": "C0",
+        "home_node_pool_size": 0,
+        "max_rollout_steps": 12,
+        "query_ttl_max": 3,
+        "query_ttl_min": 2,
+        "start_node_pool_size": 2,
+        "train_eval_writers": [
+          6,
+          10
+        ],
+        "writers_per_episode": 6
+      },
+      "c1": {
+        "display": "C1",
+        "home_node_pool_size": 8,
+        "max_rollout_steps": 12,
+        "query_ttl_max": 3,
+        "query_ttl_min": 2,
+        "start_node_pool_size": 2,
+        "train_eval_writers": [
+          6,
+          10
+        ],
+        "writers_per_episode": 6
+      },
+      "c2": {
+        "display": "C2",
+        "home_node_pool_size": 2,
+        "max_rollout_steps": 12,
+        "query_ttl_max": 3,
+        "query_ttl_min": 2,
+        "start_node_pool_size": 2,
+        "train_eval_writers": [
+          6,
+          10
+        ],
+        "writers_per_episode": 6
+      }
+    }
+  },
+  "delay_pack": {
+    "conditions": [
+      "learned",
+      "zero",
+      "random",
+      "fixed"
+    ],
+    "promotion_gate": {
+      "metric": "learned_minus_zero_gap",
+      "pass_requires": "positive_gap_on_required_delay_and_nonzero_delay_usage"
+    },
+    "regimes": {
+      "d0": {
+        "display": "D0",
+        "fixed_good_delay": 0,
+        "home_node_pool_size": 8,
+        "max_rollout_steps": 12,
+        "query_ttl_max": 3,
+        "query_ttl_min": 2,
+        "required_delay_max": 0,
+        "required_delay_min": 0,
+        "start_node_pool_size": 2,
+        "train_eval_writers": [
+          4
+        ],
+        "writers_per_episode": 4
+      },
+      "d1": {
+        "display": "D1",
+        "fixed_good_delay": 2,
+        "home_node_pool_size": 8,
+        "max_rollout_steps": 12,
+        "query_ttl_max": 3,
+        "query_ttl_min": 2,
+        "required_delay_max": 2,
+        "required_delay_min": 1,
+        "start_node_pool_size": 2,
+        "train_eval_writers": [
+          4
+        ],
+        "writers_per_episode": 4
+      },
+      "d2": {
+        "display": "D2",
+        "fixed_good_delay": 3,
+        "home_node_pool_size": 8,
+        "max_rollout_steps": 12,
+        "query_ttl_max": 3,
+        "query_ttl_min": 2,
+        "required_delay_max": 4,
+        "required_delay_min": 3,
+        "start_node_pool_size": 2,
+        "train_eval_writers": [
+          4
+        ],
+        "writers_per_episode": 4
+      }
+    }
+  },
+  "optional_followup_pack": {
+    "choices": [
+      "adaptive_compute",
+      "branch_packets"
+    ]
+  }
+}
