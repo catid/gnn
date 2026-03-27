@@ -31,6 +31,27 @@ class ModelConfig:
     cache_read_variant: str = "explicit"
     cache_read_hidden_dim: int = 256
     cache_read_layers: int = 2
+    cache_retrieval_score_temperature: float = 1.0
+    cache_retrieval_topk: int = 0
+    cache_visible_recent_limit: int = 0
+    cache_read_bypass_mode: str = "none"
+    cache_home_summary_fusion: bool = False
+    cache_output_summary_readout: bool = False
+    cache_output_summary_source: str = "mean"
+    cache_output_retrieved_blend_threshold: float = 0.5
+    cache_output_query_condition_scale: float = 1.0
+    cache_output_dispersion_scale: float = 1.0
+    cache_output_max_scale: float = 1.0
+    cache_output_gate_feature_scale: float = 1.0
+    cache_output_gate_floor_scale: float = 1.0
+    cache_output_collision_switch_width: float = 2.0
+    cache_output_collision_head_scale: float = 1.0
+    cache_output_collision_retrieved_scale: float = 1.0
+    cache_output_collision_blend_scale: float = 1.0
+    cache_output_aux_feature_scale: float = 1.0
+    cache_output_feature_modulation_scale: float = 1.0
+    cache_output_base_suppression_scale: float = 1.0
+    cache_output_classslice_suppression_scale: float = 1.0
     use_reserved_class_slice: bool = True
     first_hop_hint_residual_scale: float = 0.25
     readout_class_scale: float = 8.0
@@ -59,6 +80,7 @@ class TaskConfig:
     delay_mode: str = "none"
     required_delay_min: int = 0
     required_delay_max: int = 0
+    required_delay_hash_bits: int = 4
     sanity_min_ttl: int = 2
     sanity_max_ttl: int = 4
     train_eval_writers: list[int] = field(default_factory=lambda: [6, 10])

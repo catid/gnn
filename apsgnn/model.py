@@ -114,6 +114,10 @@ class OutputEvent:
     target_label: Tensor
     hop_index: Tensor
     packet_id: Tensor
+    cache_summary: Tensor | None = None
+    aux_summary: Tensor | None = None
+    retrieved_summary: Tensor | None = None
+    gate_features: Tensor | None = None
 
     def select(self, mask: Tensor) -> "OutputEvent":
         return OutputEvent(
@@ -123,6 +127,10 @@ class OutputEvent:
             target_label=self.target_label[mask],
             hop_index=self.hop_index[mask],
             packet_id=self.packet_id[mask],
+            cache_summary=None if self.cache_summary is None else self.cache_summary[mask],
+            aux_summary=None if self.aux_summary is None else self.aux_summary[mask],
+            retrieved_summary=None if self.retrieved_summary is None else self.retrieved_summary[mask],
+            gate_features=None if self.gate_features is None else self.gate_features[mask],
         )
 
     def detach_state(self) -> "OutputEvent":
@@ -133,6 +141,10 @@ class OutputEvent:
             target_label=self.target_label,
             hop_index=self.hop_index,
             packet_id=self.packet_id,
+            cache_summary=None if self.cache_summary is None else self.cache_summary.detach(),
+            aux_summary=None if self.aux_summary is None else self.aux_summary.detach(),
+            retrieved_summary=None if self.retrieved_summary is None else self.retrieved_summary.detach(),
+            gate_features=None if self.gate_features is None else self.gate_features.detach(),
         )
 
 
@@ -170,6 +182,10 @@ def _concat_cache_events(events: list[CacheWriteEvent]) -> CacheWriteEvent | Non
 def _concat_output_events(events: list[OutputEvent]) -> OutputEvent | None:
     if not events:
         return None
+    cache_summaries = [event.cache_summary for event in events if event.cache_summary is not None]
+    aux_summaries = [event.aux_summary for event in events if event.aux_summary is not None]
+    retrieved_summaries = [event.retrieved_summary for event in events if event.retrieved_summary is not None]
+    gate_features = [event.gate_features for event in events if event.gate_features is not None]
     return OutputEvent(
         residual=torch.cat([event.residual for event in events], dim=0),
         batch_index=torch.cat([event.batch_index for event in events], dim=0),
@@ -177,6 +193,10 @@ def _concat_output_events(events: list[OutputEvent]) -> OutputEvent | None:
         target_label=torch.cat([event.target_label for event in events], dim=0),
         hop_index=torch.cat([event.hop_index for event in events], dim=0),
         packet_id=torch.cat([event.packet_id for event in events], dim=0),
+        cache_summary=torch.cat(cache_summaries, dim=0) if cache_summaries else None,
+        aux_summary=torch.cat(aux_summaries, dim=0) if aux_summaries else None,
+        retrieved_summary=torch.cat(retrieved_summaries, dim=0) if retrieved_summaries else None,
+        gate_features=torch.cat(gate_features, dim=0) if gate_features else None,
     )
 
 
@@ -298,11 +318,17 @@ class LearnedCacheRetriever(nn.Module):
         key_dim: int,
         hidden_dim: int,
         layers: int,
+        score_temperature: float = 1.0,
+        topk: int = 0,
+        bypass_mode: str = "none",
     ) -> None:
         super().__init__()
         self.variant = variant
         self.d_model = d_model
         self.uses_key_conditioning = variant == "learned_keycond"
+        self.score_temperature = float(score_temperature)
+        self.topk = int(topk)
+        self.bypass_mode = str(bypass_mode)
 
         if self.uses_key_conditioning:
             self.key_condition_proj = nn.Linear(key_dim, d_model)
@@ -346,6 +372,7 @@ class LearnedCacheRetriever(nn.Module):
             empty_weights = hidden.new_zeros(hidden.size(0), cache_entries.size(1))
             return {
                 "update": zeros,
+                "retrieved": zeros,
                 "attention_weights": empty_weights,
                 "entropy": hidden.new_zeros(hidden.size(0)),
                 "top_mass": hidden.new_zeros(hidden.size(0)),
@@ -356,8 +383,15 @@ class LearnedCacheRetriever(nn.Module):
         cache_keys = self.cache_key_proj(cache_entries)
         cache_values = self.cache_value_proj(cache_entries)
 
-        scores = torch.einsum("gd,gcd->gc", query, cache_keys) / math.sqrt(cache_keys.size(-1))
+        temperature = max(float(self.score_temperature), 1.0e-6)
+        scores = torch.einsum("gd,gcd->gc", query, cache_keys) / (math.sqrt(cache_keys.size(-1)) * temperature)
         scores = scores.masked_fill(~cache_mask, -1.0e9)
+        if self.topk > 0 and self.topk < cache_entries.size(1):
+            topk = min(self.topk, cache_entries.size(1))
+            top_scores, top_indices = scores.topk(topk, dim=-1)
+            limited_scores = scores.new_full(scores.shape, -1.0e9)
+            limited_scores.scatter_(dim=-1, index=top_indices, src=top_scores)
+            scores = limited_scores
         attention_weights = scores.softmax(dim=-1)
         attention_weights = attention_weights * cache_mask.to(attention_weights.dtype)
         attention_norm = attention_weights.sum(dim=-1, keepdim=True).clamp_min(1.0e-6)
@@ -366,6 +400,8 @@ class LearnedCacheRetriever(nn.Module):
         retrieved = torch.einsum("gc,gcd->gd", attention_weights, cache_values)
         merged = self.merge_proj(torch.cat([hidden, retrieved], dim=-1))
         gated_update = torch.sigmoid(self.merge_gate(hidden)) * merged
+        if self.bypass_mode == "zero_update":
+            gated_update = torch.zeros_like(gated_update)
 
         safe_weights = attention_weights.clamp_min(1.0e-8)
         entropy = -(attention_weights * safe_weights.log()).sum(dim=-1)
@@ -373,6 +409,7 @@ class LearnedCacheRetriever(nn.Module):
         entry_count = cache_mask.sum(dim=-1).to(hidden.dtype)
         return {
             "update": gated_update,
+            "retrieved": retrieved,
             "attention_weights": attention_weights,
             "entropy": entropy,
             "top_mass": top_mass,
@@ -429,7 +466,179 @@ class APSGNNModel(nn.Module):
                 key_dim=model_cfg.key_dim,
                 hidden_dim=model_cfg.cache_read_hidden_dim,
                 layers=model_cfg.cache_read_layers,
+                score_temperature=model_cfg.cache_retrieval_score_temperature,
+                topk=model_cfg.cache_retrieval_topk,
+                bypass_mode=model_cfg.cache_read_bypass_mode,
             )
+        if bool(model_cfg.cache_home_summary_fusion):
+            self.cache_home_summary_proj: nn.Module | None = nn.Sequential(
+                nn.LayerNorm(model_cfg.d_model),
+                nn.Linear(model_cfg.d_model, model_cfg.d_model),
+                nn.GELU(),
+                nn.Linear(model_cfg.d_model, model_cfg.d_model),
+            )
+            self.cache_home_summary_gate: nn.Module | None = nn.Linear(model_cfg.d_model * 2, model_cfg.d_model)
+            final_linear = self.cache_home_summary_proj[-1]
+            assert isinstance(final_linear, nn.Linear)
+            nn.init.zeros_(final_linear.weight)
+            nn.init.zeros_(final_linear.bias)
+        else:
+            self.cache_home_summary_proj = None
+            self.cache_home_summary_gate = None
+        if bool(model_cfg.cache_output_summary_readout):
+            self.cache_output_summary_head: nn.Module | None = nn.Sequential(
+                nn.LayerNorm(model_cfg.d_model),
+                nn.Linear(model_cfg.d_model, model_cfg.d_model),
+                nn.GELU(),
+                nn.Linear(model_cfg.d_model, model_cfg.num_classes),
+            )
+            self.cache_output_summary_gate: nn.Module | None = nn.Linear(model_cfg.d_model * 2, 1)
+            summary_final_linear = self.cache_output_summary_head[-1]
+            assert isinstance(summary_final_linear, nn.Linear)
+            nn.init.zeros_(summary_final_linear.weight)
+            nn.init.zeros_(summary_final_linear.bias)
+            nn.init.zeros_(self.cache_output_summary_gate.weight)
+            nn.init.zeros_(self.cache_output_summary_gate.bias)
+            summary_source = str(model_cfg.cache_output_summary_source or "mean")
+            gate_feature_dim = 2
+            if summary_source in {"ambiguity_entropy_gate", "collision_interaction_floor_gate"}:
+                gate_feature_dim = 3
+            if summary_source in {
+                "ambiguity_gate",
+                "ambiguity_entropy_gate",
+                "collision_specialized_head",
+                "collision_sharpened_blend",
+                "collision_retrieved_head",
+                "confidence_floor_gate",
+                "collision_switch_gate",
+                "collision_split_floor_gate",
+                "collision_interaction_floor_gate",
+                "ambiguity_max",
+                "ambiguity_max_gate",
+                "ambiguity_feature_modulation",
+                "ambiguity_base_suppression",
+                "ambiguity_classslice_suppression",
+            }:
+                self.cache_output_gate_feature_proj: nn.Module | None = nn.Linear(gate_feature_dim, 1)
+                nn.init.zeros_(self.cache_output_gate_feature_proj.weight)
+                nn.init.zeros_(self.cache_output_gate_feature_proj.bias)
+            else:
+                self.cache_output_gate_feature_proj = None
+            if summary_source in {
+                "dispersion_augmented",
+                "max_augmented",
+                "ambiguity_max",
+                "ambiguity_max_gate",
+            }:
+                self.cache_output_aux_proj: nn.Module | None = nn.Linear(model_cfg.d_model, model_cfg.d_model)
+                nn.init.zeros_(self.cache_output_aux_proj.weight)
+                nn.init.zeros_(self.cache_output_aux_proj.bias)
+            else:
+                self.cache_output_aux_proj = None
+            if summary_source == "ambiguity_max_gate":
+                self.cache_output_aux_feature_proj: nn.Module | None = nn.Linear(2, 1)
+                nn.init.zeros_(self.cache_output_aux_feature_proj.weight)
+                nn.init.zeros_(self.cache_output_aux_feature_proj.bias)
+            else:
+                self.cache_output_aux_feature_proj = None
+            if summary_source == "collision_sharpened_blend":
+                self.cache_output_collision_blend_proj: nn.Module | None = nn.Linear(gate_feature_dim, 1)
+                nn.init.zeros_(self.cache_output_collision_blend_proj.weight)
+                nn.init.zeros_(self.cache_output_collision_blend_proj.bias)
+            else:
+                self.cache_output_collision_blend_proj = None
+            if summary_source == "query_conditioned":
+                self.cache_output_condition_scale: nn.Module | None = nn.Linear(model_cfg.d_model, model_cfg.d_model)
+                self.cache_output_condition_shift: nn.Module | None = nn.Linear(model_cfg.d_model, model_cfg.d_model)
+                nn.init.zeros_(self.cache_output_condition_scale.weight)
+                nn.init.zeros_(self.cache_output_condition_scale.bias)
+                nn.init.zeros_(self.cache_output_condition_shift.weight)
+                nn.init.zeros_(self.cache_output_condition_shift.bias)
+            else:
+                self.cache_output_condition_scale = None
+                self.cache_output_condition_shift = None
+            if summary_source == "ambiguity_feature_modulation":
+                self.cache_output_feature_scale_proj: nn.Module | None = nn.Linear(2, model_cfg.d_model)
+                self.cache_output_feature_shift_proj: nn.Module | None = nn.Linear(2, model_cfg.d_model)
+                nn.init.zeros_(self.cache_output_feature_scale_proj.weight)
+                nn.init.zeros_(self.cache_output_feature_scale_proj.bias)
+                nn.init.zeros_(self.cache_output_feature_shift_proj.weight)
+                nn.init.zeros_(self.cache_output_feature_shift_proj.bias)
+            else:
+                self.cache_output_feature_scale_proj = None
+                self.cache_output_feature_shift_proj = None
+            if summary_source == "ambiguity_base_suppression":
+                self.cache_output_base_feature_proj: nn.Module | None = nn.Linear(2, 1)
+                nn.init.zeros_(self.cache_output_base_feature_proj.weight)
+                nn.init.zeros_(self.cache_output_base_feature_proj.bias)
+            else:
+                self.cache_output_base_feature_proj = None
+            if summary_source == "ambiguity_classslice_suppression":
+                self.cache_output_classslice_feature_proj: nn.Module | None = nn.Linear(2, 1)
+                nn.init.zeros_(self.cache_output_classslice_feature_proj.weight)
+                nn.init.zeros_(self.cache_output_classslice_feature_proj.bias)
+            else:
+                self.cache_output_classslice_feature_proj = None
+            if summary_source == "dual":
+                self.cache_output_retrieved_head: nn.Module | None = nn.Sequential(
+                    nn.LayerNorm(model_cfg.d_model),
+                    nn.Linear(model_cfg.d_model, model_cfg.d_model),
+                    nn.GELU(),
+                    nn.Linear(model_cfg.d_model, model_cfg.num_classes),
+                )
+                self.cache_output_retrieved_gate: nn.Module | None = nn.Linear(model_cfg.d_model * 2, 1)
+                retrieved_final_linear = self.cache_output_retrieved_head[-1]
+                assert isinstance(retrieved_final_linear, nn.Linear)
+                nn.init.zeros_(retrieved_final_linear.weight)
+                nn.init.zeros_(retrieved_final_linear.bias)
+                nn.init.zeros_(self.cache_output_retrieved_gate.weight)
+                nn.init.zeros_(self.cache_output_retrieved_gate.bias)
+            else:
+                self.cache_output_retrieved_head = None
+                self.cache_output_retrieved_gate = None
+            if summary_source == "collision_specialized_head":
+                self.cache_output_collision_head: nn.Module | None = nn.Sequential(
+                    nn.LayerNorm(model_cfg.d_model),
+                    nn.Linear(model_cfg.d_model, model_cfg.d_model),
+                    nn.GELU(),
+                    nn.Linear(model_cfg.d_model, model_cfg.num_classes),
+                )
+                collision_final_linear = self.cache_output_collision_head[-1]
+                assert isinstance(collision_final_linear, nn.Linear)
+                nn.init.zeros_(collision_final_linear.weight)
+                nn.init.zeros_(collision_final_linear.bias)
+            else:
+                self.cache_output_collision_head = None
+            if summary_source == "collision_retrieved_head":
+                self.cache_output_collision_retrieved_head: nn.Module | None = nn.Sequential(
+                    nn.LayerNorm(model_cfg.d_model),
+                    nn.Linear(model_cfg.d_model, model_cfg.d_model),
+                    nn.GELU(),
+                    nn.Linear(model_cfg.d_model, model_cfg.num_classes),
+                )
+                collision_retrieved_final_linear = self.cache_output_collision_retrieved_head[-1]
+                assert isinstance(collision_retrieved_final_linear, nn.Linear)
+                nn.init.zeros_(collision_retrieved_final_linear.weight)
+                nn.init.zeros_(collision_retrieved_final_linear.bias)
+            else:
+                self.cache_output_collision_retrieved_head = None
+        else:
+            self.cache_output_summary_head = None
+            self.cache_output_summary_gate = None
+            self.cache_output_gate_feature_proj = None
+            self.cache_output_aux_proj = None
+            self.cache_output_aux_feature_proj = None
+            self.cache_output_collision_blend_proj = None
+            self.cache_output_condition_scale = None
+            self.cache_output_condition_shift = None
+            self.cache_output_feature_scale_proj = None
+            self.cache_output_feature_shift_proj = None
+            self.cache_output_base_feature_proj = None
+            self.cache_output_classslice_feature_proj = None
+            self.cache_output_retrieved_head = None
+            self.cache_output_retrieved_gate = None
+            self.cache_output_collision_head = None
+            self.cache_output_collision_retrieved_head = None
         self.first_hop_teacher_force_ratio = 0.0
         self.active_compute_nodes = model_cfg.num_compute_nodes
         self.bootstrap_active = False
@@ -492,6 +701,46 @@ class APSGNNModel(nn.Module):
 
     def set_probe_collection(self, enabled: bool) -> None:
         self.collect_probe_outputs = bool(enabled)
+
+    def _apply_cache_visibility_limit(
+        self,
+        cache_tensor: Tensor,
+        cache_mask: Tensor,
+        cache_meta_tensor: Tensor | None,
+    ) -> tuple[Tensor, Tensor, Tensor | None]:
+        limit = int(self.config.model.cache_visible_recent_limit)
+        if limit <= 0:
+            return cache_tensor, cache_mask, cache_meta_tensor
+        masked = cache_mask.clone()
+        for row_idx in range(masked.size(0)):
+            count = int(masked[row_idx].sum().item())
+            if count <= limit:
+                continue
+            masked[row_idx, : count - limit] = False
+        return cache_tensor, masked, cache_meta_tensor
+
+    def _delay_ready_mask(self, accumulated_delay: Tensor, required_delay: Tensor) -> Tensor:
+        delay_mode = str(self.config.task.delay_mode or "none")
+        if delay_mode == "key_hash_exact_wait":
+            return accumulated_delay == required_delay
+        if delay_mode == "required_wait":
+            return accumulated_delay >= required_delay
+        return torch.ones_like(accumulated_delay, dtype=torch.bool)
+
+    def _home_cache_summary_mask(
+        self,
+        *,
+        packet_mask: Tensor,
+        role_tensor: Tensor,
+        target_home_tensor: Tensor,
+        current_node_index: Tensor,
+        cache_mask: Tensor,
+    ) -> Tensor:
+        if self.cache_home_summary_proj is None:
+            return torch.zeros_like(packet_mask)
+        has_cache = cache_mask.any(dim=-1, keepdim=True).expand_as(packet_mask)
+        at_home = target_home_tensor == current_node_index.unsqueeze(-1)
+        return packet_mask & has_cache & at_home & (role_tensor == ROLE_QUERY)
 
     def uses_legacy_first_hop_router(self) -> bool:
         return self.config.model.first_hop_router_variant == "legacy"
@@ -808,6 +1057,8 @@ class APSGNNModel(nn.Module):
                 "final_sink_state": torch.zeros(batch_size, cfg.model.d_model, device=device, dtype=dtype),
                 "home_hidden_state": torch.zeros(batch_size, cfg.model.d_model, device=device, dtype=dtype),
                 "home_cache_mean_state": torch.zeros(batch_size, cfg.model.d_model, device=device, dtype=dtype),
+                "home_cache_max_state": torch.zeros(batch_size, cfg.model.d_model, device=device, dtype=dtype),
+                "home_cache_dispersion_state": torch.zeros(batch_size, cfg.model.d_model, device=device, dtype=dtype),
                 "home_entry_count": torch.zeros(batch_size, device=device, dtype=dtype),
                 "home_competing_entries": torch.zeros(batch_size, device=device, dtype=dtype),
                 "home_retrieval_top_mass": torch.zeros(batch_size, device=device, dtype=dtype),
@@ -891,7 +1142,25 @@ class APSGNNModel(nn.Module):
             if output_events is not None and len(output_events.batch_index) > 0:
                 query_mask = output_events.role == ROLE_QUERY
                 if query_mask.any():
-                    logits = self._output_logits(output_events.residual[query_mask])
+                    query_cache_summary = None
+                    query_aux_summary = None
+                    query_retrieved_summary = None
+                    if output_events.cache_summary is not None:
+                        query_cache_summary = output_events.cache_summary[query_mask]
+                    if output_events.aux_summary is not None:
+                        query_aux_summary = output_events.aux_summary[query_mask]
+                    if output_events.retrieved_summary is not None:
+                        query_retrieved_summary = output_events.retrieved_summary[query_mask]
+                    query_gate_features = None
+                    if output_events.gate_features is not None:
+                        query_gate_features = output_events.gate_features[query_mask]
+                    logits = self._output_logits(
+                        output_events.residual[query_mask],
+                        cache_summary=query_cache_summary,
+                        aux_summary=query_aux_summary,
+                        retrieved_summary=query_retrieved_summary,
+                        gate_features=query_gate_features,
+                    )
                     batch_index = output_events.batch_index[query_mask]
                     labels = output_events.target_label[query_mask]
                     hops = output_events.hop_index[query_mask]
@@ -945,12 +1214,20 @@ class APSGNNModel(nn.Module):
             retrieval_entry_count_values = predictions["retrieval_entry_count"]
             hidden_state = predictions["hidden_state"]
             cache_mean_state = predictions["cache_mean_state"]
+            cache_max_state = predictions["cache_max_state"]
+            cache_dispersion_state = predictions["cache_dispersion_state"]
+            cache_retrieved_state = predictions["cache_retrieved_state"]
             target_entry_hit = predictions["target_entry_hit"]
             clockwise_targets = predictions["clockwise_target"]
             all_visit_counts_sum = all_visit_counts_sum + predictions["visit_counts"].to(dtype)
             task_visit_counts_sum = task_visit_counts_sum + predictions["task_visit_counts"].to(dtype)
             query_visit_counts_sum = query_visit_counts_sum + predictions["query_visit_counts"].to(dtype)
             bootstrap_visit_counts_sum = bootstrap_visit_counts_sum + predictions["bootstrap_visit_counts"].to(dtype)
+            cache_output_summary = self._select_output_cache_summary(
+                cache_mean_state=cache_mean_state,
+                cache_retrieved_state=cache_retrieved_state,
+                retrieval_top_mass=retrieval_top_mass,
+            )
 
             writer_first_mask = (active_packets.role == ROLE_WRITER) & (active_packets.hop_index == 0)
             if writer_first_mask.any():
@@ -997,7 +1274,7 @@ class APSGNNModel(nn.Module):
                 query_hit_count = query_hit_count + query_targets.numel()
                 teacher_force_sum = teacher_force_sum + teacher_forced_mask[query_first_mask].sum()
                 teacher_force_count = teacher_force_count + query_targets.numel()
-                if str(cfg.task.delay_mode or "none") == "required_wait":
+                if str(cfg.task.delay_mode or "none") in {"required_wait", "key_hash_exact_wait"}:
                     delay_targets = active_packets.required_delay[query_first_mask].clamp(min=0, max=cfg.model.delay_bins - 1)
                 else:
                     delay_targets = torch.zeros(query_targets.numel(), device=device, dtype=torch.long)
@@ -1022,9 +1299,10 @@ class APSGNNModel(nn.Module):
             entered_home = (active_packets.role == ROLE_QUERY) & (active_packets.current_node == active_packets.target_home)
             first_home_mask = entered_home & (~active_packets.has_visited_home)
             delay_ready_mask = first_home_mask
-            if str(cfg.task.delay_mode or "none") == "required_wait":
-                delay_ready_mask = first_home_mask & (
-                    active_packets.delay_accumulated >= active_packets.required_delay
+            if str(cfg.task.delay_mode or "none") in {"required_wait", "key_hash_exact_wait"}:
+                delay_ready_mask = first_home_mask & self._delay_ready_mask(
+                    active_packets.delay_accumulated,
+                    active_packets.required_delay,
                 )
             if first_home_mask.any():
                 if delay_ready_mask.any():
@@ -1058,6 +1336,10 @@ class APSGNNModel(nn.Module):
                     sample_index = active_packets.batch_index[first_home_mask]
                     probe_states["home_hidden_state"][sample_index] = hidden_state[first_home_mask].detach()
                     probe_states["home_cache_mean_state"][sample_index] = cache_mean_state[first_home_mask].detach()
+                    probe_states["home_cache_max_state"][sample_index] = cache_max_state[first_home_mask].detach()
+                    probe_states["home_cache_dispersion_state"][sample_index] = (
+                        cache_dispersion_state[first_home_mask].detach()
+                    )
                     probe_states["home_entry_count"][sample_index] = retrieval_entry_count_values[first_home_mask].detach()
                     probe_states["home_competing_entries"][sample_index] = (
                         retrieval_entry_count_values[first_home_mask] - 1.0
@@ -1130,8 +1412,33 @@ class APSGNNModel(nn.Module):
             cache_write_mask = (~output_mask) & (ttl_after == 0)
             live_mask = (~output_mask) & (ttl_after > 0)
             detach_temporal_state = self._should_detach_temporal_state(step, rollout_steps, device)
+            source = str(cfg.model.cache_output_summary_source or "mean")
+            cache_output_aux_state = cache_dispersion_state
+            if source in {
+                "max_augmented",
+                "ambiguity_max",
+                "ambiguity_max_gate",
+            }:
+                cache_output_aux_state = cache_max_state
 
             if output_mask.any():
+                entry_count_feature = retrieval_entry_count_values / float(max(cfg.model.cache_capacity, 1))
+                entry_count_feature = entry_count_feature.clamp(min=0.0, max=1.0)
+                gate_feature_values = [
+                    retrieval_top_mass.to(next_residual.dtype),
+                    entry_count_feature.to(next_residual.dtype),
+                ]
+                if source == "ambiguity_entropy_gate":
+                    entropy_feature = torch.zeros_like(retrieval_top_mass)
+                    max_entropy = torch.log(retrieval_entry_count_values.clamp(min=1.0))
+                    entropy_mask = max_entropy > 1.0e-6
+                    entropy_feature[entropy_mask] = retrieval_entropy[entropy_mask] / max_entropy[entropy_mask]
+                    entropy_feature = entropy_feature.clamp(min=0.0, max=1.0)
+                    gate_feature_values.append(entropy_feature.to(next_residual.dtype))
+                elif source == "collision_interaction_floor_gate":
+                    ambiguity_feature = (1.0 - retrieval_top_mass.clamp(min=0.0, max=1.0)) * entry_count_feature
+                    gate_feature_values.append(ambiguity_feature.to(next_residual.dtype))
+                gate_features = torch.stack(gate_feature_values, dim=-1)
                 output_residual = next_residual[output_mask]
                 if detach_temporal_state:
                     output_residual = output_residual.detach()
@@ -1142,6 +1449,18 @@ class APSGNNModel(nn.Module):
                     target_label=active_packets.target_label[output_mask],
                     hop_index=active_packets.hop_index[output_mask] + 1,
                     packet_id=active_packets.packet_id[output_mask],
+                    cache_summary=cache_output_summary[output_mask].detach()
+                    if detach_temporal_state
+                    else cache_output_summary[output_mask],
+                    aux_summary=cache_output_aux_state[output_mask].detach()
+                    if detach_temporal_state
+                    else cache_output_aux_state[output_mask],
+                    retrieved_summary=cache_retrieved_state[output_mask].detach()
+                    if detach_temporal_state
+                    else cache_retrieved_state[output_mask],
+                    gate_features=gate_features[output_mask].detach()
+                    if detach_temporal_state
+                    else gate_features[output_mask],
                 )
                 self._schedule_output_events(output_buffer, scheduled_step[output_mask], output_events_to_schedule)
 
@@ -1400,6 +1719,15 @@ class APSGNNModel(nn.Module):
                     target_label=active_packets.target_label[output_mask],
                     hop_index=active_packets.hop_index[output_mask] + 1,
                     packet_id=active_packets.packet_id[output_mask],
+                    cache_summary=torch.zeros_like(next_residual[output_mask]),
+                    aux_summary=torch.zeros_like(next_residual[output_mask]),
+                    retrieved_summary=torch.zeros_like(next_residual[output_mask]),
+                    gate_features=torch.zeros(
+                        next_residual[output_mask].size(0),
+                        2,
+                        device=next_residual.device,
+                        dtype=next_residual.dtype,
+                    ),
                 )
                 self._schedule_output_events(output_buffer, scheduled_step[output_mask], output_events_to_schedule)
 
@@ -1567,19 +1895,20 @@ class APSGNNModel(nn.Module):
         cache_meta_tensor: Tensor | None,
         required_delay_tensor: Tensor,
         accumulated_delay_tensor: Tensor,
-    ) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
+    ) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
         full_read = torch.zeros_like(hidden_tensor)
+        retrieved_state = torch.zeros_like(hidden_tensor)
         entropy = torch.zeros(hidden_tensor.size(0), hidden_tensor.size(1), device=hidden_tensor.device, dtype=hidden_tensor.dtype)
         top_mass = torch.zeros_like(entropy)
         entry_count = torch.zeros_like(entropy)
         target_hit = torch.zeros_like(entropy)
         rows_with_cache = cache_mask.any(dim=1)
         if not rows_with_cache.any() or self.cache_retriever is None:
-            return full_read, entropy, top_mass, entry_count, target_hit
+            return full_read, retrieved_state, entropy, top_mass, entry_count, target_hit
 
         query_mask = role_tensor[rows_with_cache] == ROLE_QUERY
         if not query_mask.any():
-            return full_read, entropy, top_mass, entry_count, target_hit
+            return full_read, retrieved_state, entropy, top_mass, entry_count, target_hit
 
         hidden_rows = hidden_tensor[rows_with_cache]
         routing_key_rows = routing_key_tensor[rows_with_cache]
@@ -1622,10 +1951,12 @@ class APSGNNModel(nn.Module):
             cache_mask=selected_cache_mask,
         )
         full_read_rows = torch.zeros_like(hidden_rows)
+        retrieved_rows = torch.zeros_like(hidden_rows)
         entropy_rows = torch.zeros(hidden_rows.size(0), hidden_rows.size(1), device=hidden_rows.device, dtype=hidden_rows.dtype)
         top_mass_rows = torch.zeros_like(entropy_rows)
         entry_count_rows = torch.zeros_like(entropy_rows)
         full_read_rows[query_positions[:, 0], query_positions[:, 1]] = retrieval_outputs["update"].to(full_read_rows.dtype)
+        retrieved_rows[query_positions[:, 0], query_positions[:, 1]] = retrieval_outputs["retrieved"].to(retrieved_rows.dtype)
         entropy_rows[query_positions[:, 0], query_positions[:, 1]] = retrieval_outputs["entropy"].to(entropy_rows.dtype)
         top_mass_rows[query_positions[:, 0], query_positions[:, 1]] = retrieval_outputs["top_mass"].to(top_mass_rows.dtype)
         entry_count_rows[query_positions[:, 0], query_positions[:, 1]] = retrieval_outputs["entry_count"].to(
@@ -1644,18 +1975,22 @@ class APSGNNModel(nn.Module):
             target_hit_rows[query_positions[:, 0], query_positions[:, 1]] = target_hits
         else:
             target_hit_rows = torch.zeros_like(entropy_rows)
-        delay_ready = selected_accumulated_delay_tensor >= selected_required_delay_tensor
+        delay_ready = self._delay_ready_mask(selected_accumulated_delay_tensor, selected_required_delay_tensor)
         if not bool(delay_ready.all().item()):
             update = retrieval_outputs["update"].clone()
             update[~delay_ready] = 0.0
             full_read_rows[query_positions[:, 0], query_positions[:, 1]] = update.to(full_read_rows.dtype)
+            retrieved = retrieval_outputs["retrieved"].clone()
+            retrieved[~delay_ready] = 0.0
+            retrieved_rows[query_positions[:, 0], query_positions[:, 1]] = retrieved.to(retrieved_rows.dtype)
 
         full_read[rows_with_cache] = full_read_rows
+        retrieved_state[rows_with_cache] = retrieved_rows
         entropy[rows_with_cache] = entropy_rows
         top_mass[rows_with_cache] = top_mass_rows
         entry_count[rows_with_cache] = entry_count_rows
         target_hit[rows_with_cache] = target_hit_rows
-        return full_read, entropy, top_mass, entry_count, target_hit
+        return full_read, retrieved_state, entropy, top_mass, entry_count, target_hit
 
     def _run_compute_nodes(
         self,
@@ -1675,7 +2010,11 @@ class APSGNNModel(nn.Module):
         )
         hidden = torch.zeros_like(packets.residual)
         memory_update = torch.zeros_like(packets.residual)
+        cache_summary_update = torch.zeros_like(packets.residual)
         cache_mean_state = torch.zeros_like(packets.residual)
+        cache_max_state = torch.zeros_like(packets.residual)
+        cache_dispersion_state = torch.zeros_like(packets.residual)
+        cache_retrieved_state = torch.zeros_like(packets.residual)
         retrieval_entropy = torch.zeros(packets.residual.size(0), device=device, dtype=packets.residual.dtype)
         retrieval_top_mass = torch.zeros_like(retrieval_entropy)
         retrieval_entry_count = torch.zeros_like(retrieval_entropy)
@@ -1719,6 +2058,7 @@ class APSGNNModel(nn.Module):
                 device=device,
                 dtype=packets.routing_key.dtype,
             )
+            target_home_tensor = torch.zeros(group_count, max_packets, device=device, dtype=torch.long)
 
             for group_idx, (_, indices) in enumerate(groups):
                 index_tensor = torch.tensor(indices, device=device, dtype=torch.long)
@@ -1727,6 +2067,7 @@ class APSGNNModel(nn.Module):
                 packet_mask[group_idx, :count] = True
                 role_tensor[group_idx, :count] = packets.role[index_tensor]
                 routing_key_tensor[group_idx, :count] = packets.routing_key[index_tensor]
+                target_home_tensor[group_idx, :count] = packets.target_home[index_tensor]
 
             active_roles = role_tensor[packet_mask]
             visit_counts[node_index - 1] = visit_counts[node_index - 1] + active_roles.numel()
@@ -1740,6 +2081,11 @@ class APSGNNModel(nn.Module):
             cache_meta_tensor = None
             if cache_meta is not None:
                 cache_meta_tensor, _ = cache_meta.gather(group_batch_index, group_node_index)
+            cache_tensor, cache_mask, cache_meta_tensor = self._apply_cache_visibility_limit(
+                cache_tensor,
+                cache_mask,
+                cache_meta_tensor,
+            )
             groups_with_cache = [indices for group_idx, (_, indices) in enumerate(groups) if bool(cache_mask[group_idx].any().item())]
             cache_mean_rows = torch.zeros(
                 group_count,
@@ -1748,11 +2094,37 @@ class APSGNNModel(nn.Module):
                 device=device,
                 dtype=packet_tensor.dtype,
             )
+            cache_max_rows = torch.zeros(
+                group_count,
+                max_packets,
+                cfg.d_model,
+                device=device,
+                dtype=packet_tensor.dtype,
+            )
+            cache_dispersion_rows = torch.zeros(
+                group_count,
+                max_packets,
+                cfg.d_model,
+                device=device,
+                dtype=packet_tensor.dtype,
+            )
             cache_entry_counts = cache_mask.sum(dim=-1, keepdim=True).clamp_min(1).to(packet_tensor.dtype)
             cache_group_mean = (cache_tensor * cache_mask.unsqueeze(-1).to(cache_tensor.dtype)).sum(dim=1) / cache_entry_counts
+            masked_cache = cache_tensor.masked_fill(~cache_mask.unsqueeze(-1), float("-inf"))
+            cache_group_max = masked_cache.amax(dim=1)
+            empty_groups = ~cache_mask.any(dim=1)
+            if empty_groups.any():
+                cache_group_max[empty_groups] = 0.0
+            centered_cache = cache_tensor - cache_group_mean.unsqueeze(1)
+            cache_group_var = (
+                centered_cache.square() * cache_mask.unsqueeze(-1).to(centered_cache.dtype)
+            ).sum(dim=1) / cache_entry_counts
+            cache_group_dispersion = torch.sqrt(cache_group_var.clamp_min(0.0))
             for group_idx, (_, indices) in enumerate(groups):
                 count = len(indices)
                 cache_mean_rows[group_idx, :count] = cache_group_mean[group_idx]
+                cache_max_rows[group_idx, :count] = cache_group_max[group_idx]
+                cache_dispersion_rows[group_idx, :count] = cache_group_dispersion[group_idx]
             if self.uses_explicit_cache_read():
                 packet_tensor, full_memory_update = self._explicit_cache_read(
                     packet_tensor=packet_tensor,
@@ -1773,6 +2145,7 @@ class APSGNNModel(nn.Module):
             if self.uses_learned_cache_read():
                 (
                     full_memory_update,
+                    full_retrieved_state,
                     group_entropy,
                     group_top_mass,
                     group_entry_count,
@@ -1790,10 +2163,39 @@ class APSGNNModel(nn.Module):
                     accumulated_delay_tensor=packets.delay_accumulated,
                 )
             else:
+                full_retrieved_state = torch.zeros(
+                    group_count,
+                    max_packets,
+                    cfg.d_model,
+                    device=device,
+                    dtype=packet_tensor.dtype,
+                )
                 group_entropy = torch.zeros(group_count, max_packets, device=device, dtype=packet_tensor.dtype)
                 group_top_mass = torch.zeros_like(group_entropy)
                 group_entry_count = torch.zeros_like(group_entropy)
                 group_target_hit = torch.zeros_like(group_entropy)
+            full_summary_update = torch.zeros(
+                group_count,
+                max_packets,
+                cfg.d_model,
+                device=device,
+                dtype=packet_tensor.dtype,
+            )
+            if self.cache_home_summary_proj is not None and self.cache_home_summary_gate is not None:
+                summary_mask = self._home_cache_summary_mask(
+                    packet_mask=packet_mask,
+                    role_tensor=role_tensor,
+                    target_home_tensor=target_home_tensor,
+                    current_node_index=group_node_index,
+                    cache_mask=cache_mask,
+                )
+                if summary_mask.any():
+                    summary_candidate = self.cache_home_summary_proj(cache_mean_rows)
+                    summary_gate = torch.sigmoid(
+                        self.cache_home_summary_gate(torch.cat([outputs["hidden"], cache_mean_rows], dim=-1))
+                    )
+                    full_summary_update = summary_gate * summary_candidate
+                    full_summary_update = full_summary_update * summary_mask.unsqueeze(-1).to(full_summary_update.dtype)
 
             self._register_gradient_probe(
                 outputs["hidden"],
@@ -1808,7 +2210,13 @@ class APSGNNModel(nn.Module):
                 index_tensor = torch.tensor(indices, device=device, dtype=torch.long)
                 hidden[index_tensor] = outputs["hidden"][group_idx, :count].to(hidden.dtype)
                 memory_update[index_tensor] = full_memory_update[group_idx, :count].to(memory_update.dtype)
+                cache_summary_update[index_tensor] = full_summary_update[group_idx, :count].to(cache_summary_update.dtype)
                 cache_mean_state[index_tensor] = cache_mean_rows[group_idx, :count].to(cache_mean_state.dtype)
+                cache_max_state[index_tensor] = cache_max_rows[group_idx, :count].to(cache_max_state.dtype)
+                cache_dispersion_state[index_tensor] = cache_dispersion_rows[group_idx, :count].to(
+                    cache_dispersion_state.dtype
+                )
+                cache_retrieved_state[index_tensor] = full_retrieved_state[group_idx, :count].to(cache_retrieved_state.dtype)
                 retrieval_entropy[index_tensor] = group_entropy[group_idx, :count].to(retrieval_entropy.dtype)
                 retrieval_top_mass[index_tensor] = group_top_mass[group_idx, :count].to(retrieval_top_mass.dtype)
                 retrieval_entry_count[index_tensor] = group_entry_count[group_idx, :count].to(retrieval_entry_count.dtype)
@@ -1818,7 +2226,7 @@ class APSGNNModel(nn.Module):
         direction = self.direction_head(hidden)
         magnitude = torch.sigmoid(self.magnitude_head(hidden))
         delay_logits = self.delay_head(hidden)
-        next_residual = packets.residual + memory_update + delta.to(packets.residual.dtype)
+        next_residual = packets.residual + memory_update + cache_summary_update + delta.to(packets.residual.dtype)
 
         direction_norm = direction.norm(dim=-1, keepdim=True).clamp_min(1.0e-6)
         unit_direction = direction / direction_norm
@@ -1933,6 +2341,8 @@ class APSGNNModel(nn.Module):
         elif delay_override_mode == "fixed":
             fixed_value = max(0, min(int(self.config.train.delay_override_value), cfg.delay_bins - 1))
             delay_index = torch.full_like(delay_index, fill_value=fixed_value)
+        elif delay_override_mode == "required":
+            delay_index = packets.required_delay.clamp(min=0, max=cfg.delay_bins - 1)
         if self.uses_growth_curriculum():
             coverage_mask = (packets.role == ROLE_SANITY) & torch.tensor(
                 self.bootstrap_active,
@@ -1963,6 +2373,9 @@ class APSGNNModel(nn.Module):
             "target_entry_hit": target_entry_hit,
             "hidden_state": hidden,
             "cache_mean_state": cache_mean_state,
+            "cache_max_state": cache_max_state,
+            "cache_dispersion_state": cache_dispersion_state,
+            "cache_retrieved_state": cache_retrieved_state,
             "clockwise_target": clockwise_target,
             "visit_counts": visit_counts,
             "task_visit_counts": task_visit_counts,
@@ -1985,14 +2398,327 @@ class APSGNNModel(nn.Module):
         compute_index = compute_scores.argmax(dim=-1)
         return self.address_table[1:][compute_index]
 
-    def _output_logits(self, residual: Tensor) -> Tensor:
-        logits = self.output_head(residual)
+    def _state_readout_components(self, state: Tensor, *, use_shared_output_head: bool) -> tuple[Tensor, Tensor]:
+        head_logits = self.output_head(state) if use_shared_output_head else torch.zeros(
+            state.size(0),
+            self.config.model.num_classes,
+            device=state.device,
+            dtype=state.dtype,
+        )
         if not bool(self.config.model.use_reserved_class_slice):
-            return logits
+            return head_logits, torch.zeros_like(head_logits)
         class_start = self.config.model.key_dim
         class_end = class_start + self.config.model.num_classes
-        class_slice = residual[:, class_start:class_end]
-        return logits + self.config.model.readout_class_scale * class_slice
+        class_slice = state[:, class_start:class_end]
+        class_logits = self.config.model.readout_class_scale * class_slice
+        return head_logits, class_logits
+
+    def _state_readout_logits(self, state: Tensor, *, use_shared_output_head: bool) -> Tensor:
+        head_logits, class_logits = self._state_readout_components(
+            state,
+            use_shared_output_head=use_shared_output_head,
+        )
+        return head_logits + class_logits
+
+    def _select_output_cache_summary(
+        self,
+        *,
+        cache_mean_state: Tensor,
+        cache_retrieved_state: Tensor | None,
+        retrieval_top_mass: Tensor | None = None,
+    ) -> Tensor:
+        source = str(self.config.model.cache_output_summary_source or "mean")
+        if source == "retrieved" and cache_retrieved_state is not None and cache_retrieved_state.numel() > 0:
+            return cache_retrieved_state
+        if (
+            source == "confidence_blend"
+            and cache_retrieved_state is not None
+            and cache_retrieved_state.numel() > 0
+            and retrieval_top_mass is not None
+            and retrieval_top_mass.numel() > 0
+        ):
+            threshold = float(self.config.model.cache_output_retrieved_blend_threshold)
+            denom = max(1.0 - threshold, 1.0e-6)
+            blend = ((retrieval_top_mass - threshold) / denom).clamp(min=0.0, max=1.0).unsqueeze(-1)
+            blend = blend.to(cache_mean_state.dtype)
+            return cache_mean_state + blend * (cache_retrieved_state - cache_mean_state)
+        return cache_mean_state
+
+    def _condition_output_cache_summary(self, residual: Tensor, cache_summary: Tensor) -> Tensor:
+        if self.cache_output_condition_scale is None or self.cache_output_condition_shift is None:
+            return cache_summary
+        condition_scale = torch.tanh(self.cache_output_condition_scale(residual))
+        condition_scale = condition_scale * float(self.config.model.cache_output_query_condition_scale)
+        condition_shift = self.cache_output_condition_shift(residual)
+        return cache_summary * (1.0 + condition_scale) + condition_shift
+
+    def _blend_output_cache_summary(
+        self,
+        cache_summary: Tensor,
+        retrieved_summary: Tensor | None = None,
+        gate_features: Tensor | None = None,
+    ) -> Tensor:
+        source = str(self.config.model.cache_output_summary_source or "mean")
+        if source != "collision_sharpened_blend":
+            return cache_summary
+        if (
+            self.cache_output_collision_blend_proj is None
+            or retrieved_summary is None
+            or retrieved_summary.numel() == 0
+            or gate_features is None
+            or gate_features.numel() == 0
+        ):
+            return cache_summary
+        collision_strength = self._output_collision_strength(gate_features, cache_summary.dtype)
+        if collision_strength is None:
+            return cache_summary
+        blend = torch.tanh(self.cache_output_collision_blend_proj(gate_features.to(cache_summary.dtype)))
+        blend = blend * float(self.config.model.cache_output_collision_blend_scale)
+        blend = blend * collision_strength
+        return cache_summary + blend * (retrieved_summary - cache_summary)
+
+    def _augment_output_cache_summary(
+        self,
+        cache_summary: Tensor,
+        aux_summary: Tensor | None = None,
+        gate_features: Tensor | None = None,
+    ) -> Tensor:
+        if self.cache_output_aux_proj is None or aux_summary is None or aux_summary.numel() == 0:
+            return cache_summary
+        correction = self.cache_output_aux_proj(aux_summary)
+        source = str(self.config.model.cache_output_summary_source or "mean")
+        if source == "dispersion_augmented":
+            scale = float(self.config.model.cache_output_dispersion_scale)
+        elif source in {"max_augmented", "ambiguity_max"}:
+            scale = float(self.config.model.cache_output_max_scale)
+        elif source == "ambiguity_max_gate":
+            scale = float(self.config.model.cache_output_max_scale)
+            if (
+                self.cache_output_aux_feature_proj is None
+                or gate_features is None
+                or gate_features.numel() == 0
+            ):
+                return cache_summary
+            aux_gate = torch.tanh(
+                self.cache_output_aux_feature_proj(gate_features.to(correction.dtype))
+            )
+            scale = scale * float(self.config.model.cache_output_aux_feature_scale)
+            correction = correction * aux_gate
+        else:
+            scale = 1.0
+        correction = correction * scale
+        return cache_summary + correction
+
+    def _feature_modulate_output_cache_summary(
+        self,
+        cache_summary: Tensor,
+        gate_features: Tensor | None = None,
+    ) -> Tensor:
+        source = str(self.config.model.cache_output_summary_source or "mean")
+        if source != "ambiguity_feature_modulation":
+            return cache_summary
+        if (
+            self.cache_output_feature_scale_proj is None
+            or self.cache_output_feature_shift_proj is None
+            or gate_features is None
+            or gate_features.numel() == 0
+        ):
+            return cache_summary
+        gate_features = gate_features.to(cache_summary.dtype)
+        modulation_scale = float(self.config.model.cache_output_feature_modulation_scale)
+        feature_scale = torch.tanh(self.cache_output_feature_scale_proj(gate_features)) * modulation_scale
+        feature_shift = self.cache_output_feature_shift_proj(gate_features) * modulation_scale
+        return cache_summary * (1.0 + feature_scale) + feature_shift
+
+    def _apply_output_gate_floor(
+        self,
+        gate: Tensor,
+        gate_features: Tensor | None = None,
+    ) -> Tensor:
+        source = str(self.config.model.cache_output_summary_source or "mean")
+        if source not in {
+            "confidence_floor_gate",
+            "collision_split_floor_gate",
+            "collision_interaction_floor_gate",
+        }:
+            return gate
+        if gate_features is None or gate_features.numel() == 0:
+            return gate
+        confidence = gate_features[..., :1].to(gate.dtype).clamp(min=0.0, max=1.0)
+        confidence = confidence * float(self.config.model.cache_output_gate_floor_scale)
+        if source in {"collision_split_floor_gate", "collision_interaction_floor_gate"}:
+            collision_strength = self._output_collision_strength(gate_features, gate.dtype)
+            if collision_strength is not None:
+                confidence = confidence * (1.0 - collision_strength)
+        confidence = confidence.clamp(min=0.0, max=1.0)
+        return gate + confidence * (1.0 - gate)
+
+    def _output_collision_strength(
+        self,
+        gate_features: Tensor | None,
+        dtype: torch.dtype,
+    ) -> Tensor | None:
+        if gate_features is None or gate_features.numel() == 0:
+            return None
+        entry_feature = gate_features[..., 1:2].to(dtype).clamp(min=0.0, max=1.0)
+        approx_entries = entry_feature * float(max(self.config.model.cache_capacity, 1))
+        width = max(float(self.config.model.cache_output_collision_switch_width), 1.0e-6)
+        return ((approx_entries - 1.0) / width).clamp(min=0.0, max=1.0)
+
+    def _apply_output_collision_switch(
+        self,
+        gate_delta: Tensor,
+        gate_features: Tensor | None = None,
+    ) -> Tensor:
+        source = str(self.config.model.cache_output_summary_source or "mean")
+        if source not in {
+            "collision_switch_gate",
+            "collision_split_floor_gate",
+            "collision_interaction_floor_gate",
+        }:
+            return gate_delta
+        collision_strength = self._output_collision_strength(gate_features, gate_delta.dtype)
+        if collision_strength is None:
+            return gate_delta
+        return gate_delta * collision_strength
+
+    def _suppress_base_output_logits(
+        self,
+        logits: Tensor,
+        gate_features: Tensor | None = None,
+    ) -> Tensor:
+        source = str(self.config.model.cache_output_summary_source or "mean")
+        if source != "ambiguity_base_suppression":
+            return logits
+        if (
+            self.cache_output_base_feature_proj is None
+            or gate_features is None
+            or gate_features.numel() == 0
+        ):
+            return logits
+        gate_features = gate_features.to(logits.dtype)
+        suppression = torch.tanh(self.cache_output_base_feature_proj(gate_features))
+        suppression = suppression * float(self.config.model.cache_output_base_suppression_scale)
+        return logits * (1.0 + suppression)
+
+    def _suppress_classslice_logits(
+        self,
+        head_logits: Tensor,
+        class_logits: Tensor,
+        gate_features: Tensor | None = None,
+    ) -> Tensor:
+        source = str(self.config.model.cache_output_summary_source or "mean")
+        if source != "ambiguity_classslice_suppression":
+            return head_logits + class_logits
+        if (
+            self.cache_output_classslice_feature_proj is None
+            or gate_features is None
+            or gate_features.numel() == 0
+        ):
+            return head_logits + class_logits
+        gate_features = gate_features.to(class_logits.dtype)
+        suppression = torch.tanh(self.cache_output_classslice_feature_proj(gate_features))
+        suppression = suppression * float(self.config.model.cache_output_classslice_suppression_scale)
+        return head_logits + class_logits * (1.0 + suppression)
+
+    def _collision_specialized_output_logits(
+        self,
+        summary_state: Tensor,
+        gate_features: Tensor | None = None,
+    ) -> Tensor | None:
+        source = str(self.config.model.cache_output_summary_source or "mean")
+        if source != "collision_specialized_head" or self.cache_output_collision_head is None:
+            return None
+        collision_strength = self._output_collision_strength(gate_features, summary_state.dtype)
+        if collision_strength is None:
+            return None
+        scale = float(self.config.model.cache_output_collision_head_scale)
+        return scale * collision_strength * self.cache_output_collision_head(summary_state)
+
+    def _collision_retrieved_output_logits(
+        self,
+        retrieved_summary: Tensor | None,
+        gate_features: Tensor | None = None,
+    ) -> Tensor | None:
+        source = str(self.config.model.cache_output_summary_source or "mean")
+        if (
+            source != "collision_retrieved_head"
+            or self.cache_output_collision_retrieved_head is None
+            or retrieved_summary is None
+            or retrieved_summary.numel() == 0
+        ):
+            return None
+        collision_strength = self._output_collision_strength(gate_features, retrieved_summary.dtype)
+        if collision_strength is None:
+            return None
+        scale = float(self.config.model.cache_output_collision_retrieved_scale)
+        retrieved_logits = self.cache_output_collision_retrieved_head(retrieved_summary)
+        retrieved_logits = retrieved_logits + self._state_readout_logits(
+            retrieved_summary,
+            use_shared_output_head=False,
+        )
+        return scale * collision_strength * retrieved_logits
+
+    def _output_logits(
+        self,
+        residual: Tensor,
+        *,
+        cache_summary: Tensor | None = None,
+        aux_summary: Tensor | None = None,
+        retrieved_summary: Tensor | None = None,
+        gate_features: Tensor | None = None,
+    ) -> Tensor:
+        base_head_logits, base_class_logits = self._state_readout_components(
+            residual,
+            use_shared_output_head=True,
+        )
+        logits = self._suppress_classslice_logits(base_head_logits, base_class_logits, gate_features)
+        if (
+            cache_summary is None
+            or self.cache_output_summary_head is None
+            or self.cache_output_summary_gate is None
+            or cache_summary.numel() == 0
+        ):
+            return logits
+        summary_state = self._blend_output_cache_summary(cache_summary, retrieved_summary, gate_features)
+        summary_state = self._condition_output_cache_summary(residual, summary_state)
+        summary_state = self._augment_output_cache_summary(summary_state, aux_summary, gate_features)
+        summary_state = self._feature_modulate_output_cache_summary(summary_state, gate_features)
+        summary_logits = self.cache_output_summary_head(summary_state)
+        summary_logits = summary_logits + self._state_readout_logits(summary_state, use_shared_output_head=False)
+        collision_logits = self._collision_specialized_output_logits(summary_state, gate_features)
+        if collision_logits is not None:
+            summary_logits = summary_logits + collision_logits
+        gate_logits = self.cache_output_summary_gate(torch.cat([residual, summary_state], dim=-1))
+        if (
+            self.cache_output_gate_feature_proj is not None
+            and gate_features is not None
+            and gate_features.numel() > 0
+        ):
+            gate_delta = float(self.config.model.cache_output_gate_feature_scale) * self.cache_output_gate_feature_proj(
+                gate_features.to(summary_state.dtype)
+            )
+            gate_logits = gate_logits + self._apply_output_collision_switch(gate_delta, gate_features)
+        gate = torch.sigmoid(gate_logits)
+        gate = self._apply_output_gate_floor(gate, gate_features)
+        logits = self._suppress_base_output_logits(logits, gate_features)
+        logits = logits + gate * summary_logits
+        collision_retrieved_logits = self._collision_retrieved_output_logits(retrieved_summary, gate_features)
+        if collision_retrieved_logits is not None:
+            logits = logits + collision_retrieved_logits
+        if (
+            retrieved_summary is None
+            or self.cache_output_retrieved_head is None
+            or self.cache_output_retrieved_gate is None
+            or retrieved_summary.numel() == 0
+        ):
+            return logits
+        retrieved_logits = self.cache_output_retrieved_head(retrieved_summary)
+        retrieved_logits = retrieved_logits + self._state_readout_logits(retrieved_summary, use_shared_output_head=False)
+        retrieved_gate = torch.sigmoid(
+            self.cache_output_retrieved_gate(torch.cat([residual, retrieved_summary], dim=-1))
+        )
+        return logits + retrieved_gate * retrieved_logits
 
     def _schedule_cache_events(
         self,

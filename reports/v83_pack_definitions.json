@@ -1,0 +1,104 @@
+{
+  "collision_regimes": {
+    "c1": {
+      "display": "C1",
+      "home_node_pool_size": 8,
+      "max_rollout_steps": 12,
+      "query_ttl_max": 3,
+      "query_ttl_min": 2,
+      "start_node_pool_size": 2,
+      "train_eval_writers": [
+        6,
+        10
+      ],
+      "writers_per_episode": 6
+    },
+    "c2": {
+      "display": "C2",
+      "home_node_pool_size": 2,
+      "max_rollout_steps": 12,
+      "query_ttl_max": 3,
+      "query_ttl_min": 2,
+      "start_node_pool_size": 2,
+      "train_eval_writers": [
+        6,
+        10
+      ],
+      "writers_per_episode": 6
+    }
+  },
+  "conditions": {
+    "ambig": {
+      "display": "AmbiguityAwareReadout",
+      "model": {
+        "cache_output_gate_feature_scale": 1.0,
+        "cache_output_summary_readout": true,
+        "cache_output_summary_source": "ambiguity_gate",
+        "enable_cache": true
+      }
+    },
+    "collswitch": {
+      "display": "CollisionSwitchReadout",
+      "model": {
+        "cache_output_collision_switch_width": 2.0,
+        "cache_output_gate_feature_scale": 1.0,
+        "cache_output_summary_readout": true,
+        "cache_output_summary_source": "collision_switch_gate",
+        "enable_cache": true
+      }
+    }
+  },
+  "experiment": "v83_collision_switch_gate",
+  "pair": "visit_taskgrad_half_d",
+  "promotion_rule": "Positive only if the collision-switch gate improves C2 dense_mean in the main seeds and does not lose the fresh rerun.",
+  "schedules": {
+    "l": {
+      "anneal_steps": 450,
+      "display": "L",
+      "eval_interval": 90,
+      "save_interval": 90,
+      "stage_steps": [
+        36,
+        36,
+        45,
+        45,
+        54,
+        72,
+        1062
+      ],
+      "train_steps": 1350
+    },
+    "m": {
+      "anneal_steps": 300,
+      "display": "M",
+      "eval_interval": 60,
+      "save_interval": 60,
+      "stage_steps": [
+        24,
+        24,
+        30,
+        30,
+        36,
+        48,
+        708
+      ],
+      "train_steps": 900
+    },
+    "p": {
+      "anneal_steps": 100,
+      "display": "P",
+      "eval_interval": 25,
+      "save_interval": 25,
+      "stage_steps": [
+        8,
+        8,
+        10,
+        10,
+        12,
+        16,
+        236
+      ],
+      "train_steps": 300
+    }
+  }
+}

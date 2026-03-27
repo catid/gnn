@@ -42,6 +42,22 @@ def sample_start_nodes(
     return ingress_nodes[sampled]
 
 
+def delay_targets_from_key(
+    keys: Tensor,
+    *,
+    min_delay: int,
+    max_delay: int,
+    hash_bits: int,
+) -> Tensor:
+    span = max(int(max_delay - min_delay + 1), 1)
+    bits = max(int(hash_bits), 1)
+    take = min(bits, int(keys.size(-1)))
+    signs = (keys[..., :take] > 0).to(torch.long)
+    weights = (2 ** torch.arange(take, dtype=torch.long)).view(*([1] * (signs.dim() - 1)), take)
+    hashed = (signs * weights).sum(dim=-1)
+    return int(min_delay) + (hashed % span)
+
+
 @dataclass
 class MemoryBatch:
     writer_keys: Tensor
@@ -172,12 +188,20 @@ class MemoryRoutingTask:
             generator=generator,
         )
         query_required_delay = None
-        if str(cfg.task.delay_mode or "none") == "required_wait":
+        delay_mode = str(cfg.task.delay_mode or "none")
+        if delay_mode == "required_wait":
             query_required_delay = torch.randint(
                 cfg.task.required_delay_min,
                 cfg.task.required_delay_max + 1,
                 (batch_size,),
                 generator=generator,
+            )
+        elif delay_mode == "key_hash_exact_wait":
+            query_required_delay = delay_targets_from_key(
+                query_keys,
+                min_delay=cfg.task.required_delay_min,
+                max_delay=cfg.task.required_delay_max,
+                hash_bits=cfg.task.required_delay_hash_bits,
             )
 
         return MemoryBatch(
@@ -273,12 +297,20 @@ class GrowthMemoryRoutingTask:
             generator=generator,
         )
         query_required_delay = None
-        if str(cfg.task.delay_mode or "none") == "required_wait":
+        delay_mode = str(cfg.task.delay_mode or "none")
+        if delay_mode == "required_wait":
             query_required_delay = torch.randint(
                 cfg.task.required_delay_min,
                 cfg.task.required_delay_max + 1,
                 (batch_size,),
                 generator=generator,
+            )
+        elif delay_mode == "key_hash_exact_wait":
+            query_required_delay = delay_targets_from_key(
+                query_keys,
+                min_delay=cfg.task.required_delay_min,
+                max_delay=cfg.task.required_delay_max,
+                hash_bits=cfg.task.required_delay_hash_bits,
             )
 
         bootstrap_start_nodes = None

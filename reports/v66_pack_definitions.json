@@ -1,0 +1,151 @@
+{
+  "budgets": {
+    "l": 2160,
+    "m": 1350,
+    "p": 300
+  },
+  "collision_pack": {
+    "conditions": [
+      "cacheon",
+      "nocache",
+      "recent1",
+      "topk1"
+    ],
+    "promotion_gate": {
+      "metric": "recovery_fraction_or_decodability_signal",
+      "pass_requires": "intervention_recovers_meaningful_fraction_of_cache_on_deficit_or_decodability_redirects_blame"
+    },
+    "regimes": {
+      "c1": {
+        "display": "C1",
+        "home_node_pool_size": 8,
+        "max_rollout_steps": 12,
+        "query_ttl_max": 3,
+        "query_ttl_min": 2,
+        "start_node_pool_size": 2,
+        "train_eval_writers": [
+          6,
+          10
+        ],
+        "writers_per_episode": 6
+      },
+      "c2": {
+        "display": "C2",
+        "home_node_pool_size": 2,
+        "max_rollout_steps": 12,
+        "query_ttl_max": 3,
+        "query_ttl_min": 2,
+        "start_node_pool_size": 2,
+        "train_eval_writers": [
+          6,
+          10
+        ],
+        "writers_per_episode": 6
+      }
+    },
+    "runner_up_control": [
+      "cacheon",
+      "nocache"
+    ]
+  },
+  "delay_pack": {
+    "audit_controls": [
+      "learned",
+      "zero",
+      "random",
+      "fixed",
+      "required"
+    ],
+    "current_regimes": {
+      "d1": {
+        "display": "D1",
+        "fixed_good_delay": 2,
+        "home_node_pool_size": 8,
+        "max_rollout_steps": 12,
+        "mode": "required_wait",
+        "query_ttl_max": 3,
+        "query_ttl_min": 2,
+        "required_delay_hash_bits": 2,
+        "required_delay_max": 2,
+        "required_delay_min": 1,
+        "start_node_pool_size": 2,
+        "train_eval_writers": [
+          4
+        ],
+        "writers_per_episode": 4
+      },
+      "d2": {
+        "display": "D2",
+        "fixed_good_delay": 3,
+        "home_node_pool_size": 8,
+        "max_rollout_steps": 12,
+        "mode": "required_wait",
+        "query_ttl_max": 3,
+        "query_ttl_min": 2,
+        "required_delay_hash_bits": 2,
+        "required_delay_max": 4,
+        "required_delay_min": 3,
+        "start_node_pool_size": 2,
+        "train_eval_writers": [
+          4
+        ],
+        "writers_per_episode": 4
+      }
+    },
+    "promotion_gate": {
+      "metric": "learned_minus_zero_gap_and_timing_oracle_alignment",
+      "pass_requires": "current_benchmark_valid_or_redesigned_learned_delay_beats_zero"
+    },
+    "redesigned_regimes": {
+      "rd1": {
+        "display": "RD1",
+        "fixed_good_delay": 1,
+        "home_node_pool_size": 8,
+        "max_rollout_steps": 12,
+        "mode": "key_hash_exact_wait",
+        "query_ttl_max": 3,
+        "query_ttl_min": 2,
+        "required_delay_hash_bits": 2,
+        "required_delay_max": 2,
+        "required_delay_min": 1,
+        "start_node_pool_size": 2,
+        "train_eval_writers": [
+          4
+        ],
+        "writers_per_episode": 4
+      },
+      "rd2": {
+        "display": "RD2",
+        "fixed_good_delay": 3,
+        "home_node_pool_size": 8,
+        "max_rollout_steps": 12,
+        "mode": "key_hash_exact_wait",
+        "query_ttl_max": 3,
+        "query_ttl_min": 2,
+        "required_delay_hash_bits": 3,
+        "required_delay_max": 4,
+        "required_delay_min": 2,
+        "start_node_pool_size": 2,
+        "train_eval_writers": [
+          4
+        ],
+        "writers_per_episode": 4
+      }
+    }
+  },
+  "optional_followup_pack": {
+    "choices": [
+      "class_slice_removal",
+      "adaptive_compute",
+      "branch_packets"
+    ]
+  },
+  "pairs": {
+    "visit_taskgrad_half_d": {
+      "display": "VT-0.5/D"
+    },
+    "visitonly_d": {
+      "display": "V/D"
+    }
+  }
+}
